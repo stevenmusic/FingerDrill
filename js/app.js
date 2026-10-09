@@ -267,6 +267,7 @@ function syncExamButtons(){
   $("drawBtn").disabled = examPool().length === 0;
   $("mockBtn").hidden = false; $("mockBtn").disabled = !mock && examQuestions().length === 0;
   $("mockLabel").textContent = mock ? tr("停止", "Stop") : tr("模擬考", "Mock");
+  $("mockBtn").title = $("mockBtn").ariaLabel = mock ? tr("停止模擬考", "Stop mock exam") : tr("模擬考", "Mock exam");
 }
 /* ══ 模擬考 ══
    ABRSM:從抽考範圍隨機點 8 項(不重複,像考官點題);Trinity:整組依序。每一項自己按 ✓ / ⚠,最後給結果 */
