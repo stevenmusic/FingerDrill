@@ -196,15 +196,23 @@ body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
 .q-tag{flex:none;font-size:calc(clamp(14px, 4.2vw, 18px) * var(--tag-scale, 1));font-weight:700;color:var(--ivory);background:var(--surface-inset);border:1px solid var(--line);
   border-radius:var(--radius-sm);padding:4px 10px;white-space:nowrap}
 .q-tag.dyn{color:var(--teal);border-color:var(--teal)}
-.q-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.q-actions .grow{flex:1 1 auto}
+.q-head,.q-row{display:flex;align-items:center;gap:10px}
+.q-head .q-title{flex:1 1 auto;min-width:0}
+.q-row .q-tags{flex:1 1 auto;min-width:0}
+.play-round{flex:none;width:52px;height:52px;border-radius:50%;border:0;background:var(--gold-fill);color:var(--on-fill);
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.play-round:disabled{opacity:.35}
+.play-round svg{fill:currentColor}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.q-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
+.q-actions:not(:has(> button:not([hidden]))){display:none}
 #drawBtn{height:46px;font-size:var(--fs-lg);padding:0 22px}
-.mastery{display:flex;gap:8px}
-.mbtn{height:38px;padding:0 14px;border-radius:var(--radius-pill);border:1px solid var(--line);background:transparent;color:var(--muted-bright);
+.mastery{display:flex;gap:6px;flex:none}
+.mbtn{width:40px;height:40px;padding:0;justify-content:center;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--muted-bright);
   font-family:inherit;font-size:var(--fs-md);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .mbtn[data-m="good"][aria-pressed="true"]{background:var(--teal-fill);border-color:var(--teal-fill);color:var(--on-fill);font-weight:700}
 .mbtn[data-m="weak"][aria-pressed="true"]{background:#E8A25B;border-color:#E8A25B;color:var(--on-fill);font-weight:700}
-.loading{font-size:var(--fs-2xs);color:var(--muted);min-height:14px}
+.loading{font-size:var(--fs-2xs);color:var(--muted)}
 
 /* ── 樂譜 ── */
 .score-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
@@ -357,7 +365,8 @@ header{z-index:60}
   .fields{grid-template-columns:1fr}
   .seg button{padding:0 4px;font-size:var(--fs-sm)}
   .q-actions{gap:6px}
-  .mbtn{padding:0 10px}
+  .mbtn{width:36px;height:36px}
+  .play-round{width:46px;height:46px}
 }
 /* 選項全部看得到:換行,不橫向捲(捲動看不出還有東西) */
 .opts{flex-wrap:wrap;overflow:visible}
