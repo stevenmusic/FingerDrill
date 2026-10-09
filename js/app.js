@@ -252,6 +252,7 @@ $("catChips").onclick = e => {
 };
 $("excludeMastered").onclick = () => { S.filter.excludeMastered = !S.filter.excludeMastered; store.save(); renderExam(); };
 function onExamChange(keepCur){
+  mock = null;
   renderExam(); renderQuick("scale"); renderQuick("arp");
   if (S.tab === "exam") {
     const same = keepCur && cur && !cur.free && examQuestions().find(q => q.itemId === cur.itemId && q.tonic === cur.tonic && q.hands === cur.hands && q.articulation === cur.articulation);
@@ -260,12 +261,38 @@ function onExamChange(keepCur){
 }
 function syncExamButtons(){
   const sets = SY.systems[S.exam.system].mode === "sets";
-  $("drawBtn").hidden = false; $("drawLabel").textContent = sets ? tr("隨機抽一項", "Random") : tr("隨機抽考", "Random");
-  $("nextBtn").hidden = !sets;
+  $("drawBtn").hidden = !!mock; $("drawLabel").textContent = sets ? tr("隨機抽一項", "Random") : tr("隨機抽考", "Random");
+  $("nextBtn").hidden = !sets && !mock;
+  $("nextLabel").textContent = mock && mock.i === mock.list.length - 1 ? tr("結束", "Finish") : T("next");
   $("drawBtn").disabled = examPool().length === 0;
+  $("mockBtn").hidden = false; $("mockBtn").disabled = !mock && examQuestions().length === 0;
+  $("mockLabel").textContent = mock ? tr("停止", "Stop") : tr("模擬考", "Mock");
+}
+/* ══ 模擬考 ══
+   ABRSM:從抽考範圍隨機點 8 項(不重複,像考官點題);Trinity:整組依序。每一項自己按 ✓ / ⚠,最後給結果 */
+let mock = null;
+function shuffle(a){ for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+$("mockBtn").onclick = () => {
+  if (mock) { mock = null; showEmpty(); syncExamButtons(); return; }
+  const sets = SY.systems[S.exam.system].mode === "sets";
+  let list = sets ? examQuestions() : shuffle(examPool().slice());
+  if (!sets) { const seen = new Set(); list = list.filter(q => { const k = q.itemId + q.tonic; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8); }
+  if (!list.length) return;
+  mock = { list, i: 0 };
+  setQuestion(list[0], "exam"); syncExamButtons();
+};
+function finishMock(){
+  const list = mock.list; mock = null;
+  const n = list.length, good = list.filter(q => S.mastery[q.key] === "good").length, weak = list.filter(q => S.mastery[q.key] === "weak").length;
+  showEmpty(); syncExamButtons();
+  pairText($("qTitle"), () => tr(`模擬考結束:${n} 項中 通過 ${good}、待加強 ${weak}、未標記 ${n - good - weak}`, `Mock done: ${good} passed, ${weak} weak, ${n - good - weak} unmarked of ${n}`));
 }
 $("drawBtn").onclick = () => { const q = drawQuestion(examPool(), S.mastery, lastKey); if (q) setQuestion(q, "exam"); };
 $("nextBtn").onclick = () => {
+  if (mock) {
+    if (mock.i >= mock.list.length - 1) { finishMock(); return; }
+    mock.i++; setQuestion(mock.list[mock.i], "exam"); syncExamButtons(); return;
+  }
   const qs = examQuestions(); if (!qs.length) return;
   const i = cur && !cur.free ? qs.findIndex(q => q.key === cur.key && q.itemId === cur.itemId) : -1;
   setQuestion(qs[(i + 1) % qs.length], "exam");
@@ -301,7 +328,8 @@ function switchTab(tab){
   S.tab = tab; store.save();
   document.querySelectorAll("#tabbar button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
-  $("drawBtn").hidden = true; $("nextBtn").hidden = true;
+  if (tab !== "exam") mock = null;
+  $("drawBtn").hidden = true; $("nextBtn").hidden = true; $("mockBtn").hidden = true;
   if (tab === "scale" || tab === "arp" || tab === "hanon") { renderPicker(tab); setQuestion(tabCur[tab] || freeQuestion(tab), tab); }
   else if (tab === "exam") { renderExam(); syncExamButtons(); if (tabCur.exam) setQuestion(tabCur.exam, "exam"); else showEmpty(); }
   window.scrollTo({ top: 0 });
@@ -342,7 +370,8 @@ function setQuestion(q, tab){
     $("verifyBadge").hidden = false;
     $("verifyBadge").classList.toggle("ok", !!g.verified);
     $("verifyBadge").textContent = g.verified ? tr("官方大綱", "Official syllabus") : tr("大綱未核對", "Syllabus not checked");
-    $("poolCount").textContent = tab === "exam" ? tr(`抽考範圍 ${examPool().length} 題`, `${examPool().length} items in range`) : `${SY.systems[S.exam.system].name} ${gradeLabel(g)}`;
+    $("poolCount").textContent = mock && mock.list.includes(q) ? tr(`模擬考 ${mock.i + 1} / ${mock.list.length}`, `Mock ${mock.i + 1} / ${mock.list.length}`)
+      : tab === "exam" ? tr(`抽考範圍 ${examPool().length} 題`, `${examPool().length} items in range`) : `${SY.systems[S.exam.system].name} ${gradeLabel(g)}`;
   } else { $("verifyBadge").hidden = true; $("poolCount").textContent = ""; }
   // 樂譜下方說明
   const notes = [], noteFns = notes;   // 每一則是函式:中英文各跑一次

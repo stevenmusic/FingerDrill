@@ -303,7 +303,7 @@ body.light{background:
   .card{padding:12px}
   .qlist{grid-template-columns:1fr}
   .q-actions .btn-label{display:none}
-  #drawBtn .btn-label{display:inline}
+  #drawBtn .btn-label,#mockBtn .btn-label{display:inline}
 }
 /* 手機橫向 */
 @media (max-height:420px){
