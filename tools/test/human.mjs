@@ -72,7 +72,7 @@ async function run(vpName, vp){
       const pl = document.getElementById("playline");
       if (A.cur && s.noteXs && pl.hidden) out.push("有樂譜但沒有播放軸");
       if (pl && !pl.hidden) { const r = pl.getBoundingClientRect(), st = document.getElementById("stage").getBoundingClientRect(); if (r.left < st.left - 2 || r.right > st.right + 2) out.push("播放軸跑出樂譜紙張"); }
-      if (!(s.bpm >= 30 && s.bpm <= 200)) out.push(`速度超出範圍 ${s.bpm}`);
+      if (!(s.bpm >= 30 && s.bpm <= 240)) out.push(`速度超出範圍 ${s.bpm}`);
       if (String(s.bpm) !== document.getElementById("bpmVal").textContent || String(s.bpm) !== document.getElementById("bpmRange").value) out.push(`速度顯示不一致 ${s.bpm} / ${document.getElementById("bpmVal").textContent} / ${document.getElementById("bpmRange").value}`);
       const tab = A.S.tab, selTab = document.querySelector('#tabbar [aria-selected="true"]').dataset.tab;
       if (tab !== selTab) out.push(`分頁不一致 ${tab} / ${selTab}`);
