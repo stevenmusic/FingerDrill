@@ -115,10 +115,12 @@ const PICKERS = {
   },
   /* 哈農:曲目 1–20、調(12 個大調,同一個樣式移調)、手 */
   hanon: {
-    defaults: { no: 1, key: "C", hands: "HT", rhythm: "even", pulse: "q" },
-    rows: () => [
+    defaults: { no: 1, key: "C", hands: "HT", rhythm: "even", pulse: "q", moreKeys: false },
+    rows: p => [
       ["no", tr("曲目", "No."), Array.from({ length: 20 }, (_, i) => [i + 1, String(i + 1)])],
-      ["key", tr("調", "Key"), keyOpts(MAJ_KEYS)],
+      // 調:預設只有原譜的 C 大調;「其他調」展開 12 個調(進階,指法照 C 大調原譜)
+      ["key", tr("調", "Key"), p.moreKeys || p.key !== "C" ? keyOpts(MAJ_KEYS).concat([["__less", tr("收起", "Less")]])
+        : [["C", tr("C(原譜)", "C (orig.)")], ["__more", tr("其他調…", "Other keys…")]]],
       ["hands", tr("手", "Hands"), HANDS()],
       ["rhythm", tr("節奏", "Rhythm"), [["even", tr("原譜", "Even")], ["dotted", tr("附點", "Dotted")], ["reverse", tr("反附點", "Rev. dotted")]]],
       // 拍點:♩ = 每 4 個音一拍(原譜的速度記法)、♪ = 每 2 個音一拍(比較好數;樂譜不變,速度數字 ×2)
@@ -147,6 +149,11 @@ for (const tab of ["scale", "arp", "hanon"]) {
   paneOf(tab).querySelector(".rows").onclick = e => {
     const b = e.target.closest(".opt"); if (!b) return;
     const k = b.closest(".opts").dataset.k;
+    if (b.dataset.v === "__more" || b.dataset.v === "__less") {   // 哈農:展開 / 收起其他調(收起時回到原譜的 C)
+      const more = b.dataset.v === "__more";
+      S.pick[tab].moreKeys = more; if (!more) S.pick[tab].key = "C";
+      store.save(); renderPicker(tab); if (!more) loadFree(tab); return;
+    }
     S.pick[tab][k] = ["octaves", "inv", "no"].includes(k) ? Number(b.dataset.v) : b.dataset.v;
     store.save(); renderPicker(tab); loadFree(tab);
   };
