@@ -16,7 +16,7 @@
 <title>FingerDrill 手指特訓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=1c5077ef1f">
+<link rel="stylesheet" href="css/app.css?v=c58bbbbc9e">
 </head>
 <body>
 <header>
@@ -153,6 +153,17 @@
     </div>
   </section>
 
+  <!-- 練習紀錄:連續天數、今天練了幾次、最近 7 天 -->
+  <section class="card" id="logCard">
+    <div class="card-title"><b data-i18n="logTitle">練習紀錄</b></div>
+    <div class="log-stats">
+      <div><b id="logStreak">0</b><small data-i18n="logStreak">連續天數</small></div>
+      <div><b id="logToday">0</b><small data-i18n="logToday">今天次數</small></div>
+      <div><b id="logMin">0</b><small data-i18n="logMin">今天分鐘</small></div>
+    </div>
+    <div class="log-week" id="logWeek"></div>
+  </section>
+
   <!-- 考級:本級要求清單 -->
   <details class="card pane" data-pane="exam" id="listCard" hidden>
     <summary class="card-title"><b id="listTitle">本級要求</b><span class="sub" id="listSub"></span>
@@ -195,9 +206,9 @@
   </div>
 </div>
 
-<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=6352270c0f","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=f7cf999f67","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/hanon.js":"./js/hanon.js?v=d82a99a3af","./js/i18n.js":"./js/i18n.js?v=d8b4b26c4e","./js/musicxml.js":"./js/musicxml.js?v=7a90b7e78b","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=e7f5c08888","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
+<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=5e077ecbdb","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=f7cf999f67","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/hanon.js":"./js/hanon.js?v=d82a99a3af","./js/i18n.js":"./js/i18n.js?v=b73e46b75d","./js/musicxml.js":"./js/musicxml.js?v=7a90b7e78b","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=e7f5c08888","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
 <script type="application/json" id="fdVersions">{"data/fingerings.json":"c5b57cffa5","data/syllabus.json":"30b5443db2"}</script>
 <script src="vendor/opensheetmusicdisplay.min.js?v=fe43ac6f19"></script>
-<script type="module" src="js/app.js?v=6352270c0f"></script>
+<script type="module" src="js/app.js?v=5e077ecbdb"></script>
 </body>
 </html>

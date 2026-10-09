@@ -27,6 +27,7 @@ const STR = {
   metroTitle: ["速度", "Tempo"], bpmReset: ["回到考試速度", "Exam tempo"],
   bpmDown: ["慢 1(按住連續減少)", "Slower by 1 (hold to repeat)"], bpmUp: ["快 1(按住連續增加)", "Faster by 1 (hold to repeat)"],
   tempo: ["速度", "Tempo"],
+  logTitle: ["練習紀錄", "Practice log"], logStreak: ["連續天數", "Day streak"], logToday: ["今天次數", "Today"], logMin: ["今天分鐘", "Minutes"],
   listTitle: ["本級要求", "Grade requirements"],
   legendGood: ["通過", "Pass"], legendWeak: ["待加強", "Weak"], legendNone: ["未標記", "New"],
   footer: ["鋼琴音色:Accurate-Salamander Grand Piano V6.2(Salamander Grand Piano V3 by Alexander Holm,CC-BY 3.0)· 節拍器:Naked Drums(Wilkinson Audio,CC-BY 4.0)· 取樣經 ScrollScore 整理後直接讀取 · 樂譜:OpenSheetMusicDisplay(BSD-3-Clause)。考級要求依 ABRSM《Piano Practical Grades 2025 & 2026》與 Trinity《Piano Syllabus from 2023》整理,僅供練習參考;實際要求以官方大綱為準。",

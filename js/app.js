@@ -34,6 +34,7 @@ $("langToggle").onclick = () => {
   if (S.exam) renderExam();
   switchTab(tab);
   if (keep) setQuestion(keep, tab);
+  renderLog();
 };
 
 function segBind(el, get, set){
@@ -368,14 +369,14 @@ document.querySelectorAll(".mbtn").forEach(b => b.onclick = () => {
   if (cur.type === "hanon" && m === "good") {
     S.hanonBest[cur.no] = Math.max(S.hanonBest[cur.no] || 0, bpm);
     S.mastery[cur.key] = "good";
-    store.save();
+    logPractice(0);
     setBpm(bpm + 4, true);
     const parts = questionText(cur);
     $("qTags").innerHTML = parts.slice(1).map(t => `<span class="q-tag">${t}</span>`).join("") + hanonBestTag(cur);
     fitTitle(); syncMastery();
     return;
   }
-  if (S.mastery[cur.key] === m) delete S.mastery[cur.key]; else S.mastery[cur.key] = m;
+  if (S.mastery[cur.key] === m) delete S.mastery[cur.key]; else { S.mastery[cur.key] = m; logPractice(0); }
   store.save(); syncMastery();
   if (S.tab === "exam") renderExam(); else renderQuick(S.tab);
 });
@@ -614,7 +615,7 @@ async function startPlayback(){
     const beat = (now - play.t0) / play.beatSec;
     showBeat((now - play.t0) / play.clickSec);
     movePlayline(Math.max(0, beat), true);
-    if (beat > play.endBeat + 0.5) { stopPlayback(true); return; }
+    if (beat > play.endBeat + 0.5) { const sec = play.endBeat * play.beatSec; stopPlayback(true); logPractice(sec); return; }
     play.raf = requestAnimationFrame(tick);
   };
   play.raf = requestAnimationFrame(tick);
@@ -634,6 +635,35 @@ function showBeat(click){
   const dots = $("beats").children, n = dots.length;
   const k = click == null || click < -n ? -1 : ((Math.floor(click + 1e-6) % n) + n) % n;
   for (let i = 0; i < dots.length; i++) dots[i].classList.toggle("on", i === k);
+}
+
+/* ══ 練習紀錄 ══
+   算一次練習:示範完整播完、或按了 ✓ / ⚠ 標記。S.log = { "YYYY-MM-DD": { n: 次數, sec: 秒數 } }(只留最近 400 天) */
+const dayKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function logPractice(sec){
+  S.log = S.log || {};
+  const k = dayKey(new Date()), e = S.log[k] || (S.log[k] = { n: 0, sec: 0 });
+  e.n++; e.sec += Math.round(sec || 0);
+  const keys = Object.keys(S.log).sort();
+  while (keys.length > 400) delete S.log[keys.shift()];
+  store.save(); renderLog();
+}
+function renderLog(){
+  const log = S.log || {}, today = new Date();
+  // 連續天數:從今天(今天還沒練就從昨天)往回數
+  let streak = 0, d = new Date(today);
+  if (!(log[dayKey(d)] && log[dayKey(d)].n)) d.setDate(d.getDate() - 1);
+  while (log[dayKey(d)] && log[dayKey(d)].n) { streak++; d.setDate(d.getDate() - 1); }
+  const t = log[dayKey(today)] || { n: 0, sec: 0 };
+  $("logStreak").textContent = streak; $("logToday").textContent = t.n; $("logMin").textContent = Math.round(t.sec / 60);
+  const names = getLang() === "en" ? ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] : ["日", "一", "二", "三", "四", "五", "六"];
+  let html = "";
+  for (let i = 6; i >= 0; i--) {
+    const x = new Date(today); x.setDate(x.getDate() - i);
+    const e = log[dayKey(x)];
+    html += `<span class="${i === 0 ? "today" : ""}"><i class="${e && e.n ? "on" : ""}"></i>${names[x.getDay()]}</span>`;
+  }
+  $("logWeek").innerHTML = html;
 }
 
 /* ══ 第一次打開:在準備考試嗎? ══ */
@@ -661,6 +691,7 @@ async function init(){
   if (S.exam && !(SY.systems[S.exam.system] && gradeOf(SY, S.exam.system, S.exam.grade))) S.exam = null;
   if (window.innerWidth < 600) $("listCard").open = false;
   if (S.exam) renderExam();
+  renderLog();
   window.__app = { get cur(){ return cur; }, get ex(){ return ex; }, get osmd(){ return osmd; },
     get state(){ return { play: !!play, starting: !!starting, bpm, show, scheduled: audio.scheduledCount(), noteXs: noteXs.length }; }, setQuestion, examQuestions, examPool, switchTab, fitTitle, S, SY };
   if (!S.onboarded) { switchTab("scale"); showOnboard(); }
