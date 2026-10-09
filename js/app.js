@@ -341,8 +341,8 @@ function setQuestion(q, tab){
   if (q.apart === 6) notes.push(() => tr("相隔六度:主音在上方 — 右手從主音、左手從低六度的第三級開始。", "A sixth apart: tonic on top — RH starts on the tonic, LH on the 3rd a sixth below."));
   if (q.type === "chromatic" && q.lhStart !== q.rhStart) notes.push(() => tr(`兩手從不同的音開始:左手 ${noteLabelStr(q.lhStart)}、右手 ${noteLabelStr(q.rhStart)}。`, `Hands start on different notes: LH ${noteLabelStr(q.lhStart)}, RH ${noteLabelStr(q.rhStart)}.`));
   if (q.type === "hanon") {
-    notes.push(() => tr("依原譜(IMSLP #00874)產生:上行 14 小節、下行 14 小節,兩手相隔八度;指法照原譜標在第 1、15 小節。原譜建議 ♩ = 60,慢慢加到 108。彈順了按 ✓:記錄這個速度,下一輪自動 +4。",
-      "Generated from the original (IMSLP #00874): 14 bars up, 14 down, hands an octave apart; fingering as printed in bars 1 and 15. Hanon suggests ♩ = 60 rising to 108. Tap ✓ when it's clean: the tempo is saved and the next round is 4 faster."));
+    notes.push(() => tr("依原譜(IMSLP #00874)產生:上行 14 小節、下行 14 小節,兩手相隔八度;每個音都標指法(上行照原譜第 1 小節、下行照第 15 小節)。原譜建議 ♩ = 60,慢慢加到 108。彈順了按 ✓:記錄這個速度,下一輪自動 +4。",
+      "Generated from the original (IMSLP #00874): 14 bars up, 14 down, hands an octave apart; every note fingered (bar 1 pattern going up, bar 15 going down). Hanon suggests ♩ = 60 rising to 108. Tap ✓ when it's clean: the tempo is saved and the next round is 4 faster."));
     if (q.tonic !== "C") notes.push(() => tr("移調:同一個樣式換到這個調的音階;指法照 C 大調原譜,黑鍵上可依手形調整。", "Transposed: same pattern on this key's scale; fingering is from the C major original, so adjust on black keys if needed."));
   }
   if (!q.free && S.exam) notes.push(() => SY.systems[S.exam.system].mode === "sets" ? tr("速度是大綱的「最低速度」。", "Tempo is the syllabus minimum.") : tr("速度是大綱的「參考速度」。", "Tempo is the syllabus guide speed."));

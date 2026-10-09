@@ -346,7 +346,7 @@ let nHanon = 0;
       ns.forEach((n, i) => {
         ok(scalePcs.has(pcOf(n)) && n.midi === midiOf(n), `${label} ${h} #${i}: 不是調內音`);
         ok(n.midi >= 21 && n.midi <= 108, `${label} ${h} #${i}: 超出鋼琴音域`);
-        ok(!!n.finger === (i < 8 || (i >= 112 && i < 120)), `${label} ${h} #${i}: 指法位置不對`);
+        ok(n.finger >= 1 && n.finger <= 5, `${label} ${h} #${i}: 沒有指法`);
       });
     }
     for (let i = 0; i < 224; i++) ok(stepOf(ex.rh[i]) - stepOf(ex.lh[i]) === 7, `${label} #${i}: 兩手不是相隔八度`);

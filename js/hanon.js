@@ -63,12 +63,14 @@ export function buildHanon(no, key = "C", rhythm = "even"){
   const out = { rh: [], lh: [] };
   for (const [hand, shift] of [["rh", 0], ["lh", -1]]) {
     const fU = D(H[hand === "rh" ? "rhU" : "lhU"]), fD = D(H[hand === "rh" ? "rhD" : "lhD"]);
-    for (let b = 0; b < HANON_BARS; b++) H.up.forEach((d, i) => out[hand].push(mk(d + b, b === 0 ? fU[i] : null, shift)));
-    for (let b = 0; b < HANON_BARS; b++) H.down.forEach((d, i) => out[hand].push(mk(d - b, b === 0 ? fD[i] : null, shift)));
+    // 每個音都標指法(使用者要求):上行每小節照第 1 小節、下行每小節照第 15 小節的指法(原譜:整首同一個指法)
+    for (let b = 0; b < HANON_BARS; b++) H.up.forEach((d, i) => out[hand].push(mk(d + b, fU[i], shift)));
+    for (let b = 0; b < HANON_BARS; b++) H.down.forEach((d, i) => out[hand].push(mk(d - b, fD[i], shift)));
     // 結尾:主音的二分音符(右手 = 起音、左手低一個八度);第 20 首右手 E3 + C4、左手 C2 + C3(原譜)
     let e;
-    if (H.end20) e = hand === "rh" ? { ...mk(2, null, 0), with: mk(7, null, 0) } : { ...mk(0, null, -1), with: mk(0, null, 0) };
-    else e = mk(0, null, shift);
+    // 結尾的指法:右手拇指、左手小指(第 20 首的和弦標低音那一個)
+    if (H.end20) e = hand === "rh" ? { ...mk(2, 1, 0), with: mk(7, null, 0) } : { ...mk(0, 5, -1), with: mk(0, null, 0) };
+    else e = mk(0, hand === "rh" ? 1 : 5, shift);
     out[hand].push(e);
   }
   if (rhythm === "dotted" || rhythm === "reverse") {
