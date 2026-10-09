@@ -1,12 +1,12 @@
 /* 程式自動驗證(不需要瀏覽器):
-   1. data/syllabus.json 結構
+   1. data/syllabus.json 結構(ABRSM 點題制、Trinity A/B 組)
    2. data/fingerings.json 結構(長度、手指 1~5、循環一致)
-   3. 每個系統 × 級數 × 題目,再加上「所有調 × 所有題型 × 1~4 個八度」:音高、拼法、指法完整與可彈性
-   4. MusicXML:每小節每個譜表的時值 = 4 拍、指法數 = 音數
+   3. 大綱裡每一題 + 「所有調 × 所有題型 × 1~4 個八度」:音高、拼法、音型、音域、指法完整與可彈性
+   4. MusicXML:每小節每個譜表的時值 = 4 拍、指法數 = 音數、記譜規則(另外寫的檢查,不沿用產生器)
    用法:node tools/test/verify.mjs */
 import fs from "node:fs";
 import { buildExercise } from "../../js/exercise.js";
-import { questionsFor } from "../../js/syllabus.js";
+import { questionsFor, masteryKey } from "../../js/syllabus.js";
 import { exerciseToMusicXML } from "../../js/musicxml.js";
 import { INTERVALS, parseNote, pcOf, midiOf, isBlack } from "../../js/theory.js";
 
@@ -18,30 +18,43 @@ const fail = (msg) => { fails++; if (fails <= (process.env.ALL ? 1e9 : 60)) cons
 const ok = (cond, msg) => { checks++; if (!cond) fail(msg); return cond; };
 
 /* ── 1. syllabus.json ── */
-const TYPES = ["scale", "arpeggio", "chromatic", "dom7", "dim7"];
-const KEY_RE = /^([A-G](#|b)?|any)$/;
+const TYPES = ["scale", "arpeggio", "chromatic", "dom7", "dim7", "wholetone", "broken", "thirds", "sixths"];
+const CATS = ["scale", "contrary", "apart", "double", "chromatic", "wholetone", "arpeggio", "seventh", "broken"];
+const KEY_RE = /^[A-G](#|b)?$/;
+const TEMPO_OK = t => t && ["q", "h", "q."].includes(t.unit) && t.bpm >= 30 && t.bpm <= 200;
+function checkItem(it, at, mode){
+  ok(TYPES.includes(it.type), `${at}: type ${it.type}`);
+  ok(CATS.includes(it.cat), `${at}: cat ${it.cat}`);
+  const keys = mode === "sets" ? [it.key] : it.keys;
+  ok(Array.isArray(keys) && keys.length && keys.every(k => KEY_RE.test(k)), `${at}: keys`);
+  ok(mode === "sets" ? ["RH", "LH", "HT"].includes(it.hands) : ["HS", "HT"].includes(it.hands), `${at}: hands`);
+  ok(it.range === "5th" || [1, 2, 3, 4].includes(it.octaves), `${at}: octaves/range`);
+  const arts = mode === "sets" ? [it.articulation] : it.articulation;
+  ok(Array.isArray(arts) && arts.every(a => ["legato", "staccato"].includes(a)), `${at}: articulation`);
+  if (["scale", "arpeggio", "broken", "thirds", "sixths"].includes(it.type)) ok(["major", "minor"].includes(it.quality), `${at}: quality`);
+  if (it.type === "scale") ok(["similar", "contrary"].includes(it.motion), `${at}: motion`);
+  if (it.quality === "minor" && ["scale", "thirds", "sixths"].includes(it.type)) ok(Array.isArray(it.forms) && it.forms.length && it.forms.every(f => ["harmonic", "melodic", "natural"].includes(f)), `${at}: forms`);
+  if (it.motion === "contrary") ok(it.hands === "HT", `${at}: 反向要雙手`);
+  if (it.type === "chromatic") ok(KEY_RE.test(it.lhStart) && KEY_RE.test(it.rhStart), `${at}: 半音階起音`);
+  if (mode === "sets") { ok(["p", "mf", "f", "cresc-dim"].includes(it.dynamic), `${at}: dynamic`); ok(TEMPO_OK(it.tempo), `${at}: tempo`); }
+}
 for (const [sk, sys] of Object.entries(SY.systems)) {
-  ok(typeof sys.name === "string" && Array.isArray(sys.grades), `${sk}: name/grades`);
+  ok(typeof sys.name === "string" && Array.isArray(sys.grades) && ["examiner", "sets"].includes(sys.mode), `${sk}: name/grades/mode`);
   const seen = new Set();
   for (const g of sys.grades) {
     const at = `${sk} G${g.grade}`;
     ok(Number.isInteger(g.grade) && !seen.has(g.grade), `${at}: grade 重複或不是整數`); seen.add(g.grade);
-    ok(typeof g.verified === "boolean", `${at}: 缺 verified`);
-    for (const t of ["scale", "arpeggio", "chromatic", "four"]) ok(g.tempo && g.tempo[t] && g.tempo[t].bpm >= 30 && [2, 3, 4].includes(g.tempo[t].sub), `${at}: tempo.${t}`);
-    const ids = new Set();
-    for (const it of g.items) {
-      const ia = `${at} ${it.id}`;
-      ok(!ids.has(it.id), `${ia}: id 重複`); ids.add(it.id);
-      ok(TYPES.includes(it.type), `${ia}: type`);
-      ok(Array.isArray(it.keys) && it.keys.length && it.keys.every(k => KEY_RE.test(k)), `${ia}: keys`);
-      ok(["HS", "HT"].includes(it.hands), `${ia}: hands`);
-      ok([1, 2, 3, 4].includes(it.octaves), `${ia}: octaves`);
-      ok(Array.isArray(it.articulation) && it.articulation.every(a => ["legato", "staccato"].includes(a)), `${ia}: articulation`);
-      if (it.type === "scale" || it.type === "arpeggio") ok(["major", "minor"].includes(it.quality), `${ia}: quality`);
-      if (it.type === "scale") ok(["similar", "contrary"].includes(it.motion), `${ia}: motion`);
-      if (it.type === "scale" && it.quality === "minor") ok(Array.isArray(it.forms) && it.forms.length && it.forms.every(f => ["harmonic", "melodic", "natural"].includes(f)), `${ia}: forms`);
-      if (it.motion === "contrary") ok(it.hands === "HT", `${ia}: 反向要雙手`);
-      if (it.dynamics) ok(it.dynamics.every(d => ["f", "p"].includes(d)), `${ia}: dynamics`);
+    ok(typeof g.verified === "boolean" && typeof g.source === "string" && g.source.length > 10, `${at}: 缺 verified/source`);
+    if (sys.mode === "examiner") {
+      const ids = new Set();
+      for (const it of g.items) {
+        ok(!ids.has(it.id), `${at} ${it.id}: id 重複`); ids.add(it.id);
+        checkItem(it, `${at} ${it.id}`, "examiner");
+        ok(TEMPO_OK(g.tempo[it.tempo]), `${at} ${it.id}: 速度 ${it.tempo} 沒有定義`);
+      }
+    } else {
+      ok(g.sets && g.sets.A && g.sets.B, `${at}: 要有 A、B 兩組`);
+      for (const [k, items] of Object.entries(g.sets)) items.forEach(it => checkItem(it, `${at} ${k}${it.id}`, "sets"));
     }
   }
 }
@@ -67,97 +80,77 @@ for (const [q, table] of Object.entries(FG.arpeggio)) for (const k of PCS) {
 
 /* ── 3. 題目的音高與指法 ── */
 const LETTER_PC = [0, 2, 4, 5, 7, 9, 11];
-function spellingOk(n){ return ((LETTER_PC[n.letter] + n.alter - (n.midi - 12 * (n.octave + 1))) % 12 === 0) && Math.abs(n.alter) <= 2; }
-const ALL_BLACK_TRIADS = new Set(["arpeggio|major|6", "arpeggio|minor|3"]);   // F♯ 大三、E♭ 小三:三個都是黑鍵
-function expectScaleMidis(q, hand, tonicMidi){
-  const iv = q.quality === "major" ? INTERVALS.major : INTERVALS[q.form];
-  const down = q.quality !== "major" && q.form === "melodic" ? INTERVALS.natural : iv;
-  const seq = (ivs, n) => { const a = []; for (let o = 0; o < n; o++) for (const x of ivs) a.push(12 * o + x); a.push(12 * n); return a; };
-  const up = seq(iv, q.octaves), dn = seq(down, q.octaves);
-  if (q.motion === "contrary" && hand === "lh") {
-    // 從主音往下(下行用 down 的音)再回來(上行用 up 的音);全部相對最低音
-    const outward = dn.slice().reverse(), back = up.slice(1);
-    return outward.concat(back).map(x => tonicMidi - 12 * q.octaves + x);
+const spellingOk = n => ((LETTER_PC[n.letter] + n.alter - (n.midi - 12 * (n.octave + 1))) % 12 === 0) && Math.abs(n.alter) <= 2;
+const pc = m => ((m % 12) + 12) % 12;
+const ALL_BLACK_TRIADS = new Set(["major|6", "minor|3"]);   // F♯ 大三、E♭ 小三:三個都是黑鍵
+function scaleIvs(q, desc){ const f = q.quality === "major" ? "major" : (desc && q.form === "melodic" ? "natural" : q.form); return INTERVALS[f]; }
+
+/* 依題型算出每隻手應該的音高(跟產生器分開寫) */
+function expectedPitches(q, hand, notes){
+  const t = pcOf(parseNote(q.tonic)), first = notes[0].midi;
+  const relSeq = (ivs, startDeg, count, dir) => { const a = []; let d = startDeg, oct = 0; a.push(0);
+    for (let i = 0; i < count; i++) { const nd = d + dir; const no = oct + Math.floor(nd / 7); const md = ((nd % 7) + 7) % 7;
+      a.push(12 * no + ivs[md] - ivs[startDeg]); d = md; oct = no; } return a; };
+  if (q.type === "scale" && q.range === "5th") {
+    const iv = scaleIvs(q, false);
+    if (q.motion === "contrary" && hand === "lh") {   // 從主音往下走 4 級再回來(用同一個調的音)
+      const dn = [0, -1, -2, -3, -4].map(d => { const dd = ((d % 7) + 7) % 7, o = Math.floor(d / 7); return 12 * o + iv[dd]; });
+      return dn.concat(dn.slice(0, -1).reverse()).map(x => first + x);
+    }
+    const up = [0, 1, 2, 3, 4].map(d => iv[d]);
+    return up.concat(up.slice(0, -1).reverse()).map(x => first + x);
   }
-  return up.concat(dn.slice(0, -1).reverse()).map(x => tonicMidi + x);
+  if (q.type === "scale") {
+    const n = q.octaves, deg = hand === "rh" ? (q.apart === 3 ? 2 : 0) : (q.apart === 6 ? 2 : 0);
+    const ivU = scaleIvs(q, false), ivD = scaleIvs(q, true);
+    if (q.motion === "contrary" && hand === "lh") {
+      const out = relSeq(ivD, deg, 7 * n, -1), back = relSeq(ivU, deg, 7 * n, 1).map(x => x - 12 * n).slice(1);
+      return out.concat(back).map(x => first + x);
+    }
+    const up = relSeq(ivU, deg, 7 * n, 1), dn = relSeq(ivD, deg, 7 * n, 1).slice(0, -1).reverse();
+    return up.concat(dn).map(x => first + x);
+  }
+  if (q.type === "wholetone") { const k = 6 * q.octaves, up = []; for (let i = 0; i <= k; i++) up.push(first + 2 * i); return up.concat(up.slice(0, -1).reverse()); }
+  if (q.type === "chromatic") return null;   // 另外檢查
+  if (q.type === "arpeggio" && q.range === "5th") { const s = q.quality === "major" ? [0, 4, 7] : [0, 3, 7]; return [0, 1, 2, 1, 0].map(i => first + s[i]); }
+  if (["arpeggio", "dom7", "dim7"].includes(q.type)) {
+    let cyc = q.type === "arpeggio" ? (q.quality === "major" ? [0, 4, 7] : [0, 3, 7]) : q.type === "dom7" ? [0, 4, 7, 10] : [0, 3, 6, 9];
+    if (q.type === "arpeggio" && q.inversion) cyc = cyc.slice(q.inversion).concat(cyc.slice(0, q.inversion).map(x => x + 12)).map((x, i, a) => x - a[0]);
+    const k = cyc.length, up = [];
+    for (let i = 0; i <= k * q.octaves; i++) up.push(first + 12 * Math.floor(i / k) + cyc[i % k]);
+    const seq = up.concat(up.slice(0, -1).reverse());
+    if (q.type === "dom7") seq.push(first + 5);   // 解決:屬音往上四度到主音
+    return seq;
+  }
+  if (q.type === "broken") {
+    const s = q.quality === "major" ? [0, 4, 7] : [0, 3, 7];
+    const g0 = s, g1 = [s[1], s[2], 12], g2 = [s[2], 12, 12 + s[1]];
+    return g0.concat(g1, g2, g2.slice().reverse(), g1.slice().reverse(), [0]).map(x => first + x);
+  }
+  return null;
 }
 function checkPlayable(notes, hand, label, q){
-  // 依音高由低到高看相鄰兩個音(上下行同一個音同一根手指,所以只看上行那段)
-  const peak = notes.reduce((b, n, i) => (hand === "lh" && q.motion === "contrary" && q.type === "scale") ? b : (n.midi > notes[b].midi ? i : b), 0);
+  if (notes.every(n => n.finger == null)) return;   // 雙音音階:不標指法
+  notes.forEach((n, i) => ok(Number.isInteger(n.finger) && n.finger >= 1 && n.finger <= 5, `${label} ${hand}: 第 ${i + 1} 個音指法缺漏`));
+  if (q.type === "broken" || q.range === "5th") return;   // 固定手型,不跨指
   let asc;
-  if (q.motion === "contrary" && hand === "lh") {
-    const low = notes.reduce((b, n, i) => n.midi < notes[b].midi ? i : b, 0);
-    asc = notes.slice(low);                     // 回程:從最低音往上
-  } else asc = notes.slice(0, peak + 1);
+  if (q.motion === "contrary" && hand === "lh") { const low = notes.reduce((b, n, i) => n.midi < notes[b].midi ? i : b, 0); asc = notes.slice(low); }
+  else { const peak = notes.reduce((b, n, i) => n.midi > notes[b].midi ? i : b, 0); asc = notes.slice(0, peak + 1); }
   for (let i = 0; i + 1 < asc.length; i++) {
     const a = asc[i].finger, b = asc[i + 1].finger, at = `${label} ${hand} 第 ${i + 1}→${i + 2} 個音(${a}→${b})`;
     if (hand === "rh") ok(b > a || (b === 1 && [2, 3, 4].includes(a)), at + " 右手上行不能這樣接");
     else ok(b < a || (a === 1 && [2, 3, 4].includes(b)), at + " 左手上行不能這樣接");
     if (q.type === "scale") ok(b === 1 ? true : (hand === "rh" ? b === a + 1 : b === a - 1 || a === 1), at + " 音階手指要連續");
   }
-  // 下行段:每個音的手指要等於上行同一個音的手指(旋律小調除外:上下行音不同)
-  for (const n of notes) {
-    ok(Number.isInteger(n.finger) && n.finger >= 1 && n.finger <= 5, `${label} ${hand}: 指法缺漏`);
-    if (n.finger === 1 && isBlack(n.midi)) {
-      const allBlack = ALL_BLACK_TRIADS.has(`${q.type}|${q.quality}|${pcOf(parseNote(q.tonic))}`);
-      ok(allBlack, `${label} ${hand}: 拇指在黑鍵 ${n.midi}`);
-    }
-  }
-  // 5 指只出現在兩端(半音階不會用 5)
-  notes.forEach((n, i) => { if (n.finger === 5) { const ext = notes.every(m => m.midi <= n.midi) || notes.every(m => m.midi >= n.midi); ok(ext, `${label} ${hand}: 5 指不在最高/最低音`); } });
+  // 拇指不在黑鍵:三個音都是黑鍵的和弦(F♯ 大三、E♭ 小三,含轉位)、屬七最後解決的那一個長音除外
+  notes.forEach((n, i) => { if (n.finger === 1 && isBlack(n.midi)) {
+    const allBlack = q.type === "arpeggio" && ALL_BLACK_TRIADS.has(`${q.quality}|${pcOf(parseNote(q.tonic))}`);
+    const resolution = q.type === "dom7" && i === notes.length - 1;
+    ok(allBlack || resolution, `${label} ${hand}: 拇指在黑鍵 ${n.midi}`);
+  } });
+  const body = q.type === "dom7" ? notes.slice(0, -1) : notes;
+  body.forEach(n => { if (n.finger === 5) { const ext = body.every(m => m.midi <= n.midi) || body.every(m => m.midi >= n.midi); ok(ext, `${label} ${hand}: 5 指不在最高/最低音`); } });
 }
-function checkQuestion(q, label){
-  let ex;
-  try { ex = buildExercise(FG, q); } catch (e) { fail(`${label}: 產生失敗 ${e.message}`); return; }
-  for (const hand of ["rh", "lh"]) {
-    const notes = ex[hand];
-    notes.forEach((n, i) => ok(spellingOk(n), `${label} ${hand} 第 ${i + 1} 個音拼法與音高不符`));
-    ok(notes.every(n => n.midi >= 21 && n.midi <= 108), `${label} ${hand}: 超出鋼琴音域 A0–C8`);
-    const t = parseNote(q.tonic);
-    const tonicMidi = notes[0].midi;
-    if (q.type !== "dom7") ok(pcOf(t) === ((tonicMidi % 12) + 12) % 12, `${label} ${hand}: 起音不是 ${q.tonic}`);
-    ok(notes[notes.length - 1].midi === tonicMidi, `${label} ${hand}: 結束音不是起音`);
-    if (q.type === "scale") {
-      const exp = expectScaleMidis(q, hand, tonicMidi);
-      ok(notes.length === exp.length && notes.every((n, i) => n.midi === exp[i]), `${label} ${hand}: 音高錯誤`);
-      // 相鄰音的字母要連續(音階每級一個字母)
-      for (let i = 0; i + 1 < notes.length; i++) { const d = ((notes[i + 1].letter - notes[i].letter) % 7 + 7) % 7; ok(d === 1 || d === 6, `${label} ${hand}: 字母不連續`); }
-    } else if (q.type === "chromatic") {
-      ok(notes.length === 24 * q.octaves + 1, `${label} ${hand}: 半音階音數`);
-      for (let i = 0; i + 1 < notes.length; i++) ok(Math.abs(notes[i + 1].midi - notes[i].midi) === 1, `${label} ${hand}: 半音階不是半音`);
-    } else {
-      const ivs = q.type === "arpeggio" ? (q.quality === "major" ? [0, 4, 7] : [0, 3, 7]) : q.type === "dom7" ? [0, 4, 7, 10] : [0, 3, 6, 9];
-      const k = ivs.length;
-      ok(notes.length === 2 * k * q.octaves + 1, `${label} ${hand}: 琶音音數`);
-      const root = q.type === "dom7" ? null : tonicMidi;
-      const base = notes[0].midi;
-      for (let i = 0; i <= k * q.octaves; i++) ok(notes[i].midi === base + 12 * Math.floor(i / k) + ivs[i % k], `${label} ${hand}: 琶音第 ${i + 1} 個音`);
-      if (q.type === "dom7") { const key = pcOf(t); ok(((base - key - 7) % 12 + 12) % 12 === 0, `${label}: 屬七要從屬音開始`); }
-      void root;
-    }
-    if (q.motion === "contrary") ok(ex.rh[0].midi === ex.lh[0].midi, `${label}: 反向要從同一個音開始`);
-    checkPlayable(notes, hand, label, q);
-  }
-  // MusicXML:每小節每個譜表 48 divisions、指法數 = 音數
-  for (const show of ["both", "rh", "lh"]) {
-    const xml = exerciseToMusicXML(ex, q, show);
-    const measures = xml.split("<measure ").slice(1);
-    for (const m of measures) {
-      const parts = m.split("<backup>");
-      parts.forEach((p, si) => {
-        const sum = [...p.matchAll(/<note>(?:(?!<\/note>).)*?<duration>(\d+)<\/duration>/gs)].reduce((a, x) => a + Number(x[1]), 0);
-        ok(sum === 48, `${label} ${show}: 小節時值 ${sum} ≠ 48`);
-      });
-    }
-    checkNotation(xml, `${label} ${show}`, ex.sub);
-    const nNotes = (xml.match(/<pitch>/g) || []).length, nF = (xml.match(/<fingering /g) || []).length;
-    const expN = show === "both" ? ex.rh.length + ex.lh.length : ex[show].length;
-    ok(nNotes === expN && nF === expN, `${label} ${show}: 音數 ${nNotes} / 指法 ${nF} / 應為 ${expN}`);
-    const beg = (xml.match(/<beam number="1">begin/g) || []).length, end = (xml.match(/<beam number="1">end/g) || []).length;
-    ok(beg === end, `${label} ${show}: 連桿沒有成對`);
-  }
-}
-
 /* ── 4. 記譜規則(自己重新讀 MusicXML 檢查,不沿用產生器的程式) ──
    符桿方向、臨時記號、休止符位置、長音位置、連桿不跨拍、三連音成組、加線不超過 3 條 */
 const LET = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6 };
@@ -171,13 +164,15 @@ function checkNotation(xml, label, sub){
   const measures = xml.split("<measure ").slice(1);
   for (const [mi, m] of measures.entries()) {
     const tokens = [...m.matchAll(/<clef number="(\d)"><sign>([GF])<\/sign>|<octave-shift type="(\w+)"[^>]*\/><\/direction-type><staff>(\d)<\/staff>|<note>(.*?)<\/note>|<backup>/gs)];
-    const pos = { 1: 0, 2: 0 }, acc = { 1: new Map(), 2: new Map() };
-    let staffCur = 1, group = [], tupN = 0;
+    const pos = { 1: 0, 2: 0 }, acc = { 1: new Map(), 2: new Map() }, lastPos = { 1: 0, 2: 0 }, lastStem = { 1: null, 2: null };
+    let staffCur = 1, group = [], tupN = 0, lastSingle = null;
+    const checkSingle = sgl => { let far = 0; for (const st of sgl.steps) { const d = st - MID[sgl.clef]; if (Math.abs(d) > Math.abs(far) || (Math.abs(d) === Math.abs(far) && d > far)) far = d; }
+      ok(sgl.stem === (far >= 0 ? "down" : "up"), `${label} m${mi + 1}: 單音符桿方向不符`); };
     const flushGroup = () => {
       if (!group.length) return;
       const st = new Set(group.map(g => g.stem));
       ok(st.size === 1, `${label} m${mi + 1}: 同一組連桿符桿方向不一致`);
-      let far = 0; for (const g of group) { const d = g.step - MID[g.clef]; if (Math.abs(d) > Math.abs(far) || (Math.abs(d) === Math.abs(far) && d > far)) far = d; }
+      let far = 0; for (const g of group) for (const st of g.steps) { const d = st - MID[g.clef]; if (Math.abs(d) > Math.abs(far) || (Math.abs(d) === Math.abs(far) && d > far)) far = d; }
       ok(group[0].stem === (far >= 0 ? "down" : "up"), `${label} m${mi + 1}: 符桿方向不符(最遠的音離中線 ${far})`);
       const span = sub === 2 ? 24 : 12;
       ok(Math.floor(group[0].pos / span) === Math.floor(group[group.length - 1].pos / span), `${label} m${mi + 1}: 連桿跨拍`);
@@ -186,10 +181,11 @@ function checkNotation(xml, label, sub){
     for (const t of tokens) {
       if (t[1]) { clef[t[1]] = t[2]; continue; }
       if (t[3]) { shift[t[4]] = t[3] === "down" ? 7 : t[3] === "up" ? -7 : 0; continue; }
-      if (t[0] === "<backup>") { flushGroup(); continue; }
+      if (t[0] === "<backup>") { flushGroup(); if (lastSingle) { checkSingle(lastSingle); lastSingle = null; } continue; }
       const body = t[5], dur = Number(/<duration>(\d+)/.exec(body)[1]), staff = Number(/<staff>(\d)/.exec(body)[1]);
       staffCur = staff;
-      const p0 = pos[staff];
+      const isChord = /<chord\/>/.test(body);
+      const p0 = isChord ? lastPos[staff] : pos[staff];
       if (/<rest\/>/.test(body)) {
         ok(p0 % 12 === 0, `${label} m${mi + 1}: 休止符不在拍點`);
         ok(!/<dot\/>/.test(body), `${label} m${mi + 1}: 附點休止符`);
@@ -215,42 +211,124 @@ function checkNotation(xml, label, sub){
       if (type === "whole") ok(p0 === 0, `${label} m${mi + 1}: 全音符不在第 1 拍`);
       if (type === "half") ok(!dotted && (p0 === 0 || p0 === 24), `${label} m${mi + 1}: 二分音符位置不對`);
       // 三連音
-      if (/<time-modification>/.test(body)) { if (/<tuplet type="start"/.test(body)) { ok(tupN === 0, `${label}: 三連音沒有結束`); tupN = 1; } else { tupN++; if (/<tuplet type="stop"/.test(body)) { ok(tupN === 3, `${label}: 三連音不是 3 個`); tupN = 0; } } }
+      if (!isChord && /<time-modification>/.test(body)) { if (/<tuplet type="start"/.test(body)) { ok(tupN === 0, `${label}: 三連音沒有結束`); tupN = 1; } else { tupN++; if (/<tuplet type="stop"/.test(body)) { ok(tupN === 3, `${label}: 三連音不是 3 個`); tupN = 0; } } }
       // 符桿
       const stem = (/<stem>(\w+)/.exec(body) || [])[1];
       if (type !== "whole") ok(!!stem, `${label} m${mi + 1}: 缺符桿方向`);
+      if (isChord) {
+        ok(stem === lastStem[staff], `${label} m${mi + 1}: 雙音的符桿方向不一致`);
+        if (group.length && group[group.length - 1].pos === p0) group[group.length - 1].steps.push(disp);   // 雙音:上方音也算進「離中線最遠」
+        else if (lastSingle) lastSingle.steps.push(disp);
+        continue;
+      }
+      if (lastSingle) { checkSingle(lastSingle); lastSingle = null; }
+      lastStem[staff] = stem; lastPos[staff] = p0;
       const beam = (/<beam number="1">(\w+)/.exec(body) || [])[1];
-      if (beam) { group.push({ stem, step: disp, clef: c, pos: p0 }); if (beam === "end") flushGroup(); }
-      else if (stem) { let d = disp - MID[c]; ok(stem === (d >= 0 ? "down" : "up"), `${label} m${mi + 1}: 單音符桿方向不符`); }
+      if (beam) { if (beam === "begin" && group.length) flushGroup(); group.push({ stem, steps: [disp], clef: c, pos: p0 }); }
+      else if (stem) lastSingle = { stem, steps: [disp], clef: c };
       pos[staff] += dur;
     }
-    flushGroup(); void staffCur;
+    flushGroup(); if (lastSingle) checkSingle(lastSingle); void staffCur;
   }
 }
 
-// 3a. 大綱裡的每一題(每種小調形式)
+
+function checkQuestion(q, label){
+  let ex;
+  try { ex = buildExercise(FG, q); } catch (e) { fail(`${label}: 產生失敗 ${e.message}`); return; }
+  for (const hand of ["rh", "lh"]) {
+    const notes = ex[hand];
+    const all = notes.flatMap(n => n.with ? [n, n.with] : [n]);
+    all.forEach((n, i) => ok(spellingOk(n), `${label} ${hand} 第 ${i + 1} 個音拼法與音高不符`));
+    ok(all.every(n => n.midi >= 21 && n.midi <= 108), `${label} ${hand}: 超出鋼琴音域 A0–C8`);
+    const startName = q.type === "chromatic" ? (hand === "rh" ? q.rhStart || q.tonic : q.lhStart || q.tonic) : q.tonic;
+    const lowDeg = (q.type === "scale" && ((hand === "rh" && q.apart === 3) || (hand === "lh" && q.apart === 6))) || q.type === "sixths";
+    if (!["dom7"].includes(q.type) && !lowDeg && !(q.type === "arpeggio" && q.inversion)) ok(pcOf(parseNote(startName)) === pc(notes[0].midi), `${label} ${hand}: 起音不是 ${startName}`);
+    const endOk = q.type === "dom7" ? pc(notes[notes.length - 1].midi) === pcOf(parseNote(q.tonic)) : notes[notes.length - 1].midi === notes[0].midi;
+    ok(endOk, `${label} ${hand}: 結束音不對`);
+    const exp = expectedPitches(q, hand, notes);
+    if (exp) ok(notes.length === exp.length && notes.every((n, i) => n.midi === exp[i]), `${label} ${hand}: 音高錯誤`);
+    if (q.type === "scale" && q.range !== "5th") for (let i = 0; i + 1 < notes.length; i++) { const d = ((notes[i + 1].letter - notes[i].letter) % 7 + 7) % 7; ok(d === 1 || d === 6, `${label} ${hand}: 字母不連續`); }
+    if (q.type === "chromatic") {
+      ok(notes.length === 24 * q.octaves + 1, `${label} ${hand}: 半音階音數`);
+      for (let i = 0; i + 1 < notes.length; i++) ok(Math.abs(notes[i + 1].midi - notes[i].midi) === 1, `${label} ${hand}: 半音階不是半音`);
+    }
+    if (q.type === "thirds" || q.type === "sixths") notes.forEach((n, i) => { const iv = n.with.midi - n.midi; ok(q.type === "thirds" ? iv === 3 || iv === 4 : iv === 8 || iv === 9, `${label} ${hand} 第 ${i + 1} 個雙音音程 ${iv}`); });
+    checkPlayable(notes, hand, label, q);
+  }
+  // 兩手的距離
+  const d0 = ex.rh[0].midi - ex.lh[0].midi;
+  if (q.motion === "contrary") ok(q.type === "chromatic" ? d0 >= 0 && d0 <= 4 : d0 === 0, `${label}: 反向的兩手起音距離 ${d0}`);
+  else if (q.type === "scale" && q.apart === 3) ok(d0 === 15 || d0 === 16, `${label}: 相隔三度應該差十度(${d0})`);
+  else if (q.type === "scale" && q.apart === 6) ok(d0 === 8 || d0 === 9, `${label}: 相隔六度(${d0})`);
+  else if (q.type === "chromatic" && q.apartTenth) ok(d0 === 15 || d0 === 16, `${label}: 半音階相隔小三度應該差十度(${d0})`);
+  else if (q.type === "chromatic" && q.lhStart !== q.rhStart) ok(d0 > 0 && d0 < 12, `${label}: 半音階兩手起音(${d0})`);
+  else if (!["broken", "thirds", "sixths"].includes(q.type) && q.range !== "5th" && !(q.type === "arpeggio" && q.range)) ok(d0 === 12, `${label}: 同向兩手要差一個八度(${d0})`);
+  for (const show of ["both", "rh", "lh"]) {
+    const xml = exerciseToMusicXML(ex, q, show);
+    for (const m of xml.split("<measure ").slice(1)) m.split("<backup>").forEach(p => {
+      const sum = [...p.matchAll(/<note>((?:(?!<\/note>).)*?)<\/note>/gs)].filter(x => !/<chord\/>/.test(x[1])).reduce((a, x) => a + Number(/<duration>(\d+)/.exec(x[1])[1]), 0);
+      ok(sum === 48, `${label} ${show}: 小節時值 ${sum} ≠ 48`);
+    });
+    checkNotation(xml, `${label} ${show}`, ex.sub);
+    const hands = show === "both" ? ["rh", "lh"] : [show];
+    const expN = hands.reduce((s, h) => s + ex[h].reduce((a, n) => a + (n.with ? 2 : 1), 0), 0);
+    const expF = hands.reduce((s, h) => s + ex[h].filter(n => n.finger).length, 0);
+    const nNotes = (xml.match(/<pitch>/g) || []).length, nF = (xml.match(/<fingering /g) || []).length;
+    ok(nNotes === expN && nF === expF, `${label} ${show}: 音數 ${nNotes}/${expN}、指法 ${nF}/${expF}`);
+    const beg = (xml.match(/<beam number="1">begin/g) || []).length, end = (xml.match(/<beam number="1">end/g) || []).length;
+    ok(beg === end, `${label} ${show}: 連桿沒有成對`);
+  }
+}
+
+// 3a. 大綱裡的每一題(三種小調形式、Trinity A/B 組都跑)
 let nSyl = 0;
-for (const [sk, sys] of Object.entries(SY.systems)) for (const g of sys.grades) for (const mf of ["harmonic", "melodic", "natural"]) {
-  for (const q of questionsFor(g, { minorForm: mf })) { nSyl++; checkQuestion(q, `${sk} G${g.grade} ${q.key}`); }
+const seenKeys = new Set();
+for (const [sk, sys] of Object.entries(SY.systems)) for (const g of sys.grades) for (const mf of ["harmonic", "melodic", "natural"]) for (const set of ["A", "B"]) {
+  for (const q of questionsFor(SY, sk, g, { minorForm: mf, set })) {
+    const k = q.key + q.sub; if (seenKeys.has(k)) continue; seenKeys.add(k);
+    nSyl++; checkQuestion(q, `${sk} G${g.grade} ${q.key}`);
+  }
 }
 // 3b. 全部組合
 const MAJ = ["C", "G", "D", "A", "E", "B", "F#", "Gb", "C#", "Db", "Ab", "Eb", "Bb", "F", "Cb"];
 const MIN = ["A", "E", "B", "F#", "C#", "G#", "D#", "Eb", "Bb", "F", "C", "G", "D", "A#"];
 const STARTS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B"];
 let nAll = 0;
+const T = (o) => { nAll++; const q = { hands: "HT", articulation: "legato", sub: 2, motion: "similar", ...o }; checkQuestion(q, "全部 " + masteryKey(q)); };
 for (const oct of [1, 2, 3, 4]) {
-  const base = { hands: "HT", octaves: oct, articulation: "legato", sub: 4, bpm: 60 };
-  for (const motion of oct <= 2 ? ["similar", "contrary"] : ["similar"]) {   // 反向最多兩個八度(從中央 C 附近起,三、四個八度會超出鍵盤或不是考試要求)
-    for (const k of MAJ) { nAll++; checkQuestion({ ...base, type: "scale", tonic: k, quality: "major", motion }, `全部 ${k} 大調 ${motion} ${oct}`); }
-    for (const k of MIN) for (const form of ["harmonic", "melodic", "natural"]) { nAll++; checkQuestion({ ...base, type: "scale", tonic: k, quality: "minor", form, motion }, `全部 ${k} ${form} ${motion} ${oct}`); }
-    for (const k of STARTS) { nAll++; checkQuestion({ ...base, type: "chromatic", tonic: k, motion }, `全部 半音階 ${k} ${motion} ${oct}`); }
+  for (const motion of oct <= 2 ? ["similar", "contrary"] : ["similar"]) {
+    for (const k of MAJ) T({ type: "scale", tonic: k, quality: "major", motion, octaves: oct });
+    for (const k of MIN) for (const form of ["harmonic", "melodic", "natural"]) T({ type: "scale", tonic: k, quality: "minor", form, motion, octaves: oct });
+    for (const k of STARTS) T({ type: "chromatic", tonic: k, lhStart: k, rhStart: k, motion, octaves: oct });
   }
-  for (const k of MAJ) { nAll += 2; checkQuestion({ ...base, type: "arpeggio", tonic: k, quality: "major", sub: 3 }, `全部 ${k} 大調琶音 ${oct}`); checkQuestion({ ...base, type: "dom7", tonic: k, quality: "major" }, `全部 ${k} 屬七 ${oct}`); }
-  for (const k of MIN) { nAll += 2; checkQuestion({ ...base, type: "arpeggio", tonic: k, quality: "minor", sub: 3 }, `全部 ${k} 小調琶音 ${oct}`); checkQuestion({ ...base, type: "dom7", tonic: k, quality: "minor" }, `全部 ${k} 小調屬七 ${oct}`); }
-  for (const k of STARTS) { nAll++; checkQuestion({ ...base, type: "dim7", tonic: k }, `全部 減七 ${k} ${oct}`); }
+  for (const apart of [3, 6]) {
+    for (const k of MAJ) T({ type: "scale", tonic: k, quality: "major", apart, octaves: oct });
+    for (const k of MIN) for (const form of ["harmonic", "melodic"]) T({ type: "scale", tonic: k, quality: "minor", form, apart, octaves: oct });
+  }
+  for (const k of MAJ) {
+    for (const inversion of [0, 1, 2]) T({ type: "arpeggio", tonic: k, quality: "major", inversion, octaves: oct });
+    T({ type: "dom7", tonic: k, quality: "major", octaves: oct });
+  }
+  for (const k of MIN) {
+    for (const inversion of [0, 1, 2]) T({ type: "arpeggio", tonic: k, quality: "minor", inversion, octaves: oct });
+    T({ type: "dom7", tonic: k, quality: "minor", octaves: oct });
+  }
+  for (const k of STARTS) { T({ type: "dim7", tonic: k, octaves: oct }); T({ type: "wholetone", tonic: k, octaves: oct }); }
+  if (oct <= 2) {
+    for (const k of MAJ) for (const type of ["thirds", "sixths"]) T({ type, tonic: k, quality: "major", octaves: oct, hands: "RH" });
+    for (const k of MIN) for (const type of ["thirds", "sixths"]) T({ type, tonic: k, quality: "minor", form: "harmonic", octaves: oct, hands: "RH" });
+  }
+}
+for (const k of MAJ) { T({ type: "broken", tonic: k, quality: "major", octaves: 1, sub: 3 }); T({ type: "scale", tonic: k, quality: "major", range: "5th", motion: "contrary" }); T({ type: "arpeggio", tonic: k, quality: "major", range: "5th" }); }
+for (const k of MIN) { T({ type: "broken", tonic: k, quality: "minor", octaves: 1, sub: 3 }); T({ type: "arpeggio", tonic: k, quality: "minor", range: "5th" }); }
+// 半音階雙手錯開
+for (const [lh, rh, motion, tenth] of [["F#", "A#", "contrary"], ["C#", "E", "contrary"], ["C", "E", "contrary"], ["Eb", "C", "similar"], ["C", "Eb", "similar", true]]) for (const oct of [1, 2, 4]) {
+  if (motion === "contrary" && oct > 2) continue;
+  T({ type: "chromatic", tonic: lh, lhStart: lh, rhStart: rh, motion, octaves: oct, apartTenth: !!tenth });
 }
 
 console.log(`最多加線 ${maxLedger} 條`);
-console.log(`\n大綱題目 ${nSyl} 題(含三種小調形式)、全部組合 ${nAll} 題,共 ${checks} 項檢查。`);
+console.log(`\n大綱題目 ${nSyl} 題、全部組合 ${nAll} 題,共 ${checks} 項檢查。`);
 if (fails) { console.log(`✗ ${fails} 項失敗`); process.exit(1); }
 console.log("✓ 全部通過");

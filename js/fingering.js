@@ -84,3 +84,88 @@ export function chromaticFingers(notes, hand){
   const startMidi = midiOf(notes[0]);
   return notes.map((n, i) => { const m = midiOf(n); return chromaticFinger(m, hand, m === startMidi); });
 }
+
+/* ── 從任一級數開始的音階指法(相隔三度/六度的音階會從第 3 級開始)──
+   每個音用表裡「中間那個八度」的手指(同一個音同一根手指);
+   從主音開始/結束時用表裡的起音、最高音手指;不是主音時:右手最高音若是拇指改用前一指 +1、左手最低音若是拇指改用下一指 +1 */
+export function scaleCycle(FG, tonic, quality, form, hand, desc){
+  const e = scaleEntry(FG, quality, form, pcOf(tonic));
+  const s = digits(desc && e[hand + "Desc"] ? e[hand + "Desc"] : (form === "natural" ? (e[hand + "Desc"] || e[hand]) : e[hand]));
+  return { start: s[0], cycle: s.slice(7, 14), top: s[14] };
+}
+export function scaleFingersFrom(FG, tonic, quality, form, hand, startDeg, n){
+  const up = scaleCycle(FG, tonic, quality, form, hand, false);
+  const dn = quality !== "major" && (form === "melodic" || form === "natural") ? scaleCycle(FG, tonic, quality, form, hand, true) : up;
+  const len = 7 * n + 1;
+  const make = c => {
+    const f = [];
+    for (let i = 0; i < len; i++) f.push(c.cycle[(startDeg + i) % 7]);
+    if (startDeg === 0) { f[0] = c.start; f[len - 1] = c.top; }
+    else if (hand === "rh") { if (f[len - 1] === 1) f[len - 1] = Math.min(5, f[len - 2] + 1); }
+    else if (f[0] === 1) f[0] = Math.min(5, f[1] + 1);
+    return f;
+  };
+  const fu = make(up), fd = make(dn);
+  fd[len - 1] = fu[len - 1];
+  return { up: fu, downAsc: fd, down: fd.slice(0, -1).reverse() };
+}
+
+/* ── 琶音轉位(三個音一組)──
+   右手:拇指放在每組第一個白鍵(優先放在這個轉位的最低音);一組 1-x-y:前兩個音距四度以上用 3、否則 2;
+        第一個到第三個音距小六度以上用 4、否則 3。拇指前面的音從 2 開始;最高音是拇指的位置就用 5
+   左手:鏡像,拇指放在一組最後一個音(白鍵優先),往前 x、y 同樣依音距;最低音是拇指位置就用 5 */
+export function arpGroupFingers(tones, hand, n){
+  const pcs = tones.map(t => pcOf(t)), k = tones.length;
+  const white = pcs.map(p => !isBlack(p));
+  const gap = (a, b) => ((pcs[b % k] - pcs[a % k]) % 12 + 12) % 12 || 12;
+  const up = [];
+  if (hand === "rh") {
+    let t = white.indexOf(true); if (t < 0) t = 0;
+    const x = gap(t, t + 1) >= 5 ? 3 : 2, y = gap(t, t + 1) + gap(t + 1, t + 2) >= 8 ? 4 : 3;
+    const cyc = []; cyc[t] = 1; cyc[(t + 1) % k] = x; cyc[(t + 2) % k] = y;
+    for (let i = 0; i <= k * n; i++) up.push(cyc[i % k]);
+    for (let i = 0; i < t; i++) up[i] = 2 + i;
+    if (t === 0) up[up.length - 1] = 5;
+  } else {
+    let u = 0;
+    if (!white[0]) for (const c of [2, 1]) if (white[c]) { u = c; break; }
+    // 一組 = (u+1, u+2, u+3=u) 往上走到拇指:y x 1
+    const a = (u + 1) % k, b = (u + 2) % k;
+    const x = gap(b, u) >= 6 ? 3 : 2, y = gap(a, b) + gap(b, u) >= 8 ? 4 : 3;
+    const cyc = []; cyc[u] = 1; cyc[b] = x; cyc[a] = y;
+    for (let i = 0; i <= k * n; i++) up.push(cyc[i % k]);
+    if (u === 0) up[0] = 5;
+  }
+  return { up, down: up.slice(0, -1).reverse() };
+}
+
+/* ── 通用循環指法(全音音階):在白鍵上選拇指,兩個拇指之間 2~4 個音;右手從拇指往上 1 2 3 4、左手往上數到拇指 4 3 2 1 ──
+   窮舉拇指位置(一個八度最多 7 個音),選「拇指數最少、每組長度最平均」的 */
+export function cyclicFingers(pcsCycle, hand, n){
+  const k = pcsCycle.length;
+  let best = null;
+  for (let mask = 1; mask < (1 << k); mask++) {
+    const T = [];
+    for (let i = 0; i < k; i++) if (mask >> i & 1) T.push(i);
+    if (T.some(i => isBlack(pcsCycle[i]))) continue;
+    const gaps = T.map((t, j) => ((T[(j + 1) % T.length] - t) % k + k) % k || k);
+    if (gaps.some(g => g < 2 || g > 4)) continue;
+    const score = T.length * 10 + gaps.reduce((s, g) => s + Math.abs(g - 3), 0);
+    if (!best || score < best.score) best = { T, score };
+  }
+  if (!best) throw new Error("找不到拇指位置");
+  const cyc = new Array(k);
+  for (let j = 0; j < best.T.length; j++) {
+    const t = best.T[j], next = best.T[(j + 1) % best.T.length], g = ((next - t) % k + k) % k || k;
+    if (hand === "rh") for (let s = 0; s < g; s++) cyc[(t + s) % k] = s + 1;
+    else for (let s = 1; s <= g; s++) cyc[(t + s) % k] = g - s + 1;   // 從 t+1 往上到下一個拇指:g g-1 … 1
+  }
+  const up = [];
+  for (let i = 0; i <= k * n; i++) up.push(cyc[i % k]);
+  if (hand === "rh") { if (up[up.length - 1] === 1) up[up.length - 1] = Math.min(5, up[up.length - 2] + 1); }
+  else if (up[0] === 1) up[0] = Math.min(5, up[1] + 1);
+  return { up, down: up.slice(0, -1).reverse() };
+}
+
+/* ── 分解和弦(三個音一組:原位 1-3-5、第一轉位 1-2-5、第二轉位 1-3-5;左手 5-3-1、5-3-1、5-2-1)── */
+export const BROKEN_FINGERS = { rh: [[1, 3, 5], [1, 2, 5], [1, 3, 5]], lh: [[5, 3, 1], [5, 3, 1], [5, 2, 1]] };

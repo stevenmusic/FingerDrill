@@ -1,21 +1,17 @@
-// 截圖:手機直式(第一個畫面)、手機橫向、桌機;指定一題
+// 截圖:指定一題(JSON),手機直式 / 手機橫向 / 桌機。例:node shot.mjs '{"type":"thirds","tonic":"G","quality":"major","octaves":2,"hands":"RH","articulation":"legato"}' name
 import { open } from "./harness.mjs";
 import fs from "node:fs";
 const OUT = new URL("./out/", import.meta.url).pathname; fs.mkdirSync(OUT, { recursive: true });
-const q = process.argv[2] || "abrsm:3:maj:Eb";
-const [sys, grade, item, tonic] = q.split(":");
+const q = JSON.parse(process.argv[2]), name = process.argv[3] || "shot";
 for (const vp of [{ name: "phone", viewport: { width: 390, height: 844 }, mobile: true, dpr: 2 }, { name: "phone-land", viewport: { width: 844, height: 390 }, mobile: true, dpr: 2 }, { name: "desktop", viewport: { width: 1400, height: 900 } }]) {
   const { page, errors, close } = await open(vp);
+  await page.evaluate(() => { window.__app.S.onboarded = true; document.getElementById("onboard").hidden = true; });
   const b = await page.evaluate(() => window.__scoreReady || 0);
-  await page.evaluate(([sys, grade, item, tonic]) => {
-    document.querySelector(`#systemSeg button[data-v="${sys}"]`).click();
-    const sel = document.getElementById("selGrade"); sel.value = grade; sel.dispatchEvent(new Event("change"));
-    const q = window.__app.allQuestions().find(x => x.itemId === item && x.tonic === tonic);
-    window.__app.setQuestion(q);
-  }, [sys, grade, item, tonic]);
+  await page.evaluate(q => window.__app.setQuestion({ motion: "similar", hands: "HT", articulation: "legato", sub: 2, tempo: { unit: "q", bpm: 60 }, free: true, key: "x", ...q }, "scale"), q);
   await page.waitForFunction(b => (window.__scoreReady || 0) > b, b);
-  await page.waitForTimeout(500);
-  await page.screenshot({ path: `${OUT}${vp.name}-${q.replace(/:/g, "_")}.png` });
+  await page.waitForTimeout(400);
+  await page.evaluate(() => document.getElementById("quizCard").scrollIntoView());
+  await page.screenshot({ path: `${OUT}${vp.name}-${name}.png` });
   if (errors.length) console.log(errors.join("\n"));
   await close();
 }

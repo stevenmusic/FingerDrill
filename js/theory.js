@@ -138,3 +138,45 @@ export function chromaticRun(start, startOct, octaves, dir = "up"){
   }
   return { first, second, notes: first.concat(second) };
 }
+
+/* ── 通用:依拼法與方向放到正確的八度 ── */
+export function midiOfSp(sp, octave){ return 12 * (octave + 1) + LETTER_PC[sp.letter] + sp.alter; }
+/* 這個拼法 ≥ minMidi 的最低音 */
+export function placeAtLeast(sp, minMidi){
+  let o = Math.floor((minMidi - LETTER_PC[sp.letter] - sp.alter) / 12) - 1;
+  while (midiOfSp(sp, o) < minMidi) o++;
+  while (midiOfSp(sp, o - 1) >= minMidi) o--;
+  return { letter: sp.letter, alter: sp.alter, octave: o };
+}
+/* 依循環(音階級數或和弦音)走 count 步;dir = 1 往上(每步比前一個高)、−1 往下 */
+export function walkCycle(cycle, startIdx, startNote, count, dir = 1){
+  const out = [startNote];
+  let prev = midiOf(startNote), idx = startIdx;
+  const k = cycle.length;
+  for (let i = 0; i < count; i++) {
+    idx = ((idx + dir) % k + k) % k;
+    const sp = cycle[idx];
+    let n = placeAtLeast(sp, prev + 1);
+    if (dir < 0) { n = placeAtLeast(sp, prev - 11); if (midiOf(n) >= prev) n.octave--; }
+    out.push(n); prev = midiOf(n);
+  }
+  return out;
+}
+/* 全音音階:從起音往上 6 個音;字母照順序推(跳過一個字母的地方照音高差拼),拼法維持升或降一致 */
+export function wholeToneCycle(start){
+  const s = parseNote(start), pc0 = pcOf(s), out = [s];
+  const useFlat = s.alter < 0;
+  for (let i = 1; i < 6; i++) {
+    const pc = (pc0 + 2 * i) % 12;
+    const table = useFlat ? FLAT_SPELL : SHARP_SPELL;
+    const [letter, alter] = table[pc];
+    out.push({ letter, alter });
+  }
+  return out;
+}
+/* 三和弦轉位:0 = 原位(1-3-5)、1 = 第一轉位(3-5-1)、2 = 第二轉位(5-1-3) */
+export function inversionTones(tonic, quality, inv){
+  const t = triadTones(tonic, quality);
+  return t.slice(inv).concat(t.slice(0, inv));
+}
+export { FLAT_SPELL, SHARP_SPELL, LETTER_PC };

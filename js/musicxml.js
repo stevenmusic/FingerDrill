@@ -75,7 +75,7 @@ function clefPlan(measures, hand, sub){
   let cur = home;
   const plan = new Map(), shift = new Map();
   for (const u of unitsOf(measures, sub)) {
-    const steps = u.map(e => staffStep(e.n));
+    const steps = u.flatMap(e => e.n.with ? [staffStep(e.n), staffStep(e.n.with)] : [staffStep(e.n)]);
     const led = c => Math.max(...steps.map(st => ledgers(st, c)));
     if (cur !== home && led(home) <= 1) cur = home;
     else if (led(cur) > 2 && led(other(cur)) < led(cur)) cur = other(cur);
@@ -112,9 +112,19 @@ function noteXml(e, opts){
   x += "<notations>";
   // 三連音的「3」只標在每隻手的第一組,之後照慣例省略(simile),不跟指法數字擠在一起
   if (tuplet === "start" || tuplet === "stop") x += `<tuplet type="${tuplet}" bracket="no" show-number="${tuplet === "start" && opts.firstTuplet ? "actual" : "none"}" placement="${stem === "up" ? "above" : "below"}"/>`;
-  x += `<technical><fingering placement="${place}">${n.finger}</fingering></technical>`;
+  if (n.finger) x += `<technical><fingering placement="${place}">${n.finger}</fingering></technical>`;
   if (staccato) x += `<articulations><staccato placement="${stem === "up" ? "below" : "above"}"/></articulations>`;   // 跳音點在符頭那側
   x += "</notations></note>";
+  // 雙音:上方音用 <chord/> 跟主音同時、共用符桿
+  if (n.with) {
+    const w = n.with;
+    x += `<note><chord/><pitch><step>${LETTERS[w.letter]}</step>${w.alter ? `<alter>${w.alter}</alter>` : ""}<octave>${w.octave}</octave></pitch>`;
+    x += `<duration>${e.dur}</duration><voice>${voice}</voice>`;
+    x += e.short ? `<type>${sub === 4 ? "16th" : "eighth"}</type>` + (sub === 3 ? "<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>" : "") : `<type>${e.type}</type>` + "<dot/>".repeat(e.dots);
+    if (opts.accidentalWith) x += `<accidental>${opts.accidentalWith}</accidental>`;
+    if (e.type !== "whole") x += `<stem>${stem}</stem>`;
+    x += `<staff>${staff}</staff></note>`;
+  }
   return x;
 }
 
@@ -167,10 +177,11 @@ export function exerciseToMusicXML(ex, q, show = "both"){
       const { marks, tup, groups } = beamMarks(evs, ex.sub);
       const place = h === "rh" ? "above" : "below";
       const shiftOf = cp[i].shift;   // 7 = 8va(畫低一個八度)、−7 = 8vb
-      const shown = e => shiftOf.has(e) ? { ...e.n, octave: e.n.octave - shiftOf.get(e) / 7 } : e.n;   // 譜上畫的位置
+      const shift1 = (n, e) => shiftOf.has(e) ? { ...n, octave: n.octave - shiftOf.get(e) / 7 } : n;
+      const shownAll = e => e.n.with ? [shift1(e.n, e), shift1(e.n.with, e)] : [shift1(e.n, e)];   // 譜上畫的位置(雙音兩個都算)
       // 符桿:同一組連桿一起決定;沒有連桿的音自己決定
       const stems = new Map();
-      for (const g of groups) { const st = stemFor(g.map(shown), plans[i].get(g[0])); g.forEach(e => stems.set(e, st)); }
+      for (const g of groups) { const st = stemFor(g.flatMap(shownAll), plans[i].get(g[0])); g.forEach(e => stems.set(e, st)); }
       // 臨時記號:同一小節、同一譜表、同一個音高(字母 + 實際八度)到小節線為止都有效;
       // 換譜號、8va 都不影響(Gould《Behind Bars》的規則,OSMD 也是這樣算)
       const keyA = keyAlters(ex.fifths), accState = new Map();
@@ -185,16 +196,20 @@ export function exerciseToMusicXML(ex, q, show = "both"){
           if (sh) body += ottava(sh > 0 ? "down" : "up", sh > 0);
           inOttava = sh;
         }
-        let accidental = null, stem = null;
+        let accidental = null, accidentalWith = null, stem = null;
+        const accFor = n => {
+          const pos = staffStep(n), curA = accState.has(pos) ? accState.get(pos) : keyA[n.letter];
+          accState.set(pos, n.alter);
+          return n.alter !== curA ? ACC_NAME[n.alter] : null;
+        };
         if (!e.rest) {
-          const pos = staffStep(e.n), curA = accState.has(pos) ? accState.get(pos) : keyA[e.n.letter];
-          if (e.n.alter !== curA) accidental = ACC_NAME[e.n.alter];
-          accState.set(pos, e.n.alter);
-          stem = stems.get(e) || stemFor([shown(e)], c);
+          accidental = accFor(e.n);
+          if (e.n.with) accidentalWith = accFor(e.n.with);
+          stem = stems.get(e) || stemFor(shownAll(e), c);
         }
         const tp = tup.get(e), firstTuplet = tp === "start" && !tupletShown[i];
         if (firstTuplet) tupletShown[i] = true;
-        body += noteXml(e, { staff: i + 1, voice: h === "rh" ? 1 : 5, sub: ex.sub, place, staccato: q.articulation === "staccato", beam: marks.get(e), tuplet: tp, firstTuplet, stem, accidental });
+        body += noteXml(e, { staff: i + 1, voice: h === "rh" ? 1 : 5, sub: ex.sub, place, staccato: q.articulation === "staccato", beam: marks.get(e), tuplet: tp, firstTuplet, stem, accidental, accidentalWith });
       }
       if (inOttava) body += ottava("stop", inOttava > 0);
     });
@@ -206,17 +221,14 @@ export function exerciseToMusicXML(ex, q, show = "both"){
 <score-partwise version="3.1"><part-list><score-part id="P1"><part-name print-object="no">Piano</part-name></score-part></part-list><part id="P1">${body}</part></score-partwise>`;
 }
 
-/* 播放時間表:每個音的起點(拍)與長度(拍),兩手同一份時間軸。
-   HS(雙手分開)而且顯示兩手時:右手彈完、空一小節再彈左手 */
+/* 播放時間表:每個音的起點(拍)與長度(拍),兩手同一份時間軸;雙音兩個音一起 */
 export function playbackEvents(ex, q, show = "both"){
   const out = [], step = 1 / ex.sub;
-  const handEvents = (notes, offset, hand) => notes.forEach((n, i) => {
-    const last = i === notes.length - 1;
-    out.push({ midi: n.midi, beat: offset + i * step, len: last ? 2 : step, hand, idx: i });
+  const handEvents = (notes, hand) => notes.forEach((n, i) => {
+    const last = i === notes.length - 1, ev = { beat: i * step, len: last ? 2 : step, hand, idx: i };
+    out.push({ ...ev, midi: n.midi });
+    if (n.with) out.push({ ...ev, midi: n.with.midi, chord: true });
   });
-  const len = (notes) => (notes.length - 1) * step + 2;
-  if (show !== "both") handEvents(ex[show], 0, show);
-  else if (q.hands === "HS") { handEvents(ex.rh, 0, "rh"); handEvents(ex.lh, Math.ceil(len(ex.rh) / 4) * 4 + 4, "lh"); }
-  else { handEvents(ex.rh, 0, "rh"); handEvents(ex.lh, 0, "lh"); }
+  for (const h of show === "both" ? ["rh", "lh"] : [show]) handEvents(ex[h], h);
   return out;
 }

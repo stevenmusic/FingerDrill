@@ -29,7 +29,7 @@ export async function open(opts = {}){
   const errors = [];
   page.on("pageerror", e => errors.push("[pageerror] " + e.message));
   page.on("console", m => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errors.push("[console] " + m.text()); });
-  page.on("requestfailed", r => { if (!/fonts\.(googleapis|gstatic)/.test(r.url())) errors.push("[requestfailed] " + r.url()); });
+  page.on("requestfailed", r => { if (!/fonts\.(googleapis|gstatic)/.test(r.url()) && !/ERR_ABORTED/.test((r.failure() || {}).errorText || "")) errors.push("[requestfailed] " + r.url() + " " + ((r.failure() || {}).errorText || "")); });
   await page.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
   await page.route(/raw\.githubusercontent\.com/, async r => {
     const u = r.request().url(), f = path.join(CACHE, u.replace(/^https:\/\/raw\.githubusercontent\.com\//, "").replace(/\//g, "__"));

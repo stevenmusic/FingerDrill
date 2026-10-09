@@ -1,21 +1,35 @@
-/* 產生 README 的「大綱核對清單」(Markdown):node tools/build/checklist.mjs > /tmp/x.md */
+/* 產生 README 的「大綱核對清單」(Markdown):node tools/build/checklist.mjs [--fingerings] */
 import fs from "node:fs";
 const SY = JSON.parse(fs.readFileSync(new URL("../../data/syllabus.json", import.meta.url)));
-const nm = k => k === "any" ? "任何音" : k.replace("#", "♯").replace(/^([A-G])b$/, "$1♭");
-const TYPE = { scale: "音階", arpeggio: "琶音", chromatic: "半音階", dom7: "屬七琶音", dim7: "減七琶音" };
+const nm = k => k.replace("#", "♯").replace(/^([A-G])b$/, "$1♭");
+const TYPE = { scale: "音階", arpeggio: "琶音", chromatic: "半音階", dom7: "屬七琶音", dim7: "減七琶音", wholetone: "全音音階", broken: "分解和弦", thirds: "三度雙音音階", sixths: "六度雙音音階" };
 const FORM = { harmonic: "和聲", melodic: "旋律", natural: "自然" };
-const SUB = { 2: "八分", 3: "三連音", 4: "十六分" };
+const UNIT = { q: "♩", h: "𝅗𝅥", "q.": "♩." };
+const HANDS = { HS: "分手(考官指定左/右)", HT: "雙手同時", RH: "右手", LH: "左手" };
+const ART = a => (Array.isArray(a) ? a : [a]).map(x => x === "legato" ? "圓滑" : "斷奏").join("/");
+const DYN = { "cresc-dim": "漸強再漸弱(p–f–p)" };
+function desc(it){
+  const kind = (it.motion === "contrary" ? "反向" : "") + (it.quality === "major" ? "大調" : it.quality === "minor" ? "小調" : "") + TYPE[it.type]
+    + (it.apart ? `(相隔${it.apart === 3 ? "三" : "六"}度)` : "") + (it.inversion ? `(第${it.inversion === 1 ? "一" : "二"}轉位)` : "");
+  const keys = it.type === "chromatic" && it.lhStart !== it.rhStart ? `左手 ${nm(it.lhStart)}、右手 ${nm(it.rhStart)}` : (it.keys || [it.key]).map(nm).join("、");
+  const extra = [HANDS[it.hands], it.range === "5th" ? "五度範圍" : it.octaves + " 個八度", ART(it.articulation)];
+  if (it.forms) extra.push(it.forms.length === 1 ? "指定" + FORM[it.forms[0]] + "小調" : (it.examinerForms ? "考官指定:" : "小調自選:") + it.forms.map(f => FORM[f]).join("/"));
+  if (it.dynamic) extra.push(DYN[it.dynamic] || it.dynamic);
+  if (it.tempo && it.tempo.unit) extra.push(`最低 ${UNIT[it.tempo.unit]} = ${it.tempo.bpm}`);
+  return `${kind}:${keys}(${extra.join("、")})`;
+}
 let out = "";
 for (const [sk, sys] of Object.entries(SY.systems)) {
   out += `### ${sys.name}(${sys.syllabus})\n\n`;
   for (const g of sys.grades) {
-    out += `- [ ] **${sys.name} ${g.grade} 級**(verified: ${g.verified})— 速度:音階 ♩=${g.tempo.scale.bpm} ${SUB[g.tempo.scale.sub]}、琶音 ♩=${g.tempo.arpeggio.bpm} ${SUB[g.tempo.arpeggio.sub]}、半音階 ♩=${g.tempo.chromatic.bpm} ${SUB[g.tempo.chromatic.sub]}、屬七/減七 ♩=${g.tempo.four.bpm} ${SUB[g.tempo.four.sub]}\n`;
-    for (const it of g.items) {
-      const kind = (it.motion === "contrary" ? "反向" : "") + (it.quality === "major" ? "大調" : it.quality === "minor" ? "小調" : "") + TYPE[it.type];
-      const extra = [it.hands === "HS" ? "分手" : "雙手同時", it.octaves + " 個八度", it.articulation.map(a => a === "legato" ? "圓滑" : "斷奏").join("/")];
-      if (it.forms) extra.push("小調:" + it.forms.map(f => FORM[f]).join("/"));
-      if (it.dynamics) extra.push("力度 " + it.dynamics.join("/"));
-      out += `  - ${kind}:${it.keys.map(nm).join("、")}(${extra.join("、")})\n`;
+    const label = g.grade === 0 ? "初級" : g.grade + " 級";
+    if (sys.mode === "examiner") {
+      const tp = Object.entries(g.tempo).map(([k, t]) => `${{ scale: "音階", arpeggio: "琶音", apart: "相隔三/六度", thirdsLegato: "圓滑三度", doubleStaccato: "斷奏三/六度" }[k]} ${UNIT[t.unit]} = ${t.bpm}`).join("、");
+      out += `- [ ] **${sys.name} ${label}**(${g.source})— 參考速度:${tp}\n`;
+      for (const it of g.items) out += `  - ${desc(it)}\n`;
+    } else {
+      out += `- [ ] **${sys.name} ${label}**(${g.source})\n`;
+      for (const [k, items] of Object.entries(g.sets)) { out += `  - ${k} 組\n`; for (const it of items) out += `    - ${desc(it)}\n`; }
     }
   }
   out += "\n";

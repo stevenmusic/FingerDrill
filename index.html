@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="指法特訓">
 <meta name="application-name" content="FingerDrill">
-<meta name="description" content="FingerDrill 指法特訓:ABRSM / Trinity 鋼琴考級音階、琶音抽考,附五線譜指法、取樣鋼琴示範與節拍器。">
+<meta name="description" content="FingerDrill 指法特訓:鋼琴音階、琶音、哈農練習與 ABRSM / Trinity 考級抽考,附五線譜指法、取樣鋼琴示範與節拍器。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230C0A07'/%3E%3Cpath d='M5 17l4-4 3 2 4-6 3 2' fill='none' stroke='%23F2B94B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='19' cy='11' r='2' fill='%233FBFAE'/%3E%3C/svg%3E">
 <title>FingerDrill — 指法特訓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,132 +20,179 @@
 <header>
   <div class="header-left">
     <h1>Finger<span>Drill</span></h1>
-    <span class="tagline">指法特訓 · 考級音階抽考</span>
+    <span class="tagline" id="tagline">指法特訓</span>
   </div>
   <div class="header-right">
-    <button class="btn" id="themeToggle" aria-pressed="false" aria-label="淺色模式" title="切換淺色/深色主題">
+    <button class="btn small ghost" id="examChip" hidden></button>
+    <button class="btn" id="themeToggle" aria-pressed="false" data-i18n-attr="aria-label:themeToggleLabel,title:themeToggleTitle" aria-label="淺色模式" title="切換淺色/深色主題">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18z" fill="currentColor" stroke="none"/></svg>
     </button>
+    <button class="btn" id="langToggle" aria-pressed="false" data-i18n-attr="aria-label:langToggleLabel,title:langToggleTitle" data-i18n="langToggleText">EN</button>
   </div>
 </header>
 
 <main>
-  <!-- 1. 設定:手機收成一行摘要 -->
-  <section class="card setup" id="setupCard">
-    <button class="setup-summary" id="setupToggle" aria-expanded="false" aria-controls="setupBody">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-      <span id="setupSummary"></span>
-      <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
-    <div class="setup-body" id="setupBody">
+  <!-- 音階 / 琶音:選擇器(由 js/app.js 依設定產生) -->
+  <section class="card picker pane" data-pane="scale" id="paneScale">
+    <button class="setup-summary" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="sum"></span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div class="setup-body"><div class="quick" hidden></div><div class="rows"></div></div>
+  </section>
+  <section class="card picker pane" data-pane="arp" id="paneArp" hidden>
+    <button class="setup-summary" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="sum"></span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div class="setup-body"><div class="quick" hidden></div><div class="rows"></div></div>
+  </section>
+
+  <!-- 哈農(第二階段) -->
+  <section class="card pane" data-pane="hanon" id="paneHanon" hidden>
+    <div class="card-title"><b data-i18n="hanonTitle">哈農 · 第一部分(1–20 首)</b></div>
+    <p class="soon" data-i18n="hanonSoon">製作中(第二階段)。會用「樣式 + 移位規則」產生全部 20 首,並對照原譜驗證每首前兩小節與轉折處;
+      支援 12 個調、速度階梯(每輪 +4 BPM 到目標速度)、附點/反附點/三連音等節奏變化,以及每首練到的最高速度紀錄。</p>
+  </section>
+
+  <!-- 考級抽考 -->
+  <section class="card setup pane" data-pane="exam" id="paneExam" hidden>
+    <button class="setup-summary" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="sum" id="examSummary"></span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div class="setup-body">
       <div class="fields">
-        <div class="field"><span class="lbl">考試系統</span>
+        <div class="field"><span class="lbl" data-i18n="lblSystem">考試系統</span>
           <div class="seg" id="systemSeg" role="group" aria-label="考試系統">
             <button data-v="abrsm" aria-pressed="true">ABRSM</button>
             <button data-v="trinity" aria-pressed="false">Trinity</button>
           </div></div>
-        <div class="field"><label for="selGrade">級數</label><select id="selGrade"></select></div>
-        <div class="field"><span class="lbl">大調 / 小調</span>
-          <div class="seg" id="qualitySeg" role="group" aria-label="大小調">
-            <button data-v="all" aria-pressed="true">全部</button>
-            <button data-v="major" aria-pressed="false">大調</button>
-            <button data-v="minor" aria-pressed="false">小調</button>
+        <div class="field"><label for="selGrade" data-i18n="lblGrade">級數</label><select id="selGrade"></select></div>
+        <div class="field" id="fSet"><span class="lbl" data-i18n="lblSet">準備哪一組(Trinity)</span>
+          <div class="seg" id="setSeg" role="group" aria-label="A 組或 B 組">
+            <button data-v="A" aria-pressed="true" data-i18n="setA">A 組</button>
+            <button data-v="B" aria-pressed="false" data-i18n="setB">B 組</button>
           </div></div>
-        <div class="field"><label for="selMinor">小調形式(考生自選)</label>
+        <div class="field" id="fQuality"><span class="lbl" data-i18n="lblQuality">大調 / 小調</span>
+          <div class="seg" id="qualitySeg" role="group" aria-label="大小調">
+            <button data-v="all" aria-pressed="true" data-i18n="qAll">全部</button>
+            <button data-v="major" aria-pressed="false" data-i18n="qMajor">大調</button>
+            <button data-v="minor" aria-pressed="false" data-i18n="qMinor">小調</button>
+          </div></div>
+        <div class="field"><label for="selMinor" data-i18n="lblMinorForm">小調形式(考生自選時)</label>
           <select id="selMinor">
-            <option value="harmonic">和聲小調</option>
-            <option value="melodic">旋律小調</option>
-            <option value="natural">自然小調(大綱允許時)</option>
+            <option value="harmonic" data-i18n="formHarmonic">和聲小調</option>
+            <option value="melodic" data-i18n="formMelodic">旋律小調</option>
+            <option value="natural" data-i18n="formNatural">自然小調(大綱允許時)</option>
           </select></div>
-        <div class="field full"><span class="lbl">抽考範圍</span>
+        <div class="field full" id="fCats"><span class="lbl" data-i18n="lblCats">抽考範圍</span>
           <div class="chips" id="catChips"></div></div>
         <div class="field full">
           <div class="chips"><button class="chip" id="excludeMastered" aria-pressed="false">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            排除已熟練的項目</button></div></div>
+            <span data-i18n="excludeMastered">排除已熟練的項目</span></button></div></div>
       </div>
       <p class="verify-note" id="verifyNote"></p>
     </div>
   </section>
 
-  <!-- 2. 題目 -->
+  <!-- 練習面板(音階、琶音、考級共用) -->
   <section class="card quiz" id="quizCard" aria-live="polite">
     <div class="quiz-top">
-      <span class="verify-badge" id="verifyBadge" hidden>大綱未核對</span>
+      <span class="verify-badge" id="verifyBadge" hidden></span>
       <span class="count" id="poolCount"></span>
     </div>
-    <div class="q-title empty" id="qTitle">按「隨機抽考」開始</div>
+    <div class="q-title empty" id="qTitle"></div>
     <div class="q-tags" id="qTags"></div>
     <div class="q-actions">
-      <button class="btn primary" id="drawBtn">
+      <button class="btn primary" id="drawBtn" hidden>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>
-        <span class="btn-label">隨機抽考</span></button>
+        <span class="btn-label" id="drawLabel">隨機抽考</span></button>
+      <button class="btn" id="nextBtn" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        <span class="btn-label" data-i18n="next">下一項</span></button>
       <button class="btn" id="playBtn" disabled>
         <svg id="playIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16l13-8z"/></svg>
         <span class="btn-label" id="playLabel">播放示範</span></button>
       <span class="grow"></span>
       <div class="mastery">
         <button class="mbtn" data-m="good" aria-pressed="false" disabled>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>熟練</button>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="good">熟練</span></button>
         <button class="mbtn" data-m="weak" aria-pressed="false" disabled>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg>待加強</button>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg><span data-i18n="weak">待加強</span></button>
       </div>
     </div>
     <div class="loading" id="loadingMsg"></div>
   </section>
 
-  <!-- 3. 樂譜 -->
   <section class="card" id="scoreCard">
     <div class="score-head">
-      <div class="card-title" style="margin:0"><b>樂譜與指法</b></div>
+      <div class="card-title" style="margin:0"><b data-i18n="scoreTitle">樂譜與指法</b></div>
       <span style="flex:1"></span>
       <div class="seg small" id="handSeg" role="group" aria-label="顯示哪隻手">
-        <button data-v="rh" aria-pressed="false">右手</button>
-        <button data-v="lh" aria-pressed="false">左手</button>
-        <button data-v="both" aria-pressed="true">雙手</button>
+        <button data-v="rh" aria-pressed="false" data-i18n="handRH">右手</button>
+        <button data-v="lh" aria-pressed="false" data-i18n="handLH">左手</button>
+        <button data-v="both" aria-pressed="true" data-i18n="handBoth">雙手</button>
       </div>
     </div>
-    <div class="paper"><div id="osmd"></div><div class="paper-msg" id="paperMsg">抽一題之後,這裡會顯示五線譜與指法</div></div>
+    <div class="paper"><div id="osmd"></div><div class="paper-msg" id="paperMsg"></div></div>
+    <p class="score-note" id="scoreNote" hidden></p>
   </section>
 
-  <!-- 4. 節拍器 -->
   <section class="card" id="metroCard">
-    <div class="card-title"><b>節拍器</b><span class="sub" id="examTempo"></span></div>
+    <div class="card-title"><b data-i18n="metroTitle">節拍器</b><span class="sub" id="examTempo"></span></div>
     <div class="metro">
-      <button class="btn round" id="bpmDown" aria-label="慢 1(按住連續減少)" title="點一下 −1,按住連續減少">
+      <button class="btn round" id="bpmDown" data-i18n-attr="aria-label:bpmDown,title:bpmDown" aria-label="慢 1(按住連續減少)" title="慢 1(按住連續減少)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
-      <div class="bpm"><b id="bpmVal">60</b><small>♩ / 分</small><small id="bpmPct"></small></div>
-      <button class="btn round" id="bpmUp" aria-label="快 1(按住連續增加)" title="點一下 +1,按住連續增加">
+      <div class="bpm"><b id="bpmVal">60</b><small id="bpmUnit">♩ / 分</small><small id="bpmPct"></small></div>
+      <button class="btn round" id="bpmUp" data-i18n-attr="aria-label:bpmUp,title:bpmUp" aria-label="快 1(按住連續增加)" title="快 1(按住連續增加)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-      <input type="range" id="bpmRange" min="30" max="200" step="1" value="60" aria-label="速度" style="grid-column:1 / -1">
+      <input type="range" id="bpmRange" min="30" max="200" step="1" value="60" data-i18n-attr="aria-label:tempo" aria-label="速度" style="grid-column:1 / -1">
       <div class="row2">
         <button class="btn" id="metroBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l4 18H5z"/><path d="m12 15 6-9"/></svg>
-          <span id="metroLabel">開始</span></button>
-        <button class="btn ghost small" id="bpmReset">回到考試速度</button>
+          <span id="metroLabel" data-i18n="metroStart">開始</span></button>
+        <button class="btn ghost small" id="bpmReset" data-i18n="bpmReset">回到考試速度</button>
         <div class="beats" id="beats"><i class="first"></i><i></i><i></i><i></i></div>
         <span class="info" id="metroInfo"></span>
       </div>
     </div>
   </section>
 
-  <!-- 5. 本級要求 -->
-  <details class="card" id="listCard" open>
-    <summary class="card-title"><b>本級要求</b><span class="sub" id="listSub"></span>
+  <!-- 考級:本級要求清單 -->
+  <details class="card pane" data-pane="exam" id="listCard" hidden>
+    <summary class="card-title"><b id="listTitle">本級要求</b><span class="sub" id="listSub"></span>
       <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
     <div class="progress"><i id="progressBar" style="width:0"></i></div>
-    <div class="legend-row"><span><i class="dot good"></i>熟練</span><span><i class="dot weak"></i>待加強</span><span><i class="dot"></i>未標記</span></div>
+    <div class="legend-row"><span><i class="dot good"></i><span data-i18n="legendGood">熟練</span></span><span><i class="dot weak"></i><span data-i18n="legendWeak">待加強</span></span><span><i class="dot"></i><span data-i18n="legendNone">未標記</span></span></div>
     <div id="qGroups"></div>
   </details>
+
+  <footer data-i18n="footer"></footer>
 </main>
 
-<footer>
-  鋼琴音色:Accurate-Salamander Grand Piano V6.2(Salamander Grand Piano V3 by Alexander Holm,CC-BY 3.0)·
-  節拍器:Naked Drums(Wilkinson Audio,CC-BY 4.0)·
-  取樣經 <a href="https://github.com/stevenmusic/ScrollScore" target="_blank" rel="noopener">ScrollScore</a> 整理後直接讀取 ·
-  樂譜:OpenSheetMusicDisplay(BSD-3-Clause)<br>
-  考試要求為整理後的練習用資料,未經 ABRSM / Trinity 審定;實際要求以官方大綱為準。
-</footer>
+<!-- 底部分頁 -->
+<nav class="tabbar" id="tabbar" role="tablist" aria-label="練習項目">
+  <button role="tab" data-tab="scale" aria-selected="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19h4v-4h4v-4h4V7h4"/></svg><span data-i18n="tabScale">音階</span></button>
+  <button role="tab" data-tab="arp" aria-selected="false">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 9 12l4 3 7-9"/><circle cx="4" cy="18" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="13" cy="15" r="1.5"/><circle cx="20" cy="6" r="1.5"/></svg><span data-i18n="tabArp">琶音</span></button>
+  <button role="tab" data-tab="hanon" aria-selected="false">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20V9a2 2 0 0 1 4 0v4"/><path d="M10 13V6a2 2 0 0 1 4 0v7"/><path d="M14 13V8a2 2 0 0 1 4 0v8a6 6 0 0 1-6 6h-1a5 5 0 0 1-5-5"/></svg><span data-i18n="tabHanon">哈農</span></button>
+  <button role="tab" data-tab="exam" aria-selected="false">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l1 2h3v15H5V6h3z"/><path d="m9 13 2 2 4-4"/></svg><span data-i18n="tabExam">考級</span></button>
+</nav>
+
+<!-- 第一次打開:在準備考試嗎? -->
+<div class="modal" id="onboard" hidden role="dialog" aria-modal="true" aria-labelledby="onboardTitle">
+  <div class="modal-card">
+    <h2 id="onboardTitle" data-i18n="obTitle">你在準備鋼琴考級嗎?</h2>
+    <p class="modal-sub" data-i18n="obSub">選了考試和級數,App 會直接打開「考級」分頁,音階、琶音分頁也會先列出這一級的要求。之後隨時可以在「考級」分頁更改。</p>
+    <div class="field"><span class="lbl" data-i18n="lblSystem">考試系統</span>
+      <div class="seg" id="obSystem" role="group">
+        <button data-v="abrsm" aria-pressed="true">ABRSM</button>
+        <button data-v="trinity" aria-pressed="false">Trinity</button>
+      </div></div>
+    <div class="field"><label for="obGrade" data-i18n="lblGrade">級數</label><select id="obGrade"></select></div>
+    <div class="modal-actions">
+      <button class="btn primary" id="obYes" data-i18n="obYes">開始準備考試</button>
+      <button class="btn ghost" id="obNo" data-i18n="obNo">不考試,自由練習</button>
+    </div>
+  </div>
+</div>
 
 <script src="vendor/opensheetmusicdisplay.min.js"></script>
 <script type="module" src="js/app.js"></script>

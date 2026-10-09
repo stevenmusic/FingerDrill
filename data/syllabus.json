@@ -1,198 +1,322 @@
 {
- "_doc": ["考試系統的音階/琶音要求。每個級數的 verified 一律先為 false,核對官方大綱後才改成 true(README 有核對清單)。",
-  "items[].type:scale(音階,motion=similar 同向 / contrary 反向)、arpeggio(三和弦原位琶音)、chromatic(半音階,keys = 起音;\"any\" = 考官指定任何音)、dom7(某調的屬七琶音,keys = 調)、dim7(減七琶音,keys = 起音)",
-  "quality:major / minor;小調的 forms = 可以彈的小調形式(考生自選)。hands:HS = 雙手分開、HT = 雙手同時(反向一律 HT)。",
-  "articulation:可能被點到的奏法(legato 圓滑奏 / staccato 斷奏);dynamics:考官會指定的力度(Trinity)。",
-  "tempo:考試速度。bpm = 每分鐘幾拍(四分音符),sub = 每拍幾個音(2 = 八分、3 = 三連音、4 = 十六分)。scale 也用在反向音階;four = 屬七/減七。",
+ "_doc": ["考試系統的音階/琶音要求:依官方大綱逐項抄寫(official = true,來源與頁碼在每一級的 source);verified 等使用者核對後才改成 true。",
+  "ABRSM(mode = examiner):考官從清單點題。hands HS = 分手(考官指定左手或右手)、HT = 雙手同時;examinerForms = 小調形式由考官指定(6–8 級),否則考生自選 forms 之一;articulation 有兩種 = 考官選。",
+  "Trinity(mode = sets):考生準備 A 組或 B 組,整組都要彈;每一項固定手(RH/LH/HT)、力度(dynamic)、奏法(articulation)、最低速度(tempo)。",
+  "type:scale(motion similar/contrary;apart 3 = 相隔三度(十度)、6 = 相隔六度)、arpeggio(inversion 0/1/2;range 5th = 五度範圍)、chromatic(lhStart/rhStart;apartTenth = 右手高十度)、dom7(解決到主音)、dim7、wholetone、broken(分解和弦)、thirds/sixths(雙音音階)",
+  "tempo:unit q = 四分音符、h = 二分音符、q. = 附點四分;全部是平均的八分音符(q 一拍 2 個、h 一拍 4 個、q. 一拍 3 個三連音)。ABRSM 速度是「參考速度」,Trinity 是「最低速度」。",
   "鍵名用英文字母 + # / b(F#、Bb)。"],
  "systems": {
   "abrsm": {
-   "name": "ABRSM", "fullName": "英國皇家音樂學院 ABRSM", "syllabus": "Piano Scales & Arpeggios(from 2021)— 版本待核對",
+   "name": "ABRSM", "fullName": "英國皇家音樂學院 ABRSM", "mode": "examiner", "syllabus": "Piano Practical Grades 2025 & 2026(2027 & 2028 要求相同)", "url": "https://www.abrsm.org/en-gb/piano", "tempoNote": "參考速度",
    "grades": [
-    { "grade": 1, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 60, "sub": 2}, "arpeggio": {"bpm": 40, "sub": 3}, "chromatic": {"bpm": 60, "sub": 2}, "four": {"bpm": 45, "sub": 2}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["C", "G", "D", "F"], "hands": "HS", "octaves": 1, "articulation": ["legato"], "motion": "similar"},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["A", "D"], "hands": "HS", "octaves": 1, "articulation": ["legato"], "motion": "similar", "forms": ["natural", "harmonic", "melodic"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["C"], "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["C", "G", "F"], "hands": "HS", "octaves": 1, "articulation": ["legato"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["A", "D"], "hands": "HS", "octaves": 1, "articulation": ["legato"]}
-      ] },
-    { "grade": 2, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 66, "sub": 2}, "arpeggio": {"bpm": 44, "sub": 3}, "chromatic": {"bpm": 66, "sub": 2}, "four": {"bpm": 49, "sub": 2}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["G", "D", "A", "F"], "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar"},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["E", "D", "G"], "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar", "forms": ["harmonic", "melodic"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["E"], "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "chr", "type": "chromatic", "keys": ["D"], "hands": "HS", "octaves": 1, "articulation": ["legato"], "motion": "similar"},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["G", "D", "F"], "hands": "HS", "octaves": 2, "articulation": ["legato"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["E", "D"], "hands": "HS", "octaves": 2, "articulation": ["legato"]}
-      ] },
-    { "grade": 3, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 80, "sub": 2}, "arpeggio": {"bpm": 50, "sub": 3}, "chromatic": {"bpm": 80, "sub": 2}, "four": {"bpm": 60, "sub": 2}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["A", "E", "Bb", "Eb"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar"},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["B", "G", "C"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "forms": ["harmonic", "melodic"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["A"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "chr", "type": "chromatic", "keys": ["Ab"], "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar"},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["A", "E", "Bb", "Eb"], "hands": "HS", "octaves": 2, "articulation": ["legato"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["B", "G", "C"], "hands": "HS", "octaves": 2, "articulation": ["legato"]}
-      ] },
-    { "grade": 4, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 48, "sub": 4}, "arpeggio": {"bpm": 60, "sub": 3}, "chromatic": {"bpm": 48, "sub": 4}, "four": {"bpm": 40, "sub": 4}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["B", "Db", "Ab", "Eb"], "hands": "HT", "octaves": 2, "articulation": ["legato", "staccato"], "motion": "similar"},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["C#", "F#", "F", "C"], "hands": "HT", "octaves": 2, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"]},
-        {"id": "chr-cm", "type": "chromatic", "keys": ["D"], "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "chr", "type": "chromatic", "keys": ["Bb"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar"},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["B", "Db", "Ab", "Eb"], "hands": "HT", "octaves": 2, "articulation": ["legato"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["C#", "F#", "F", "C"], "hands": "HT", "octaves": 2, "articulation": ["legato"]},
-        {"id": "dom7", "type": "dom7", "quality": "major", "keys": ["C", "F"], "hands": "HS", "octaves": 2, "articulation": ["legato"]}
-      ] },
-    { "grade": 5, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 56, "sub": 4}, "arpeggio": {"bpm": 66, "sub": 3}, "chromatic": {"bpm": 56, "sub": 4}, "four": {"bpm": 44, "sub": 4}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["F#", "Db", "B", "Ab", "E"], "hands": "HT", "octaves": 2, "articulation": ["legato", "staccato"], "motion": "similar"},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["G#", "Bb", "D#", "C#"], "hands": "HT", "octaves": 2, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["F#", "Db"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "chr", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar"},
-        {"id": "chr-cm", "type": "chromatic", "keys": ["C", "F#"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["F#", "Db", "B", "Ab", "E"], "hands": "HT", "octaves": 2, "articulation": ["legato"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["G#", "Bb", "D#", "C#"], "hands": "HT", "octaves": 2, "articulation": ["legato"]},
-        {"id": "dom7", "type": "dom7", "quality": "major", "keys": ["Ab", "Db", "E", "B"], "hands": "HT", "octaves": 2, "articulation": ["legato"]},
-        {"id": "dim7", "type": "dim7", "keys": ["A", "Bb"], "hands": "HS", "octaves": 2, "articulation": ["legato"]}
-      ] },
-    { "grade": 6, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 66, "sub": 4}, "arpeggio": {"bpm": 80, "sub": 3}, "chromatic": {"bpm": 66, "sub": 4}, "four": {"bpm": 52, "sub": 4}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar"},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["Eb", "A"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "chr", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "motion": "similar"},
-        {"id": "chr-cm", "type": "chromatic", "keys": ["E", "Bb"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato"]},
-        {"id": "dom7", "type": "dom7", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato"]},
-        {"id": "dim7", "type": "dim7", "keys": ["C", "C#", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato"]}
-      ] },
-    { "grade": 7, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 76, "sub": 4}, "arpeggio": {"bpm": 88, "sub": 3}, "chromatic": {"bpm": 76, "sub": 4}, "four": {"bpm": 60, "sub": 4}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar"},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "chr", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar"},
-        {"id": "chr-cm", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato"]},
-        {"id": "dom7", "type": "dom7", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato"]},
-        {"id": "dim7", "type": "dim7", "keys": ["C", "C#", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato"]}
-      ] },
-    { "grade": 8, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 88, "sub": 4}, "arpeggio": {"bpm": 96, "sub": 3}, "chromatic": {"bpm": 88, "sub": 4}, "four": {"bpm": 66, "sub": 4}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar"},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "chr", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar"},
-        {"id": "chr-cm", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary"},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato"]},
-        {"id": "dom7", "type": "dom7", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"]},
-        {"id": "dim7", "type": "dim7", "keys": ["C", "C#", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"]}
-      ] }
+    {"grade": 0, "label": "初級(Initial)", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 20 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 20 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 54}, "arpeggio": {"unit": "q", "bpm": 52}},
+     "items": [
+      {"id": "maj", "cat": "scale", "type": "scale", "keys": ["C"], "quality": "major", "hands": "HS", "octaves": 1, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min", "cat": "scale", "type": "scale", "keys": ["D"], "quality": "minor", "hands": "HS", "octaves": 1, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["natural", "harmonic", "melodic"], "examinerForms": false},
+      {"id": "cm", "cat": "contrary", "type": "scale", "keys": ["C"], "quality": "major", "hands": "HT", "articulation": ["legato"], "motion": "contrary", "tempo": "scale", "range": "5th"},
+      {"id": "arp-maj", "cat": "arpeggio", "type": "arpeggio", "keys": ["C"], "quality": "major", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "range": "5th"},
+      {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["D"], "quality": "minor", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "range": "5th"}
+     ] },
+    {"grade": 1, "label": "1 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 23 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 23 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 60}, "arpeggio": {"unit": "q", "bpm": 58}},
+     "items": [
+      {"id": "maj-ht", "cat": "scale", "type": "scale", "keys": ["C"], "quality": "major", "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
+      {"id": "maj", "cat": "scale", "type": "scale", "keys": ["G", "F"], "quality": "major", "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min", "cat": "scale", "type": "scale", "keys": ["A", "D"], "quality": "minor", "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["natural", "harmonic", "melodic"], "examinerForms": false},
+      {"id": "cm", "cat": "contrary", "type": "scale", "keys": ["C"], "quality": "major", "hands": "HT", "articulation": ["legato"], "motion": "contrary", "tempo": "scale", "octaves": 1},
+      {"id": "arp-maj", "cat": "arpeggio", "type": "arpeggio", "keys": ["G"], "quality": "major", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 1},
+      {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["A"], "quality": "minor", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 1}
+     ] },
+    {"grade": 2, "label": "2 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 26 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 26 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 66}, "arpeggio": {"unit": "q", "bpm": 63}},
+     "items": [
+      {"id": "maj-ht", "cat": "scale", "type": "scale", "keys": ["G", "F"], "quality": "major", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min-ht", "cat": "scale", "type": "scale", "keys": ["A", "D"], "quality": "minor", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["natural", "harmonic", "melodic"], "examinerForms": false},
+      {"id": "maj-hs", "cat": "scale", "type": "scale", "keys": ["D", "A"], "quality": "major", "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min-hs", "cat": "scale", "type": "scale", "keys": ["E", "G"], "quality": "minor", "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["natural", "harmonic", "melodic"], "examinerForms": false},
+      {"id": "cm", "cat": "contrary", "type": "scale", "keys": ["C"], "quality": "major", "hands": "HT", "articulation": ["legato"], "motion": "contrary", "tempo": "scale", "octaves": 2},
+      {"id": "chr", "cat": "chromatic", "type": "chromatic", "keys": ["D"], "lhStart": "D", "rhStart": "D", "hands": "HS", "octaves": 1, "motion": "similar", "articulation": ["legato"], "tempo": "scale"},
+      {"id": "arp-maj", "cat": "arpeggio", "type": "arpeggio", "keys": ["D", "A"], "quality": "major", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
+      {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["E", "G"], "quality": "minor", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2}
+     ] },
+    {"grade": 3, "label": "3 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 29 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 29 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 80}, "arpeggio": {"unit": "q", "bpm": 72}},
+     "items": [
+      {"id": "maj-ht", "cat": "scale", "type": "scale", "keys": ["D", "A"], "quality": "major", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min-ht", "cat": "scale", "type": "scale", "keys": ["E", "G"], "quality": "minor", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": false},
+      {"id": "maj-hs", "cat": "scale", "type": "scale", "keys": ["Bb", "Eb"], "quality": "major", "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min-hs", "cat": "scale", "type": "scale", "keys": ["B", "C"], "quality": "minor", "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": false},
+      {"id": "cm", "cat": "contrary", "type": "scale", "keys": ["E"], "quality": "major", "hands": "HT", "articulation": ["legato"], "motion": "contrary", "tempo": "scale", "octaves": 2},
+      {"id": "chr-cm", "cat": "chromatic", "type": "chromatic", "keys": ["D"], "lhStart": "D", "rhStart": "D", "hands": "HT", "octaves": 1, "motion": "contrary", "articulation": ["legato"], "tempo": "scale"},
+      {"id": "arp-maj-ht", "cat": "arpeggio", "type": "arpeggio", "keys": ["D", "A"], "quality": "major", "hands": "HT", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
+      {"id": "arp-min-ht", "cat": "arpeggio", "type": "arpeggio", "keys": ["E", "G"], "quality": "minor", "hands": "HT", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
+      {"id": "arp-maj-hs", "cat": "arpeggio", "type": "arpeggio", "keys": ["Bb", "Eb"], "quality": "major", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
+      {"id": "arp-min-hs", "cat": "arpeggio", "type": "arpeggio", "keys": ["B", "C"], "quality": "minor", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2}
+     ] },
+    {"grade": 4, "label": "4 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 32 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 32 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 100}, "arpeggio": {"unit": "q", "bpm": 80}},
+     "items": [
+      {"id": "maj-ht", "cat": "scale", "type": "scale", "keys": ["Bb", "Eb"], "quality": "major", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min-ht", "cat": "scale", "type": "scale", "keys": ["B", "C"], "quality": "minor", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": false},
+      {"id": "maj-hs", "cat": "scale", "type": "scale", "keys": ["B", "F#", "Ab"], "quality": "major", "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min-hs", "cat": "scale", "type": "scale", "keys": ["F#", "F"], "quality": "minor", "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": false},
+      {"id": "cm-maj", "cat": "contrary", "type": "scale", "keys": ["Eb"], "quality": "major", "hands": "HT", "articulation": ["legato"], "motion": "contrary", "tempo": "scale", "octaves": 2},
+      {"id": "cm-min", "cat": "contrary", "type": "scale", "keys": ["C"], "quality": "minor", "hands": "HT", "articulation": ["legato"], "motion": "contrary", "tempo": "scale", "octaves": 2, "forms": ["harmonic"], "examinerForms": false},
+      {"id": "chr", "cat": "chromatic", "type": "chromatic", "keys": ["F#"], "lhStart": "F#", "rhStart": "F#", "hands": "HT", "octaves": 2, "motion": "similar", "articulation": ["legato"], "tempo": "scale"},
+      {"id": "arp-maj-ht", "cat": "arpeggio", "type": "arpeggio", "keys": ["Bb", "Eb"], "quality": "major", "hands": "HT", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
+      {"id": "arp-min-ht", "cat": "arpeggio", "type": "arpeggio", "keys": ["B", "C"], "quality": "minor", "hands": "HT", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
+      {"id": "arp-maj-hs", "cat": "arpeggio", "type": "arpeggio", "keys": ["B", "F#", "Ab"], "quality": "major", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
+      {"id": "arp-min-hs", "cat": "arpeggio", "type": "arpeggio", "keys": ["F#", "F"], "quality": "minor", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2}
+     ] },
+    {"grade": 5, "label": "5 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 35 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 35 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 60}, "arpeggio": {"unit": "h", "bpm": 44}},
+     "items": [
+      {"id": "maj", "cat": "scale", "type": "scale", "keys": ["A", "E", "B", "F#", "Db"], "quality": "major", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min", "cat": "scale", "type": "scale", "keys": ["F#", "C#", "G#", "Eb", "Bb"], "quality": "minor", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": false},
+      {"id": "stacc-maj", "cat": "scale", "type": "scale", "keys": ["Ab"], "quality": "major", "hands": "HS", "octaves": 2, "articulation": ["staccato"], "motion": "similar", "tempo": "scale"},
+      {"id": "stacc-min", "cat": "scale", "type": "scale", "keys": ["F"], "quality": "minor", "hands": "HS", "octaves": 2, "articulation": ["staccato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": false},
+      {"id": "cm-maj", "cat": "contrary", "type": "scale", "keys": ["Db"], "quality": "major", "hands": "HT", "articulation": ["legato"], "motion": "contrary", "tempo": "scale", "octaves": 2},
+      {"id": "cm-min", "cat": "contrary", "type": "scale", "keys": ["C#"], "quality": "minor", "hands": "HT", "articulation": ["legato"], "motion": "contrary", "tempo": "scale", "octaves": 2, "forms": ["harmonic"], "examinerForms": false},
+      {"id": "chr-cm", "cat": "chromatic", "type": "chromatic", "keys": ["F#"], "lhStart": "F#", "rhStart": "A#", "hands": "HT", "octaves": 2, "motion": "contrary", "articulation": ["legato"], "tempo": "scale"},
+      {"id": "arp-maj", "cat": "arpeggio", "type": "arpeggio", "keys": ["A", "E", "B", "F#", "Ab", "Db"], "quality": "major", "hands": "HT", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
+      {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["F#", "C#", "G#", "Eb", "F", "Bb"], "quality": "minor", "hands": "HT", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
+      {"id": "dim7", "cat": "seventh", "type": "dim7", "keys": ["B"], "hands": "HS", "octaves": 2, "articulation": ["legato"], "tempo": "arpeggio"}
+     ] },
+    {"grade": 6, "label": "6 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 38 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 38 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 72}, "arpeggio": {"unit": "h", "bpm": 50}},
+     "items": [
+      {"id": "maj", "cat": "scale", "type": "scale", "keys": ["D", "F", "Ab", "B"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min", "cat": "scale", "type": "scale", "keys": ["D", "F", "G#", "B"], "quality": "minor", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": true},
+      {"id": "cm-maj", "cat": "contrary", "type": "scale", "keys": ["D", "F", "Ab", "B"], "quality": "major", "hands": "HT", "articulation": ["legato"], "motion": "contrary", "tempo": "scale", "octaves": 2},
+      {"id": "cm-min", "cat": "contrary", "type": "scale", "keys": ["D", "F", "G#", "B"], "quality": "minor", "hands": "HT", "articulation": ["legato"], "motion": "contrary", "tempo": "scale", "octaves": 2, "forms": ["harmonic"], "examinerForms": false},
+      {"id": "chr-g#", "cat": "chromatic", "type": "chromatic", "keys": ["G#"], "lhStart": "G#", "rhStart": "G#", "hands": "HT", "octaves": 4, "motion": "similar", "articulation": ["legato", "staccato"], "tempo": "scale"},
+      {"id": "chr-b", "cat": "chromatic", "type": "chromatic", "keys": ["B"], "lhStart": "B", "rhStart": "B", "hands": "HT", "octaves": 4, "motion": "similar", "articulation": ["legato", "staccato"], "tempo": "scale"},
+      {"id": "arp-maj", "cat": "arpeggio", "type": "arpeggio", "keys": ["D", "F", "Ab", "B"], "quality": "major", "hands": "HT", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 4},
+      {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["D", "F", "G#", "B"], "quality": "minor", "hands": "HT", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 4},
+      {"id": "dom7", "cat": "seventh", "type": "dom7", "keys": ["D", "F", "Ab", "B"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato"], "tempo": "arpeggio"},
+      {"id": "dim7", "cat": "seventh", "type": "dim7", "keys": ["G#", "B"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "tempo": "arpeggio"}
+     ] },
+    {"grade": 7, "label": "7 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 41 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 41 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 80}, "arpeggio": {"unit": "h", "bpm": 56}, "apart": {"unit": "h", "bpm": 60}, "thirdsLegato": {"unit": "h", "bpm": 46}, "doubleStaccato": {"unit": "h", "bpm": 54}},
+     "items": [
+      {"id": "maj", "cat": "scale", "type": "scale", "keys": ["Db", "E", "G", "Bb"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min", "cat": "scale", "type": "scale", "keys": ["C#", "E", "G", "Bb"], "quality": "minor", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": true},
+      {"id": "apart-maj", "cat": "apart", "type": "scale", "keys": ["Db", "E", "G", "Bb"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "apart", "apart": 3},
+      {"id": "apart-min", "cat": "apart", "type": "scale", "keys": ["C#", "E", "G", "Bb"], "quality": "minor", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "apart", "forms": ["harmonic"], "examinerForms": false, "apart": 3},
+      {"id": "cm-maj", "cat": "contrary", "type": "scale", "keys": ["Db", "E", "G", "Bb"], "quality": "major", "hands": "HT", "articulation": ["legato", "staccato"], "motion": "contrary", "tempo": "scale", "octaves": 2},
+      {"id": "cm-min", "cat": "contrary", "type": "scale", "keys": ["C#", "E", "G", "Bb"], "quality": "minor", "hands": "HT", "articulation": ["legato", "staccato"], "motion": "contrary", "tempo": "scale", "octaves": 2, "forms": ["harmonic"], "examinerForms": false},
+      {"id": "thirds-legato", "cat": "double", "type": "thirds", "keys": ["G"], "quality": "major", "hands": "HS", "octaves": 2, "articulation": ["legato"], "tempo": "thirdsLegato"},
+      {"id": "thirds-staccato", "cat": "double", "type": "thirds", "keys": ["G"], "quality": "major", "hands": "HS", "octaves": 2, "articulation": ["staccato"], "tempo": "doubleStaccato"},
+      {"id": "chr-cm", "cat": "chromatic", "type": "chromatic", "keys": ["C#"], "lhStart": "C#", "rhStart": "E", "hands": "HT", "octaves": 2, "motion": "contrary", "articulation": ["legato", "staccato"], "tempo": "scale"},
+      {"id": "arp-maj", "cat": "arpeggio", "type": "arpeggio", "keys": ["Db", "E", "G", "Bb"], "quality": "major", "hands": "HT", "articulation": ["legato"], "inversion": 1, "tempo": "arpeggio", "octaves": 4},
+      {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["C#", "E", "G", "Bb"], "quality": "minor", "hands": "HT", "articulation": ["legato"], "inversion": 1, "tempo": "arpeggio", "octaves": 4},
+      {"id": "dom7", "cat": "seventh", "type": "dom7", "keys": ["Db", "E", "G", "Bb"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato"], "tempo": "arpeggio"},
+      {"id": "dim7", "cat": "seventh", "type": "dim7", "keys": ["Bb", "E"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "tempo": "arpeggio"}
+     ] },
+    {"grade": 8, "label": "8 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 44 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 44 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 88}, "arpeggio": {"unit": "h", "bpm": 66}, "apart": {"unit": "h", "bpm": 60}, "thirdsLegato": {"unit": "h", "bpm": 52}, "doubleStaccato": {"unit": "h", "bpm": 54}},
+     "items": [
+      {"id": "maj", "cat": "scale", "type": "scale", "keys": ["C", "Eb", "F#", "A"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale"},
+      {"id": "min", "cat": "scale", "type": "scale", "keys": ["C", "Eb", "F#", "A"], "quality": "minor", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": true},
+      {"id": "apart-maj", "cat": "apart", "type": "scale", "keys": ["C", "Eb", "F#", "A"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "apart", "apart": 6},
+      {"id": "apart-min", "cat": "apart", "type": "scale", "keys": ["C", "Eb", "F#", "A"], "quality": "minor", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "apart", "forms": ["harmonic"], "examinerForms": false, "apart": 6},
+      {"id": "cm-maj", "cat": "contrary", "type": "scale", "keys": ["C", "Eb", "F#", "A"], "quality": "major", "hands": "HT", "articulation": ["legato", "staccato"], "motion": "contrary", "tempo": "scale", "octaves": 2},
+      {"id": "cm-min", "cat": "contrary", "type": "scale", "keys": ["C", "Eb", "F#", "A"], "quality": "minor", "hands": "HT", "articulation": ["legato", "staccato"], "motion": "contrary", "tempo": "scale", "octaves": 2, "forms": ["harmonic"], "examinerForms": false},
+      {"id": "thirds-legato", "cat": "double", "type": "thirds", "keys": ["Eb"], "quality": "major", "hands": "HS", "octaves": 2, "articulation": ["legato"], "tempo": "thirdsLegato"},
+      {"id": "sixths-staccato", "cat": "double", "type": "sixths", "keys": ["C"], "quality": "major", "hands": "HS", "octaves": 2, "articulation": ["staccato"], "tempo": "doubleStaccato"},
+      {"id": "chr-6th", "cat": "chromatic", "type": "chromatic", "keys": ["Eb"], "lhStart": "Eb", "rhStart": "C", "hands": "HT", "octaves": 4, "motion": "similar", "articulation": ["legato", "staccato"], "tempo": "apart"},
+      {"id": "wholetone", "cat": "wholetone", "type": "wholetone", "keys": ["Eb", "C"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "tempo": "scale"},
+      {"id": "arp-maj", "cat": "arpeggio", "type": "arpeggio", "keys": ["C", "Eb", "F#", "A"], "quality": "major", "hands": "HT", "articulation": ["legato"], "inversion": 2, "tempo": "arpeggio", "octaves": 4},
+      {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["C", "Eb", "F#", "A"], "quality": "minor", "hands": "HT", "articulation": ["legato"], "inversion": 2, "tempo": "arpeggio", "octaves": 4},
+      {"id": "dom7", "cat": "seventh", "type": "dom7", "keys": ["C", "Eb", "F#", "A"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato"], "tempo": "arpeggio"},
+      {"id": "dim7", "cat": "seventh", "type": "dim7", "keys": ["Eb", "C"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "tempo": "arpeggio"}
+     ] }
    ]
   },
   "trinity": {
-   "name": "Trinity", "fullName": "聖三一學院 Trinity College London", "syllabus": "Piano Technical Work(from 2021)— 版本待核對",
+   "name": "Trinity", "fullName": "聖三一學院 Trinity College London", "mode": "sets", "syllabus": "Piano Syllabus from 2023(Technical work pathway)", "url": "https://www.trinitycollege.com/qualifications/music/grade-exams/piano", "tempoNote": "最低速度",
    "grades": [
-    { "grade": 1, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 60, "sub": 2}, "arpeggio": {"bpm": 40, "sub": 3}, "chromatic": {"bpm": 60, "sub": 2}, "four": {"bpm": 45, "sub": 2}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["C", "G", "F"], "hands": "HS", "octaves": 1, "articulation": ["legato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["A", "D"], "hands": "HS", "octaves": 1, "articulation": ["legato"], "motion": "similar", "forms": ["harmonic", "melodic"], "dynamics": ["f", "p"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["C"], "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "contrary", "dynamics": ["f", "p"]},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["C", "G"], "hands": "HS", "octaves": 1, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["A"], "hands": "HS", "octaves": 1, "articulation": ["legato"], "dynamics": ["f", "p"]}
-      ] },
-    { "grade": 2, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 70, "sub": 2}, "arpeggio": {"bpm": 46, "sub": 3}, "chromatic": {"bpm": 70, "sub": 2}, "four": {"bpm": 52, "sub": 2}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["D", "A", "F", "Bb"], "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["E", "G", "D"], "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "similar", "forms": ["harmonic", "melodic"], "dynamics": ["f", "p"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["E"], "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "contrary", "dynamics": ["f", "p"]},
-        {"id": "chr", "type": "chromatic", "keys": ["D"], "hands": "HS", "octaves": 1, "articulation": ["legato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["D", "F"], "hands": "HS", "octaves": 2, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["E", "D"], "hands": "HS", "octaves": 2, "articulation": ["legato"], "dynamics": ["f", "p"]}
-      ] },
-    { "grade": 3, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 80, "sub": 2}, "arpeggio": {"bpm": 52, "sub": 3}, "chromatic": {"bpm": 80, "sub": 2}, "four": {"bpm": 60, "sub": 2}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["A", "E", "Bb", "Eb"], "hands": "HT", "octaves": 2, "articulation": ["legato", "staccato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["B", "C", "F#"], "hands": "HT", "octaves": 2, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"], "dynamics": ["f", "p"]},
-        {"id": "chr", "type": "chromatic", "keys": ["Ab"], "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "chr-cm", "type": "chromatic", "keys": ["C"], "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "contrary", "dynamics": ["f", "p"]},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["A", "Bb"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["B", "C"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "dynamics": ["f", "p"]}
-      ] },
-    { "grade": 4, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 100, "sub": 2}, "arpeggio": {"bpm": 58, "sub": 3}, "chromatic": {"bpm": 100, "sub": 2}, "four": {"bpm": 80, "sub": 2}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["B", "Ab", "Db"], "hands": "HT", "octaves": 2, "articulation": ["legato", "staccato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["F", "C#", "G#"], "hands": "HT", "octaves": 2, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"], "dynamics": ["f", "p"]},
-        {"id": "chr", "type": "chromatic", "keys": ["Eb"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["Ab"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary", "dynamics": ["f", "p"]},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["B", "Ab", "Db"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["F", "C#", "G#"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "dom7", "type": "dom7", "quality": "major", "keys": ["C", "G"], "hands": "HS", "octaves": 2, "articulation": ["legato"]}
-      ] },
-    { "grade": 5, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 60, "sub": 4}, "arpeggio": {"bpm": 66, "sub": 3}, "chromatic": {"bpm": 60, "sub": 4}, "four": {"bpm": 46, "sub": 4}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["F#", "E", "Eb"], "hands": "HT", "octaves": 2, "articulation": ["legato", "staccato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["D#", "Bb", "G"], "hands": "HT", "octaves": 2, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"], "dynamics": ["f", "p"]},
-        {"id": "chr", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "chr-cm", "type": "chromatic", "keys": ["Ab"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary", "dynamics": ["f", "p"]},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["F#", "E", "Eb"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["D#", "Bb", "G"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "dom7", "type": "dom7", "quality": "major", "keys": ["Eb", "Ab"], "hands": "HT", "octaves": 2, "articulation": ["legato"]},
-        {"id": "dim7", "type": "dim7", "keys": ["D", "E"], "hands": "HS", "octaves": 2, "articulation": ["legato"]}
-      ] },
-    { "grade": 6, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 70, "sub": 4}, "arpeggio": {"bpm": 80, "sub": 3}, "chromatic": {"bpm": 70, "sub": 4}, "four": {"bpm": 54, "sub": 4}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 3, "articulation": ["legato", "staccato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 3, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"], "dynamics": ["f", "p"]},
-        {"id": "chr", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 3, "articulation": ["legato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 3, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 3, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "dom7", "type": "dom7", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 3, "articulation": ["legato"]},
-        {"id": "dim7", "type": "dim7", "keys": ["C", "C#", "D"], "hands": "HT", "octaves": 3, "articulation": ["legato"]}
-      ] },
-    { "grade": 7, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 80, "sub": 4}, "arpeggio": {"bpm": 88, "sub": 3}, "chromatic": {"bpm": 80, "sub": 4}, "four": {"bpm": 60, "sub": 4}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"], "dynamics": ["f", "p"]},
-        {"id": "chr", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "motion": ["legato", "staccato"], "dynamics": ["f", "p"]},
-        {"id": "cm", "type": "scale", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary", "dynamics": ["f", "p"]},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "dom7", "type": "dom7", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato"]},
-        {"id": "dim7", "type": "dim7", "keys": ["C", "C#", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato"]}
-      ] },
-    { "grade": 8, "verified": false, "note": "草稿:憑記憶整理,尚未對照官方大綱逐項核對(調、手、八度數、奏法、速度都要核對)",
-      "tempo": {"scale": {"bpm": 88, "sub": 4}, "arpeggio": {"bpm": 96, "sub": 3}, "chromatic": {"bpm": 88, "sub": 4}, "four": {"bpm": 66, "sub": 4}},
-      "items": [
-        {"id": "maj", "type": "scale", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "dynamics": ["f", "p"]},
-        {"id": "min", "type": "scale", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "forms": ["harmonic", "melodic"], "dynamics": ["f", "p"]},
-        {"id": "chr", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "motion": ["legato", "staccato"], "dynamics": ["f", "p"]},
-        {"id": "chr-cm", "type": "chromatic", "keys": ["any"], "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "contrary", "dynamics": ["f", "p"]},
-        {"id": "arp-maj", "type": "arpeggio", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "arp-min", "type": "arpeggio", "quality": "minor", "keys": ["A", "E", "B", "F#", "C#", "G#", "D#", "Bb", "F", "C", "G", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "dynamics": ["f", "p"]},
-        {"id": "dom7", "type": "dom7", "quality": "major", "keys": ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"]},
-        {"id": "dim7", "type": "dim7", "keys": ["C", "C#", "D"], "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"]}
-      ] }
+    {"grade": 0, "label": "初級(Initial)", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 29 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 29",
+     "sets": {
+      "A": [
+       {"type": "scale", "key": "C", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 1, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
+       {"type": "scale", "key": "A", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 1, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["natural", "harmonic", "melodic"], "id": "A2"},
+       {"type": "broken", "key": "C", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "range": "5th", "quality": "major", "cat": "broken", "id": "A3"},
+       {"type": "broken", "key": "A", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "range": "5th", "quality": "minor", "cat": "broken", "id": "A4"}
+      ],
+      "B": [
+       {"type": "scale", "key": "C", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 1, "quality": "major", "motion": "similar", "cat": "scale", "id": "B1"},
+       {"type": "scale", "key": "A", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 1, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["natural", "harmonic", "melodic"], "id": "B2"},
+       {"type": "broken", "key": "C", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "range": "5th", "quality": "major", "cat": "broken", "id": "B3"},
+       {"type": "broken", "key": "A", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "range": "5th", "quality": "minor", "cat": "broken", "id": "B4"}
+      ]
+     } },
+    {"grade": 1, "label": "1 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 31 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 31",
+     "sets": {
+      "A": [
+       {"type": "scale", "key": "F", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 1, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
+       {"type": "scale", "key": "E", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 1, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["natural", "harmonic", "melodic"], "id": "A2"},
+       {"type": "chromatic", "key": "D", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 1, "lhStart": "D", "rhStart": "D", "motion": "contrary", "cat": "chromatic", "id": "A3"},
+       {"type": "broken", "key": "G", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q.", "bpm": 50}, "octaves": 1, "quality": "major", "cat": "broken", "id": "A4"},
+       {"type": "broken", "key": "D", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q.", "bpm": 50}, "octaves": 1, "quality": "minor", "cat": "broken", "id": "A5"}
+      ],
+      "B": [
+       {"type": "scale", "key": "G", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 1, "quality": "major", "motion": "similar", "cat": "scale", "id": "B1"},
+       {"type": "scale", "key": "D", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 1, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["natural", "harmonic", "melodic"], "id": "B2"},
+       {"type": "scale", "key": "C", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 1, "quality": "major", "motion": "contrary", "cat": "contrary", "id": "B3"},
+       {"type": "broken", "key": "F", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q.", "bpm": 50}, "octaves": 1, "quality": "major", "cat": "broken", "id": "B4"},
+       {"type": "broken", "key": "E", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q.", "bpm": 50}, "octaves": 1, "quality": "minor", "cat": "broken", "id": "B5"}
+      ]
+     } },
+    {"grade": 2, "label": "2 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 33 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 33",
+     "sets": {
+      "A": [
+       {"type": "scale", "key": "Bb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
+       {"type": "scale", "key": "B", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic", "melodic"], "id": "A2"},
+       {"type": "scale", "key": "C", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "major", "motion": "contrary", "cat": "contrary", "id": "A3"},
+       {"type": "arpeggio", "key": "D", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 2, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "A4"},
+       {"type": "arpeggio", "key": "G", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "A5"}
+      ],
+      "B": [
+       {"type": "scale", "key": "D", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "B1"},
+       {"type": "scale", "key": "G", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic", "melodic"], "id": "B2"},
+       {"type": "chromatic", "key": "Bb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "lhStart": "Bb", "rhStart": "Bb", "motion": "similar", "cat": "chromatic", "id": "B3"},
+       {"type": "arpeggio", "key": "Bb", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 2, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "B4"},
+       {"type": "arpeggio", "key": "B", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B5"}
+      ]
+     } },
+    {"grade": 3, "label": "3 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 35 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 35",
+     "sets": {
+      "A": [
+       {"type": "scale", "key": "Eb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
+       {"type": "scale", "key": "C", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic", "melodic"], "id": "A2"},
+       {"type": "chromatic", "key": "F#", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "lhStart": "F#", "rhStart": "F#", "motion": "similar", "cat": "chromatic", "id": "A3"},
+       {"type": "arpeggio", "key": "A", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 2, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "A4"},
+       {"type": "arpeggio", "key": "F#", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "A5"}
+      ],
+      "B": [
+       {"type": "scale", "key": "A", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "B1"},
+       {"type": "scale", "key": "F#", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic", "melodic"], "id": "B2"},
+       {"type": "scale", "key": "Eb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "quality": "major", "motion": "contrary", "cat": "contrary", "id": "B3"},
+       {"type": "arpeggio", "key": "Eb", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 2, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "B4"},
+       {"type": "arpeggio", "key": "C", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B5"}
+      ]
+     } },
+    {"grade": 4, "label": "4 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 37 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 37",
+     "sets": {
+      "A": [
+       {"type": "scale", "key": "E", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
+       {"type": "scale", "key": "F", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 2, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic", "melodic"], "id": "A2"},
+       {"type": "chromatic", "key": "B", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 2, "lhStart": "B", "rhStart": "B", "motion": "similar", "cat": "chromatic", "id": "A3"},
+       {"type": "chromatic", "key": "Ab", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 1, "lhStart": "Ab", "rhStart": "Ab", "motion": "contrary", "cat": "chromatic", "id": "A4"},
+       {"type": "arpeggio", "key": "Ab", "hands": "RH", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "A5"},
+       {"type": "arpeggio", "key": "F", "hands": "LH", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "A6"}
+      ],
+      "B": [
+       {"type": "scale", "key": "Ab", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "B1"},
+       {"type": "scale", "key": "C#", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 2, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic", "melodic"], "id": "B2"},
+       {"type": "scale", "key": "E", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 2, "quality": "major", "motion": "contrary", "cat": "contrary", "id": "B3"},
+       {"type": "chromatic", "key": "B", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 2, "lhStart": "B", "rhStart": "B", "motion": "similar", "cat": "chromatic", "id": "B4"},
+       {"type": "arpeggio", "key": "E", "hands": "LH", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "B5"},
+       {"type": "arpeggio", "key": "C#", "hands": "RH", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B6"}
+      ]
+     } },
+    {"grade": 5, "label": "5 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 39–40 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 39–40",
+     "sets": {
+      "A": [
+       {"type": "scale", "key": "Db", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
+       {"type": "scale", "key": "G#", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic", "melodic"], "id": "A2"},
+       {"type": "scale", "key": "G", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "quality": "minor", "motion": "contrary", "cat": "contrary", "forms": ["harmonic"], "id": "A3"},
+       {"type": "chromatic", "key": "C", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "lhStart": "C", "rhStart": "E", "motion": "contrary", "cat": "chromatic", "id": "A4"},
+       {"type": "arpeggio", "key": "B", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "A5"},
+       {"type": "arpeggio", "key": "Bb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "A6"},
+       {"type": "dim7", "key": "B", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "cat": "seventh", "id": "A7"}
+      ],
+      "B": [
+       {"type": "scale", "key": "B", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "B1"},
+       {"type": "scale", "key": "Bb", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic", "melodic"], "id": "B2"},
+       {"type": "chromatic", "key": "Db", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "lhStart": "Db", "rhStart": "Db", "motion": "similar", "cat": "chromatic", "id": "B3"},
+       {"type": "chromatic", "key": "C", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "lhStart": "C", "rhStart": "E", "motion": "contrary", "cat": "chromatic", "id": "B4"},
+       {"type": "arpeggio", "key": "Db", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "B5"},
+       {"type": "arpeggio", "key": "G#", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B6"},
+       {"type": "dim7", "key": "B", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "cat": "seventh", "id": "B7"}
+      ]
+     } },
+    {"grade": 6, "label": "6 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 41–42 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 41–42",
+     "sets": {
+      "A": [
+       {"type": "scale", "key": "Bb", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
+       {"type": "scale", "key": "Bb", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic"], "id": "A2"},
+       {"type": "scale", "key": "D", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["melodic"], "id": "A3"},
+       {"type": "chromatic", "key": "D", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "lhStart": "D", "rhStart": "D", "motion": "similar", "cat": "chromatic", "id": "A4"},
+       {"type": "chromatic", "key": "Eb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 2, "lhStart": "Eb", "rhStart": "Eb", "motion": "contrary", "cat": "chromatic", "id": "A5"},
+       {"type": "thirds", "key": "C", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 1, "quality": "major", "cat": "double", "id": "A6"},
+       {"type": "arpeggio", "key": "D", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 4, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "A7"},
+       {"type": "arpeggio", "key": "Bb", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 4, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "A8"},
+       {"type": "dim7", "key": "D", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 4, "cat": "seventh", "id": "A9"},
+       {"type": "dom7", "key": "Bb", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 4, "quality": "major", "cat": "seventh", "id": "A10"}
+      ],
+      "B": [
+       {"type": "scale", "key": "D", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "major", "motion": "similar", "cat": "scale", "id": "B1"},
+       {"type": "scale", "key": "Bb", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic"], "id": "B2"},
+       {"type": "scale", "key": "Bb", "hands": "HT", "dynamic": "mf", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["melodic"], "id": "B3"},
+       {"type": "chromatic", "key": "D", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "lhStart": "D", "rhStart": "D", "motion": "similar", "cat": "chromatic", "id": "B4"},
+       {"type": "chromatic", "key": "Eb", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 2, "lhStart": "Eb", "rhStart": "Eb", "motion": "contrary", "cat": "chromatic", "id": "B5"},
+       {"type": "thirds", "key": "C", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 1, "quality": "major", "cat": "double", "id": "B6"},
+       {"type": "arpeggio", "key": "Bb", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 4, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "B7"},
+       {"type": "arpeggio", "key": "D", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 4, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B8"},
+       {"type": "dim7", "key": "Bb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 4, "cat": "seventh", "id": "B9"},
+       {"type": "dom7", "key": "D", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 4, "quality": "major", "cat": "seventh", "id": "B10"}
+      ]
+     } },
+    {"grade": 7, "label": "7 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 43–44 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 43–44",
+     "sets": {
+      "A": [
+       {"type": "scale", "key": "E", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 130}, "octaves": 4, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
+       {"type": "scale", "key": "E", "hands": "HT", "dynamic": "cresc-dim", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 130}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic"], "id": "A2"},
+       {"type": "scale", "key": "G#", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 130}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["melodic"], "id": "A3"},
+       {"type": "chromatic", "key": "C", "hands": "HT", "dynamic": "mf", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 130}, "octaves": 4, "lhStart": "C", "rhStart": "Eb", "motion": "similar", "cat": "chromatic", "apartTenth": true, "id": "A4"},
+       {"type": "thirds", "key": "E", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 2, "quality": "major", "cat": "double", "id": "A5"},
+       {"type": "arpeggio", "key": "Ab", "hands": "HT", "dynamic": "cresc-dim", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 4, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "A6"},
+       {"type": "arpeggio", "key": "E", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 4, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "A7"},
+       {"type": "dim7", "key": "Ab", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 4, "cat": "seventh", "id": "A8"},
+       {"type": "dom7", "key": "E", "hands": "HT", "dynamic": "cresc-dim", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 4, "quality": "major", "cat": "seventh", "id": "A9"},
+       {"type": "scale", "key": "E", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "quality": "major", "motion": "contrary", "cat": "contrary", "id": "A10"}
+      ],
+      "B": [
+       {"type": "scale", "key": "Ab", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 130}, "octaves": 4, "quality": "major", "motion": "similar", "cat": "scale", "id": "B1"},
+       {"type": "scale", "key": "G#", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 130}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic"], "id": "B2"},
+       {"type": "scale", "key": "E", "hands": "HT", "dynamic": "cresc-dim", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 130}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["melodic"], "id": "B3"},
+       {"type": "chromatic", "key": "C", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 130}, "octaves": 4, "lhStart": "C", "rhStart": "Eb", "motion": "similar", "cat": "chromatic", "apartTenth": true, "id": "B4"},
+       {"type": "thirds", "key": "E", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 2, "quality": "major", "cat": "double", "id": "B5"},
+       {"type": "arpeggio", "key": "E", "hands": "HT", "dynamic": "cresc-dim", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 4, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "B6"},
+       {"type": "arpeggio", "key": "G#", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 4, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B7"},
+       {"type": "dim7", "key": "E", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 4, "cat": "seventh", "id": "B8"},
+       {"type": "dom7", "key": "Ab", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 4, "quality": "major", "cat": "seventh", "id": "B9"},
+       {"type": "scale", "key": "E", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "quality": "major", "motion": "contrary", "cat": "contrary", "id": "B10"}
+      ]
+     } },
+    {"grade": 8, "label": "8 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 45–46 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 45–46",
+     "sets": {
+      "A": [
+       {"type": "scale", "key": "F#", "hands": "HT", "dynamic": "cresc-dim", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 140}, "octaves": 4, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
+       {"type": "scale", "key": "B", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 140}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic"], "id": "A2"},
+       {"type": "scale", "key": "Eb", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 140}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["melodic"], "id": "A3"},
+       {"type": "chromatic", "key": "F#", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 140}, "octaves": 4, "lhStart": "F#", "rhStart": "F#", "motion": "similar", "cat": "chromatic", "id": "A4"},
+       {"type": "thirds", "key": "B", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "major", "cat": "double", "id": "A5"},
+       {"type": "thirds", "key": "C", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "minor", "forms": ["harmonic"], "cat": "double", "id": "A6"},
+       {"type": "arpeggio", "key": "B", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "A7"},
+       {"type": "arpeggio", "key": "Eb", "hands": "HT", "dynamic": "cresc-dim", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "A8"},
+       {"type": "dim7", "key": "F#", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "cat": "seventh", "id": "A9"},
+       {"type": "dom7", "key": "B", "hands": "HT", "dynamic": "cresc-dim", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "major", "cat": "seventh", "id": "A10"},
+       {"type": "scale", "key": "Eb", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 2, "quality": "major", "motion": "contrary", "cat": "contrary", "id": "A11"}
+      ],
+      "B": [
+       {"type": "scale", "key": "Eb", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 140}, "octaves": 4, "quality": "major", "motion": "similar", "cat": "scale", "id": "B1"},
+       {"type": "scale", "key": "F#", "hands": "HT", "dynamic": "cresc-dim", "articulation": "legato", "tempo": {"unit": "q", "bpm": 140}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["harmonic"], "id": "B2"},
+       {"type": "scale", "key": "B", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 140}, "octaves": 4, "quality": "minor", "motion": "similar", "cat": "scale", "forms": ["melodic"], "id": "B3"},
+       {"type": "chromatic", "key": "Eb", "hands": "HT", "dynamic": "mf", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 140}, "octaves": 4, "lhStart": "Eb", "rhStart": "Eb", "motion": "similar", "cat": "chromatic", "id": "B4"},
+       {"type": "thirds", "key": "B", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "major", "cat": "double", "id": "B5"},
+       {"type": "thirds", "key": "C", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "minor", "forms": ["harmonic"], "cat": "double", "id": "B6"},
+       {"type": "arpeggio", "key": "F#", "hands": "HT", "dynamic": "p", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "major", "inversion": 0, "cat": "arpeggio", "id": "B7"},
+       {"type": "arpeggio", "key": "B", "hands": "HT", "dynamic": "cresc-dim", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B8"},
+       {"type": "dim7", "key": "Eb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "cat": "seventh", "id": "B9"},
+       {"type": "dom7", "key": "F#", "hands": "HT", "dynamic": "cresc-dim", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "major", "cat": "seventh", "id": "B10"},
+       {"type": "scale", "key": "F#", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 2, "quality": "minor", "motion": "contrary", "cat": "contrary", "forms": ["harmonic"], "id": "B11"}
+      ]
+     } }
    ]
   }
  }
