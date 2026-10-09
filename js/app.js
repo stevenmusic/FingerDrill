@@ -357,7 +357,7 @@ function setQuestion(q, tab){
   if (!q.free && S.exam) notes.push(() => SY.systems[S.exam.system].mode === "sets" ? tr("速度是大綱的「最低速度」。", "Tempo is the syllabus minimum.") : tr("速度是大綱的「參考速度」。", "Tempo is the syllabus guide speed."));
   $("scoreNote").hidden = !notes.length;
   pairText($("scoreNote"), () => noteFns.map(f => f()).join(" "));
-  bpm = q.free ? q.tempo.bpm : Math.max(30, Math.min(200, Math.round(q.tempo.bpm * S.tempoPct / 100)));
+  bpm = q.free ? q.tempo.bpm : Math.max(30, Math.min(240, Math.round(q.tempo.bpm * S.tempoPct / 100)));
   syncTempoUI();
   renderScore();
   if (tab === "exam" && S.exam) renderList();
@@ -616,7 +616,7 @@ function syncTempoUI(){
   $("beats").innerHTML = "<i class=\"first\"></i>" + "<i></i>".repeat(beatsPerBar() - 1);
 }
 /* ♪ 拍點時速度數字是 ♩ 的兩倍:上限放寬到 240(♩ = 120) */
-function maxBpm(){ return unitOf() === "e16" ? 240 : 200; }
+function maxBpm(){ return 240; }   // 速度上限一律 240(使用者要求)
 function setBpm(v, fromUser){
   bpm = Math.max(30, Math.min(maxBpm(), Math.round(v)));
   if (fromUser && cur) {
