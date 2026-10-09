@@ -46,11 +46,11 @@ function noteAt(scale, tonicOct, deg){
 function tonicOctave(t){ return [4, 5, 6].includes(t.letter) ? 2 : 3; }   // letter:0=C … 4=G 5=A 6=B
 
 /* 產生一首:{ rh, lh, fifths, sub: 4, bar: 24 } */
-/* 節奏變化(哈農練習常用的附點練法):兩個音一組
-   dotted = 附點八分 + 十六分(長短)、reverse = 十六分 + 附點八分(短長);每組 = 一拍,原本 2/4 的一小節變成 4/4 的一小節 */
+/* 節奏變化(哈農練習常用的附點練法):兩個音一組,一組 = 一個八分音符(速度、小節跟原譜一樣,2/4)
+   dotted = 附點十六分 + 三十二分(長短)、reverse = 三十二分 + 附點十六分(短長);一拍 = 24 divisions 才寫得出三十二分音符 */
 export const HANON_RHYTHMS = ["even", "dotted", "reverse"];
 function applyRhythm(notes, rhythm){
-  const L = { dur: 9, ntype: "eighth", ndots: 1 }, S = { dur: 3, ntype: "16th", ndots: 0 };
+  const L = { dur: 9, ntype: "16th", ndots: 1 }, S = { dur: 3, ntype: "32nd", ndots: 0 };
   notes.forEach((n, i) => {
     if (i === notes.length - 1) return;
     const first = i % 2 === 0, long = rhythm === "dotted" ? first : !first;
@@ -75,7 +75,7 @@ export function buildHanon(no, key = "C", rhythm = "even"){
   }
   if (rhythm === "dotted" || rhythm === "reverse") {
     applyRhythm(out.rh, rhythm); applyRhythm(out.lh, rhythm);
-    return { rh: out.rh, lh: out.lh, fifths: keyFifths(key, "major"), sub: 4, bar: 48, time: [4, 4], rhythm, clefPerBar: true };
+    return { rh: out.rh, lh: out.lh, fifths: keyFifths(key, "major"), sub: 4, div: 24, bar: 48, time: [2, 4], rhythm, clefPerBar: true };
   }
   return { rh: out.rh, lh: out.lh, fifths: keyFifths(key, "major"), sub: 4, bar: 24, time: [2, 4], rhythm: "even", clefPerBar: true };
 }

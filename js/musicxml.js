@@ -3,7 +3,7 @@
    每個音都標指法:右手在上、左手在下。譜號依每小節的音域自動換(右手偏好高音譜號、左手偏好低音譜號)。 */
 import { LETTERS } from "./theory.js";
 
-const DIV = 12;
+let DIV = 12;   // 一拍(四分音符)幾個 division:預設 12;哈農附點節奏要三十二分音符 → 24(ex.div)
 let BAR = 48;   // 一小節的長度:預設 4/4;哈農 2/4 = 24(ex.bar)
 const NOTE_TYPES = [[48, "whole", 0], [36, "half", 1], [24, "half", 0], [18, "quarter", 1], [12, "quarter", 0], [9, "eighth", 1], [6, "eighth", 0], [3, "16th", 0]];
 function fitType(d){ for (const [len, type, dots] of NOTE_TYPES) if (len <= d) return { len, type, dots }; return { len: 3, type: "16th", dots: 0 }; }
@@ -15,15 +15,15 @@ function finalAndRests(pos){
   const inBar = pos % BAR, out = [];
   let len;
   if (inBar % DIV) len = DIV - (inBar % DIV);
-  else len = inBar === 0 ? BAR : inBar === 24 ? 24 : DIV;
+  else len = inBar === 0 ? BAR : inBar === 2 * DIV ? 2 * DIV : DIV;
   out.push(len);
   let p = inBar + len;
   const rests = [];
-  while (p < BAR) { const r = (p === 0 || p === 24) && p + 24 <= BAR ? 24 : DIV - (p % DIV) || DIV; rests.push(r); p += r; }
+  while (p < BAR) { const r = (p === 0 || p === 2 * DIV) && p + 2 * DIV <= BAR ? 2 * DIV : DIV - (p % DIV) || DIV; rests.push(r); p += r; }
   return { len, rests };
 }
 const TYPE_OF = { 48: ["whole", 0], 36: ["half", 1], 24: ["half", 0], 12: ["quarter", 0], 8: ["quarter", 0], 6: ["eighth", 0], 4: ["eighth", 0], 3: ["16th", 0], 9: ["eighth", 1] };
-function typeOf(len){ return TYPE_OF[len] || ["quarter", 0]; }
+function typeOf(len){ return TYPE_OF[len * 12 / DIV] || ["quarter", 0]; }   // 表是以一拍 = 12 寫的
 
 /* 一隻手的音 → 依小節切開的事件 */
 function layoutHand(notes, sub){
@@ -61,7 +61,7 @@ export function ledgers(step, clef){
 }
 /* 一組音(連桿一組、或最後的長音)= 換譜號與 8va 的單位 */
 function unitsOf(measures, sub, perBar){
-  const g = perBar ? 1e9 : sub === 2 ? 24 : 12, units = [];
+  const g = perBar ? 1e9 : sub === 2 ? 2 * DIV : DIV, units = [];
   measures.forEach((evs, mi) => {
     const groups = new Map();
     for (const e of evs) if (!e.rest) { const k = e.short ? "s" + Math.floor(e.pos / g) : "l" + e.pos; (groups.get(k) || groups.set(k, []).get(k)).push(e); }
@@ -113,7 +113,8 @@ function noteXml(e, opts){
   x += `<staff>${staff}</staff>`;
   if (beam) {
     x += `<beam number="1">${beam}</beam>`;
-    if (e.ntype) { if (e.hook) x += `<beam number="2">${e.hook}</beam>`; }
+    // 自帶時值的音(哈農附點:附點十六分 + 三十二分):第 2 條連桿整組連、三十二分音符的第 3 條是半截
+    if (e.ntype) { x += `<beam number="2">${beam}</beam>`; if (e.hook) x += `<beam number="3">${e.hook}</beam>`; }
     else if (sub === 4) x += `<beam number="2">${beam}</beam>`;
   }
   x += "<notations>";
@@ -146,7 +147,7 @@ export function keyAlters(fifths){
 const ACC_NAME = { "-2": "flat-flat", "-1": "flat", "0": "natural", "1": "sharp", "2": "double-sharp" };
 
 function beamMarks(evs, sub){
-  const g = sub === 2 ? 24 : 12, marks = new Map(), tup = new Map();
+  const g = sub === 2 ? 2 * DIV : DIV, marks = new Map(), tup = new Map();
   const groups = new Map();
   evs.forEach(e => { if (e.short) { const k = Math.floor(e.pos / g); (groups.get(k) || groups.set(k, []).get(k)).push(e); } });
   for (const arr of groups.values()) {
@@ -154,7 +155,7 @@ function beamMarks(evs, sub){
   }
   if (sub === 3) {
     const beats = new Map();
-    evs.forEach(e => { if (e.short) { const k = Math.floor(e.pos / 12); (beats.get(k) || beats.set(k, []).get(k)).push(e); } });
+    evs.forEach(e => { if (e.short) { const k = Math.floor(e.pos / DIV); (beats.get(k) || beats.set(k, []).get(k)).push(e); } });
     for (const arr of beats.values()) if (arr.length === 3) { tup.set(arr[0], "start"); tup.set(arr[2], "stop"); tup.set(arr[1], "mid"); }
   }
   return { marks, tup, groups: [...groups.values()] };
@@ -162,7 +163,7 @@ function beamMarks(evs, sub){
 
 /* show: "both" | "rh" | "lh" */
 export function exerciseToMusicXML(ex, q, show = "both"){
-  BAR = ex.bar || 48;
+  DIV = ex.div || 12; BAR = ex.bar || 4 * DIV;
   const hands = show === "both" ? ["rh", "lh"] : [show];
   const lay = hands.map(h => layoutHand(ex[h], ex.sub));
   const cp = hands.map((h, i) => clefPlan(lay[i], h, ex.sub, ex.clefPerBar));   // 哈農:一小節一個譜號(不在小節中間來回換)
@@ -231,6 +232,7 @@ export function exerciseToMusicXML(ex, q, show = "both"){
 
 /* 播放時間表:每個音的起點(拍)與長度(拍),兩手同一份時間軸;雙音兩個音一起 */
 export function playbackEvents(ex, q, show = "both"){
+  DIV = ex.div || 12;
   const out = [], step = 1 / ex.sub;
   const handEvents = (notes, hand) => { let pos = 0; notes.forEach((n, i) => {
     const d = n.dur ? n.dur / DIV : step;

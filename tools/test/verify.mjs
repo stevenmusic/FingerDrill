@@ -160,7 +160,7 @@ function keyAltersT(f){ const a = [0, 0, 0, 0, 0, 0, 0], o = [3, 0, 4, 1, 5, 2, 
 const ACCN = { "flat-flat": -2, flat: -1, natural: 0, sharp: 1, "double-sharp": 2 };
 let maxLedger = 0;
 function checkNotation(xml, label, sub){
-  const fifths = Number(/<fifths>(-?\d+)<\/fifths>/.exec(xml)[1]), keyA = keyAltersT(fifths);
+  const fifths = Number(/<fifths>(-?\d+)<\/fifths>/.exec(xml)[1]), keyA = keyAltersT(fifths), D = Number(/<divisions>(\d+)/.exec(xml)[1]);
   const clef = {}, shift = {};
   const measures = xml.split("<measure ").slice(1);
   for (const [mi, m] of measures.entries()) {
@@ -175,7 +175,7 @@ function checkNotation(xml, label, sub){
       ok(st.size === 1, `${label} m${mi + 1}: 同一組連桿符桿方向不一致`);
       let far = 0; for (const g of group) for (const st of g.steps) { const d = st - MID[g.clef]; if (Math.abs(d) > Math.abs(far) || (Math.abs(d) === Math.abs(far) && d > far)) far = d; }
       ok(group[0].stem === (far >= 0 ? "down" : "up"), `${label} m${mi + 1}: 符桿方向不符(最遠的音離中線 ${far})`);
-      const span = sub === 2 ? 24 : 12;
+      const span = sub === 2 ? 2 * D : D;
       ok(Math.floor(group[0].pos / span) === Math.floor(group[group.length - 1].pos / span), `${label} m${mi + 1}: 連桿跨拍`);
       group = [];
     };
@@ -188,9 +188,9 @@ function checkNotation(xml, label, sub){
       const isChord = /<chord\/>/.test(body);
       const p0 = isChord ? lastPos[staff] : pos[staff];
       if (/<rest\/>/.test(body)) {
-        ok(p0 % 12 === 0, `${label} m${mi + 1}: 休止符不在拍點`);
+        ok(p0 % D === 0, `${label} m${mi + 1}: 休止符不在拍點`);
         ok(!/<dot\/>/.test(body), `${label} m${mi + 1}: 附點休止符`);
-        if (dur === 24) ok(p0 === 0 || p0 === 24, `${label} m${mi + 1}: 二分休止符不在第 1、3 拍`);
+        if (dur === 2 * D) ok(p0 === 0 || p0 === 2 * D, `${label} m${mi + 1}: 二分休止符不在第 1、3 拍`);
         pos[staff] += dur; continue;
       }
       const step = LET[/<step>(\w)/.exec(body)[1]], oct = Number(/<octave>(-?\d+)/.exec(body)[1]);
@@ -210,7 +210,7 @@ function checkNotation(xml, label, sub){
       // 長音位置
       const type = /<type>(\w+)/.exec(body)[1], dotted = /<dot\/>/.test(body);
       if (type === "whole") ok(p0 === 0, `${label} m${mi + 1}: 全音符不在第 1 拍`);
-      if (type === "half") ok(!dotted && (p0 === 0 || p0 === 24), `${label} m${mi + 1}: 二分音符位置不對`);
+      if (type === "half") ok(!dotted && (p0 === 0 || p0 === 2 * D), `${label} m${mi + 1}: 二分音符位置不對`);
       // 三連音
       if (!isChord && /<time-modification>/.test(body)) { if (/<tuplet type="start"/.test(body)) { ok(tupN === 0, `${label}: 三連音沒有結束`); tupN = 1; } else { tupN++; if (/<tuplet type="stop"/.test(body)) { ok(tupN === 3, `${label}: 三連音不是 3 個`); tupN = 0; } } }
       // 符桿
