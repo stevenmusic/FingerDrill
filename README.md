@@ -1,4 +1,4 @@
-# FingerDrill 指法特訓
+# FingerDrill 手指特訓
 
 鋼琴技巧練習工具:**音階、琶音、哈農**三個練習庫,加上 **ABRSM / Trinity 考級抽考**。給考級的學生、上課點考的老師,也給不考試、只想練手指的人。
 介面中英雙語(頂欄右上角切換)、黑金設計系統(與 ScrollScore / HarmonyMap / HarmonyHands 同一系列),手機直式優先(iPhone 放在譜架上看)。

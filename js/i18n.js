@@ -11,7 +11,7 @@ export const getLang = () => LANG;
 export const tr = (zh, en) => LANG === "en" ? en : zh;
 
 const STR = {
-  pageTitle: ["FingerDrill — 指法特訓", "FingerDrill — Piano Technique Trainer"],
+  pageTitle: ["FingerDrill 手指特訓", "FingerDrill 手指特訓"],
   themeToggleLabel: ["淺色模式", "Light mode"], themeToggleTitle: ["切換淺色/深色主題", "Switch light/dark theme"],
   langToggleText: ["EN", "中"], langToggleLabel: ["切換為英文", "Switch to Chinese"], langToggleTitle: ["切換語言", "Switch language"],
   tabScale: ["音階", "Scales"], tabArp: ["琶音", "Arpeggios"], tabHanon: ["哈農", "Hanon"], tabExam: ["考級", "Exams"],

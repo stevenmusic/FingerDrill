@@ -408,3 +408,5 @@ export function stopAll(){
 /* 排程過的節點會一直累積:超過一定數量時把已經結束的清掉 */
 export function pruneScheduled(){ if (scheduled.length > 400) scheduled = scheduled.slice(-200); }
 export { masterReady };
+/* 測試用:目前排程中的音訊節點數(連點播放不會變兩份) */
+export function scheduledCount(){ return scheduled.length; }

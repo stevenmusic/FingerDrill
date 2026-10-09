@@ -331,3 +331,50 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 .verify-badge.ok{color:var(--teal);border-color:var(--teal)}
 /* 第一次打開的問題出現時,頂欄(主題、語言)還是按得到 */
 header{z-index:60}
+
+/* ══ 各種尺寸的修正(tools/test/layout.mjs 檢查)══ */
+/* 副標「指法特訓」:手機也顯示(360 以下才藏);頂欄的考試標籤在 480 以下不顯示(底部分頁就有「考級」) */
+@media (max-width:600px){ .tagline{display:inline} }
+@media (max-width:359px){ .tagline{display:none} }
+@media (max-width:480px){ #examChip{display:none !important} }
+/* 主題/語言按鈕一律正方形,窄螢幕也不被擠扁 */
+#themeToggle,#langToggle{aspect-ratio:1;padding:0;min-width:34px;justify-content:center}
+@media (max-height:420px){ #themeToggle,#langToggle{min-width:30px} }
+/* 速度滑桿:加高點擊區域(滑軌樣式不變) */
+.metro input[type=range]{height:36px;margin:0}
+/* 收起/展開:手指點得到 */
+.quick .qhead .chip{height:32px;padding:0 14px}
+/* 極窄螢幕(折疊機 280、SE 320):設定欄位改單欄 */
+@media (max-width:360px){
+  .fields{grid-template-columns:1fr}
+  .seg button{padding:0 4px;font-size:var(--fs-sm)}
+  .q-actions{gap:6px}
+  .mbtn{padding:0 10px}
+}
+/* 選項全部看得到:換行,不橫向捲(捲動看不出還有東西) */
+.opts{flex-wrap:wrap;overflow:visible}
+/* 分頁列:目前的分頁淡金底 */
+.tabbar button{transition:color .15s,background .15s}
+.tabbar button[aria-selected="true"]{background:rgba(242,185,75,.12)}
+body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
+/* 手機橫放:分頁列改成矮的(圖示和文字並排) */
+@media (max-height:420px){
+  .tabbar{padding-top:3px;padding-bottom:calc(3px + env(safe-area-inset-bottom))}
+  .tabbar button{flex-direction:row;gap:6px;min-height:38px;padding:0}
+  .tabbar svg{width:18px;height:18px}
+  main{padding-bottom:calc(56px + env(safe-area-inset-bottom))}
+}
+/* 選項全部看得到:換行,不橫向捲(捲動看不出還有東西) */
+.opts{flex-wrap:wrap;overflow:visible}
+/* 分頁列:目前的分頁淡金底 */
+.tabbar button{transition:color .15s,background .15s}
+.tabbar button[aria-selected="true"]{background:rgba(242,185,75,.12)}
+body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
+/* 手機橫放:分頁列改成矮的(圖示和文字並排) */
+@media (max-height:420px){
+  .tabbar{padding-top:3px;padding-bottom:calc(3px + env(safe-area-inset-bottom))}
+  .tabbar button{flex-direction:row;gap:6px;min-height:38px;padding:0}
+  .tabbar svg{width:18px;height:18px}
+  main{padding-bottom:calc(56px + env(safe-area-inset-bottom))}
+}
+@media (max-height:420px){ .tabbar button{justify-content:center} }

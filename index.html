@@ -7,20 +7,20 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="指法特訓">
+<meta name="apple-mobile-web-app-title" content="手指特訓">
 <meta name="application-name" content="FingerDrill">
-<meta name="description" content="FingerDrill 指法特訓:鋼琴音階、琶音、哈農練習與 ABRSM / Trinity 考級抽考,附五線譜指法、取樣鋼琴示範與節拍器。">
+<meta name="description" content="FingerDrill 手指特訓:鋼琴音階、琶音、哈農練習與 ABRSM / Trinity 考級抽考,附五線譜指法、取樣鋼琴示範與節拍器。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230C0A07'/%3E%3Cpath d='M5 17l4-4 3 2 4-6 3 2' fill='none' stroke='%23F2B94B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='19' cy='11' r='2' fill='%233FBFAE'/%3E%3C/svg%3E">
-<title>FingerDrill — 指法特訓</title>
+<title>FingerDrill 手指特訓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/app.css?v=381e49d09a">
 </head>
 <body>
 <header>
   <div class="header-left">
     <h1>Finger<span>Drill</span></h1>
-    <span class="tagline" id="tagline">指法特訓</span>
+    <span class="tagline">手指特訓</span>
   </div>
   <div class="header-right">
     <button class="btn small ghost" id="examChip" hidden></button>
@@ -171,7 +171,7 @@
   <button role="tab" data-tab="arp" aria-selected="false">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 9 12l4 3 7-9"/><circle cx="4" cy="18" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="13" cy="15" r="1.5"/><circle cx="20" cy="6" r="1.5"/></svg><span data-i18n="tabArp">琶音</span></button>
   <button role="tab" data-tab="hanon" aria-selected="false">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20V9a2 2 0 0 1 4 0v4"/><path d="M10 13V6a2 2 0 0 1 4 0v7"/><path d="M14 13V8a2 2 0 0 1 4 0v8a6 6 0 0 1-6 6h-1a5 5 0 0 1-5-5"/></svg><span data-i18n="tabHanon">哈農</span></button>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14V5.5"/><path d="M11.5 12V3.5"/><path d="M15 12V4.5"/><path d="M18.5 12.5V7"/><path d="M18.5 12.5v2a7 7 0 0 1-7 7h-.8a6 6 0 0 1-4.7-2.3l-3-3.8a1.6 1.6 0 0 1 2.5-2L8 16v-2"/></svg><span data-i18n="tabHanon">哈農</span></button>
   <button role="tab" data-tab="exam" aria-selected="false">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l1 2h3v15H5V6h3z"/><path d="m9 13 2 2 4-4"/></svg><span data-i18n="tabExam">考級</span></button>
 </nav>
@@ -194,7 +194,9 @@
   </div>
 </div>
 
-<script src="vendor/opensheetmusicdisplay.min.js"></script>
-<script type="module" src="js/app.js"></script>
+<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=c17f874874","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=18e6cbccfc","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/i18n.js":"./js/i18n.js?v=f7b46b0078","./js/musicxml.js":"./js/musicxml.js?v=da0302b9be","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=a0655b1f7d","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
+<script type="application/json" id="fdVersions">{"data/fingerings.json":"c5b57cffa5","data/syllabus.json":"44f00617de"}</script>
+<script src="vendor/opensheetmusicdisplay.min.js?v=fe43ac6f19"></script>
+<script type="module" src="js/app.js?v=c17f874874"></script>
 </body>
 </html>

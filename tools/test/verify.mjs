@@ -328,6 +328,12 @@ for (const [lh, rh, motion, tenth] of [["F#", "A#", "contrary"], ["C#", "E", "co
   T({ type: "chromatic", tonic: lh, lhStart: lh, rhStart: rh, motion, octaves: oct, apartTenth: !!tenth });
 }
 
+// 版本指紋(快取):index.html 裡的 ?v= 要跟檔案內容一致
+{
+  const { execFileSync } = await import("node:child_process");
+  try { execFileSync("node", [new URL("../build/stamp.mjs", import.meta.url).pathname, "--check"], { stdio: "pipe" }); checks++; }
+  catch (e) { fail("index.html 的版本指紋不是最新的:執行 node tools/build/stamp.mjs"); }
+}
 console.log(`最多加線 ${maxLedger} 條`);
 console.log(`\n大綱題目 ${nSyl} 題、全部組合 ${nAll} 題,共 ${checks} 項檢查。`);
 if (fails) { console.log(`✗ ${fails} 項失敗`); process.exit(1); }

@@ -277,7 +277,6 @@ function switchTab(tab){
   document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
   const practice = tab !== "hanon";
   for (const id of ["quizCard", "scoreCard", "metroCard"]) $(id).hidden = !practice;
-  $("tagline").textContent = { scale: T("tabScale"), arp: T("tabArp"), hanon: T("tabHanon"), exam: tr("考級抽考", "Exam drill") }[tab];
   $("drawBtn").hidden = true; $("nextBtn").hidden = true;
   if (tab === "scale" || tab === "arp") { renderPicker(tab); setQuestion(tabCur[tab] || freeQuestion(tab), tab); }
   else if (tab === "exam") { renderExam(); syncExamButtons(); if (tabCur.exam) setQuestion(tabCur.exam, "exam"); else showEmpty(); }
@@ -287,6 +286,7 @@ $("tabbar").onclick = e => { const b = e.target.closest("button[data-tab]"); if 
 
 /* ══ 練習面板 ══ */
 function showEmpty(){
+  stopPlayback();
   cur = null; ex = null;
   $("qTitle").textContent = tr("按「" + $("drawLabel").textContent + "」開始,或從下面的清單選一項", "Tap “" + $("drawLabel").textContent + "” or pick an item from the list below");
   $("qTitle").classList.add("empty"); $("qTags").innerHTML = "";
@@ -383,7 +383,15 @@ function buildCursorSteps(){
   while (!c.Iterator.EndReached && guard++ < 3000) { cursorSteps.push(c.Iterator.currentTimeStamp.RealValue * 4); c.next(); }
   c.reset(); c.hide(); cursorOn = false;
 }
-window.addEventListener("resize", () => { if (osmd && cur) { const z = window.innerWidth < 600 ? 0.72 : 0.9; if (osmd.zoom !== z) { osmd.zoom = z; osmd.render(); buildCursorSteps(); } } });
+/* 旋轉螢幕 / 改視窗大小:樂譜重畫;播放中的話游標接回目前的位置 */
+window.addEventListener("resize", () => {
+  if (!osmd || !cur) return;
+  const z = window.innerWidth < 600 ? 0.72 : 0.9;
+  if (osmd.zoom === z) return;
+  const wasOn = cursorOn, idx = cursorIdx;
+  osmd.zoom = z; osmd.render(); buildCursorSteps();
+  if (play && wasOn) { osmd.cursor.reset(); osmd.cursor.show(); for (let i = 0; i < idx; i++) osmd.cursor.next(); cursorIdx = idx; cursorOn = true; }
+});
 
 /* ── 速度 ──
    考級題目:單位照大綱(♩ 或 𝅗𝅥),一拍幾個八分音符照 NOTES_PER_UNIT;自由練習:♩、一拍兩個八分音符 */
@@ -461,15 +469,20 @@ async function preloadSamples(){
 }
 
 /* ── 示範播放:預備拍一小節 + 節拍器 ── */
-let play = null;
+let play = null, starting = 0;   // starting:正在準備播放(載入取樣中)的序號;連點、換題時舊的準備作廢
 async function startPlayback(){
-  if (!cur) return;
+  if (!cur || starting) return;
+  const token = starting = Date.now() + Math.random();
+  const q0 = cur, show0 = show;
   stopMetronome();
   const ctx = audio.ensureAudio();
   if (ctx.state === "suspended") await ctx.resume();
   $("playLabel").textContent = tr("準備中…", "Preparing…");
   await preloadSamples();
   await audio.masterReady;
+  // 準備期間換了題目、換了手、按了停止 → 不播
+  if (starting !== token || cur !== q0 || show !== show0) { if (starting === token) { starting = 0; $("playLabel").textContent = T("play"); } return; }
+  starting = 0;
   if (!samplesReady) { $("playLabel").textContent = T("play"); return; }
   const events = playbackEvents(ex, cur, show);
   const u = unitOf(), clickSec = 60 / bpm, noteSec = clickSec / NOTES_PER_UNIT[u];
@@ -510,27 +523,32 @@ async function startPlayback(){
   play.raf = requestAnimationFrame(tick);
 }
 function stopPlayback(natural){
+  starting = 0;
   if (play) { cancelAnimationFrame(play.raf); play = null; if (!natural) audio.stopAll(); }
   if (osmd && cursorOn) { try { osmd.cursor.hide(); } catch (e) {} cursorOn = false; }
   $("playLabel").textContent = T("play");
   $("playIcon").innerHTML = '<path d="M7 4v16l13-8z"/>';
   showBeat(null);
 }
-$("playBtn").onclick = () => { if (play) stopPlayback(); else startPlayback(); };
+$("playBtn").onclick = () => { if (play || starting) stopPlayback(); else startPlayback(); };
 
 /* ── 節拍器(獨立使用;排程往前看 0.12 秒)── */
-let metro = null;
+let metro = null, metroStarting = 0;
 function showBeat(click){
   const dots = $("beats").children, n = dots.length;
   const k = click == null || click < -n ? -1 : ((Math.floor(click + 1e-6) % n) + n) % n;
   for (let i = 0; i < dots.length; i++) dots[i].classList.toggle("on", i === k);
 }
 async function startMetronome(){
+  if (metro || metroStarting) return;
+  const token = metroStarting = Date.now() + Math.random();
   stopPlayback();
   const ctx = audio.ensureAudio();
   if (ctx.state === "suspended") await ctx.resume();
   try { await audio.loadClick(); } catch (e) { $("metroInfo").textContent = tr("節拍器音色載入失敗(需要網路)", "Could not load the metronome sound (needs internet)"); return; }
   await audio.masterReady;
+  if (metroStarting !== token) return;   // 準備期間按了停止或開始播放
+  metroStarting = 0;
   metro = { next: ctx.currentTime + 0.1, n: 0, timer: 0, raf: 0 };
   const pump = () => {
     if (!metro) return;
@@ -550,11 +568,12 @@ async function startMetronome(){
   $("metroLabel").textContent = T("stop");
 }
 function stopMetronome(){
-  if (!metro) return;
+  metroStarting = 0;
+  if (!metro) { $("metroLabel").textContent = T("metroStart"); return; }
   clearInterval(metro.timer); cancelAnimationFrame(metro.raf); metro = null;
   $("metroLabel").textContent = T("metroStart"); showBeat(null);
 }
-$("metroBtn").onclick = () => { if (metro) stopMetronome(); else startMetronome(); };
+$("metroBtn").onclick = () => { if (metro || metroStarting) stopMetronome(); else { $("metroLabel").textContent = T("stop"); startMetronome(); } };
 
 /* ══ 第一次打開:在準備考試嗎? ══ */
 const obState = { system: "abrsm", grade: 1 };
@@ -573,12 +592,16 @@ function showOnboard(){
 
 /* ── 啟動 ── */
 async function init(){
-  const [sy, fg] = await Promise.all([fetch("data/syllabus.json").then(r => r.json()), fetch("data/fingerings.json").then(r => r.json())]);
+  // 資料檔帶版本指紋(index.html 的 fdVersions,由 tools/build/stamp.mjs 產生),更新後不會讀到舊的快取
+  let ver = {}; try { ver = JSON.parse(document.getElementById("fdVersions").textContent); } catch (e) {}
+  const data = f => fetch(f + (ver[f] ? "?v=" + ver[f] : "")).then(r => r.json());
+  const [sy, fg] = await Promise.all([data("data/syllabus.json"), data("data/fingerings.json")]);
   SY = sy; FG = fg;
   if (S.exam && !(SY.systems[S.exam.system] && gradeOf(SY, S.exam.system, S.exam.grade))) S.exam = null;
   if (window.innerWidth < 600) $("listCard").open = false;
   if (S.exam) renderExam();
-  window.__app = { get cur(){ return cur; }, get ex(){ return ex; }, get osmd(){ return osmd; }, setQuestion, examQuestions, examPool, switchTab, S, SY };
+  window.__app = { get cur(){ return cur; }, get ex(){ return ex; }, get osmd(){ return osmd; },
+    get state(){ return { play: !!play, starting: !!starting, metro: !!metro, metroStarting: !!metroStarting, bpm, cursorOn, show, scheduled: audio.scheduledCount() }; }, setQuestion, examQuestions, examPool, switchTab, S, SY };
   if (!S.onboarded) { switchTab("scale"); showOnboard(); }
   else switchTab(S.tab || (S.exam ? "exam" : "scale"));
   window.__stageReady = 1;
