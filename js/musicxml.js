@@ -3,7 +3,8 @@
    每個音都標指法:右手在上、左手在下。譜號依每小節的音域自動換(右手偏好高音譜號、左手偏好低音譜號)。 */
 import { LETTERS } from "./theory.js";
 
-const DIV = 12, BAR = 48;
+const DIV = 12;
+let BAR = 48;   // 一小節的長度:預設 4/4;哈農 2/4 = 24(ex.bar)
 const NOTE_TYPES = [[48, "whole", 0], [36, "half", 1], [24, "half", 0], [18, "quarter", 1], [12, "quarter", 0], [9, "eighth", 1], [6, "eighth", 0], [3, "16th", 0]];
 function fitType(d){ for (const [len, type, dots] of NOTE_TYPES) if (len <= d) return { len, type, dots }; return { len: 3, type: "16th", dots: 0 }; }
 
@@ -155,6 +156,7 @@ function beamMarks(evs, sub){
 
 /* show: "both" | "rh" | "lh" */
 export function exerciseToMusicXML(ex, q, show = "both"){
+  BAR = ex.bar || 48;
   const hands = show === "both" ? ["rh", "lh"] : [show];
   const lay = hands.map(h => layoutHand(ex[h], ex.sub));
   const cp = hands.map((h, i) => clefPlan(lay[i], h, ex.sub));
@@ -167,7 +169,7 @@ export function exerciseToMusicXML(ex, q, show = "both"){
   for (let m = 0; m < nMeasures; m++) {
     body += `<measure number="${m + 1}">`;
     let attrs = "";
-    if (m === 0) attrs += `<divisions>${DIV}</divisions><key><fifths>${ex.fifths}</fifths></key><time print-object="no"><beats>4</beats><beat-type>4</beat-type></time>` + (staves > 1 ? `<staves>${staves}</staves>` : "");
+    if (m === 0) attrs += `<divisions>${DIV}</divisions><key><fifths>${ex.fifths}</fifths></key>${ex.time ? `<time><beats>${ex.time[0]}</beats><beat-type>${ex.time[1]}</beat-type></time>` : '<time print-object="no"><beats>4</beats><beat-type>4</beat-type></time>'}` + (staves > 1 ? `<staves>${staves}</staves>` : "");
     hands.forEach((h, i) => { if (m === 0) { clefNow[i] = plans[i].get(lay[i][0][0]); attrs += clefXml(clefNow[i], i + 1); } });
     if (attrs) body += `<attributes>${attrs}</attributes>`;
     if (m === 0 && q.dynamic) body += `<direction placement="below"><direction-type><dynamics><${q.dynamic}/></dynamics></direction-type><staff>1</staff></direction>`;

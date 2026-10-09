@@ -17,7 +17,7 @@
   並對照 PDF 頁面圖片逐格核對手、力度、奏法、八度、速度,都對了才設 verified = true;README 的清單用 `node tools/build/checklist.mjs --fingerings` 重新產生
 - 官方大綱 PDF:ABRSM https://www.abrsm.org/en-gb/piano(Cloudflare 擋 curl,要用 Playwright 開頁面再在頁內 fetch);Trinity https://www.trinitycollege.com/resource/?id=9079
 - **不要用合成鋼琴音**:鋼琴讀 ScrollScore 的 Salamander 取樣(`raw.githubusercontent.com/stevenmusic/ScrollScore/main/piano/`),引擎照 HarmonyHands;節拍器用 Naked Drums 的 xstick 取樣
-- **哈農不要逐音手打**:用「樣式 + 移位規則」生成,再對照原譜驗證每首前兩小節與轉折處
+- **哈農不要逐音手打**:用「樣式 + 移位規則」生成(`js/hanon.js`),已對照原譜(IMSLP #00874)逐首核對第 1、15 小節與結尾
 - 外觀照 HarmonyHands / HarmonyMap 的設計代幣(`css/app.css` 開頭那段逐項相同),圖示用線稿 SVG(24 格、stroke 2、圓端點)
 
 ## 樂理/指法

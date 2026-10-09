@@ -197,6 +197,7 @@ body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
 .q-tag{flex:none;font-size:calc(clamp(14px, 4.2vw, 18px) * var(--tag-scale, 1));font-weight:700;color:var(--ivory);background:var(--surface-inset);border:1px solid var(--line);
   border-radius:var(--radius-sm);padding:4px 10px;white-space:nowrap}
 .q-tag.dyn{color:var(--teal);border-color:var(--teal)}
+.q-tag.best{color:var(--gold-bright);border-color:var(--gold)}
 .q-head,.q-row{display:flex;align-items:center;gap:10px}
 .q-head .q-title{flex:1 1 auto;min-width:0}
 .q-row .q-tags{flex:1 1 auto;min-width:0}

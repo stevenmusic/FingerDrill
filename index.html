@@ -14,7 +14,7 @@
 <title>FingerDrill 手指特訓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=4dc57675a6">
+<link rel="stylesheet" href="css/app.css?v=1c5077ef1f">
 </head>
 <body>
 <header>
@@ -43,11 +43,10 @@
     <div class="setup-body"><div class="quick" hidden></div><div class="rows"></div></div>
   </section>
 
-  <!-- 哈農(第二階段) -->
-  <section class="card pane" data-pane="hanon" id="paneHanon" hidden>
-    <div class="card-title"><b data-i18n="hanonTitle">哈農 · 第一部分(1–20 首)</b></div>
-    <p class="soon" data-i18n="hanonSoon" data-i18n-pair>製作中(第二階段)。會用「樣式 + 移位規則」產生全部 20 首,並對照原譜驗證每首前兩小節與轉折處;
-      支援 12 個調、速度階梯(每輪 +4 BPM 到目標速度)、附點/反附點/三連音等節奏變化,以及每首練到的最高速度紀錄。</p>
+  <!-- 哈農:選曲目、調、手(由 js/app.js 產生) -->
+  <section class="card picker pane" data-pane="hanon" id="paneHanon" hidden>
+    <button class="setup-summary" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="sum"></span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div class="setup-body"><div class="quick" hidden></div><div class="rows"></div></div>
   </section>
 
   <!-- 考級抽考 -->
@@ -194,9 +193,9 @@
   </div>
 </div>
 
-<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=1abc72a8f0","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=8406a4ab8a","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/i18n.js":"./js/i18n.js?v=5edf1bb796","./js/musicxml.js":"./js/musicxml.js?v=da0302b9be","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=33ba27966e","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
+<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=5cc7db98d2","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=f7cf999f67","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/hanon.js":"./js/hanon.js?v=d82a99a3af","./js/i18n.js":"./js/i18n.js?v=5edf1bb796","./js/musicxml.js":"./js/musicxml.js?v=7a90b7e78b","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=e7f5c08888","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
 <script type="application/json" id="fdVersions">{"data/fingerings.json":"c5b57cffa5","data/syllabus.json":"30b5443db2"}</script>
 <script src="vendor/opensheetmusicdisplay.min.js?v=fe43ac6f19"></script>
-<script type="module" src="js/app.js?v=1abc72a8f0"></script>
+<script type="module" src="js/app.js?v=5cc7db98d2"></script>
 </body>
 </html>

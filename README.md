@@ -429,3 +429,10 @@ cd tools/test && node shot.mjs '<題目 JSON>' 名稱   # 截圖
 - 節拍器:Naked Drums(Wilkinson Audio,CC-BY 4.0)side-stick,經 ScrollScore 整理
 - OpenSheetMusicDisplay 2.0.0(BSD-3-Clause,`vendor/OSMD-LICENSE.txt`)
 - 考試要求為練習用整理資料,未經 ABRSM / Trinity College London 審定;ABRSM、Trinity 為各自機構的名稱
+
+## 哈農(第一部分 1–20 首)
+
+- `js/hanon.js`:每首只記「上行第 1 小節、下行第 1 小節(第 15 小節)的 8 個音 + 指法」,其餘用移位規則產生(上行每小節 +1 級、下行每小節 −1 級,各 14 小節,結尾主音二分音符;兩手平行八度)。
+- 來源:IMSLP #00874(Schirmer 版 Part I)。逐首把第 1 小節與第 15 小節(下行轉折處)用加了音高格線的放大掃描圖讀出來,並核對第 3、20 首的結尾;第 20 首從 E 開始、結尾是和弦(右手 E3 + C4、左手 C2 + C3)。
+- 移調:同一組級數換成該調的大音階(右手起音在 C3 附近);指法照 C 大調原譜。
+- 速度階梯:按 ✓ 記錄這首的最高速度,下一輪 +4(原譜建議 ♩ = 60 → 108)。

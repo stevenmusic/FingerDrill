@@ -9,6 +9,7 @@ import { tr, getLang } from "./i18n.js";
 import {
   scaleFingersFrom, triadFingers, fourNoteFingers, chromaticFingers, arpGroupFingers, cyclicFingers, BROKEN_FINGERS
 } from "./fingering.js";
+import { buildHanon } from "./hanon.js";
 
 const withF = (notes, fingers) => notes.map((n, i) => ({ ...n, midi: midiOf(n), finger: fingers ? fingers[i] : null }));
 const scaleIv = q => q.quality === "major" ? INTERVALS.major : INTERVALS[q.form];
@@ -194,6 +195,7 @@ function buildDouble(FG, q){
 }
 
 export function buildExercise(FG, q){
+  if (q.type === "hanon") return buildHanon(q.no, q.tonic);
   const b = {
     scale: buildScale, arpeggio: buildArp, dom7: buildArp, dim7: buildArp,
     chromatic: (FG, q) => buildChromatic(q), wholetone: (FG, q) => buildWholeTone(q),
@@ -236,6 +238,7 @@ export function keyName(q){
 }
 export const keyNameZh = keyName;
 export function questionText(q){
+  if (q.type === "hanon") return [tr(`哈農 第 ${q.no} 首`, `Hanon No. ${q.no}`), pick(HAND[q.hands] || HAND.HT), nm(q.tonic) + tr(" 大調", " major")];
   // 相隔三度/六度放在標籤(取代「雙手」),題目才不會比另一種語言多一行
   const parts = [keyName(q.apart ? { ...q, apart: 0 } : q)];
   parts.push(q.motion === "contrary" ? tr("反向", "Contrary") : q.apart === 3 ? tr("相隔三度", "3rd apart") : q.apart === 6 ? tr("相隔六度", "6th apart") : pick(HAND[q.hands] || HAND.HT));

@@ -33,7 +33,7 @@ $("langToggle").onclick = () => {
   const keep = cur, tab = S.tab;
   if (S.exam) renderExam();
   switchTab(tab);
-  if (keep && tab !== "hanon") setQuestion(keep, tab);
+  if (keep) setQuestion(keep, tab);
 };
 
 function segBind(el, get, set){
@@ -111,12 +111,23 @@ const PICKERS = {
       else Object.assign(q, { type: p.kind, quality: "major", cat: "seventh" });
       return q;
     }
+  },
+  /* 哈農:曲目 1–20、調(12 個大調,同一個樣式移調)、手 */
+  hanon: {
+    defaults: { no: 1, key: "C", hands: "HT" },
+    rows: () => [
+      ["no", tr("曲目", "No."), Array.from({ length: 20 }, (_, i) => [i + 1, String(i + 1)])],
+      ["key", tr("調", "Key"), keyOpts(MAJ_KEYS)],
+      ["hands", tr("手", "Hands"), HANDS()]
+    ],
+    toQ: p => ({ type: "hanon", no: Number(p.no), tonic: p.key, hands: p.hands, articulation: "legato", motion: "similar", cat: "hanon" })
   }
 };
 S.pick = S.pick || {};
-for (const t of ["scale", "arp"]) S.pick[t] = { ...PICKERS[t].defaults, ...(S.pick[t] || {}) };
-S.freeBpm = S.freeBpm || { scale: 60, arp: 60 };
-const paneOf = tab => $(tab === "scale" ? "paneScale" : "paneArp");
+for (const t of ["scale", "arp", "hanon"]) S.pick[t] = { ...PICKERS[t].defaults, ...(S.pick[t] || {}) };
+S.freeBpm = { scale: 60, arp: 60, hanon: 60, ...(S.freeBpm || {}) };
+S.hanonBest = S.hanonBest || {};   // 哈農每首(不分調)練過的最高速度
+const paneOf = tab => $(tab === "scale" ? "paneScale" : tab === "arp" ? "paneArp" : "paneHanon");
 
 function renderPicker(tab){
   const pane = paneOf(tab), p = S.pick[tab], cfg = PICKERS[tab];
@@ -128,18 +139,18 @@ function renderPicker(tab){
   pane.querySelector(".sum").textContent = questionText(cfg.toQ(p)).join(" · ");
   renderQuick(tab);
 }
-for (const tab of ["scale", "arp"]) {
+for (const tab of ["scale", "arp", "hanon"]) {
   paneOf(tab).querySelector(".rows").onclick = e => {
     const b = e.target.closest(".opt"); if (!b) return;
     const k = b.closest(".opts").dataset.k;
-    S.pick[tab][k] = ["octaves", "inv"].includes(k) ? Number(b.dataset.v) : b.dataset.v;
+    S.pick[tab][k] = ["octaves", "inv", "no"].includes(k) ? Number(b.dataset.v) : b.dataset.v;
     store.save(); renderPicker(tab); loadFree(tab);
   };
 }
 function freeQuestion(tab){
   const q = PICKERS[tab].toQ(S.pick[tab]);
-  q.tempo = { unit: "q", bpm: S.freeBpm[tab] }; q.free = true; q.sub = 2;
-  q.key = masteryKey(q);
+  q.tempo = { unit: tab === "hanon" ? "q16" : "q", bpm: S.freeBpm[tab] }; q.free = true; q.sub = tab === "hanon" ? 4 : 2;
+  q.key = tab === "hanon" ? `hanon|${q.no}|${q.tonic}|${q.hands}` : masteryKey(q);
   return q;
 }
 function loadFree(tab){ setQuestion(freeQuestion(tab), tab); }
@@ -153,7 +164,7 @@ function examQuestions(){
 }
 function renderQuick(tab){
   const box = paneOf(tab).querySelector(".quick");
-  if (!S.exam) { box.hidden = true; return; }
+  if (!S.exam || tab === "hanon") { box.hidden = true; return; }
   const sys = SY.systems[S.exam.system], g = gradeOf(SY, S.exam.system, S.exam.grade);
   const qs = examQuestions().filter(q => TAB_CATS[tab].includes(q.cat));
   box.hidden = false;
@@ -277,10 +288,8 @@ function switchTab(tab){
   S.tab = tab; store.save();
   document.querySelectorAll("#tabbar button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
-  const practice = tab !== "hanon";
-  for (const id of ["quizCard", "scoreCard", "metroCard"]) $(id).hidden = !practice;
   $("drawBtn").hidden = true; $("nextBtn").hidden = true;
-  if (tab === "scale" || tab === "arp") { renderPicker(tab); setQuestion(tabCur[tab] || freeQuestion(tab), tab); }
+  if (tab === "scale" || tab === "arp" || tab === "hanon") { renderPicker(tab); setQuestion(tabCur[tab] || freeQuestion(tab), tab); }
   else if (tab === "exam") { renderExam(); syncExamButtons(); if (tabCur.exam) setQuestion(tabCur.exam, "exam"); else showEmpty(); }
   window.scrollTo({ top: 0 });
 }
@@ -309,7 +318,7 @@ function setQuestion(q, tab){
   syncHandSeg();
   const parts = questionText(q);
   unpair($("qTitle")); $("qTitle").textContent = parts[0]; $("qTitle").classList.remove("empty");
-  $("qTags").innerHTML = parts.slice(1).map((t, i) => `<span class="q-tag${q.dynamic && i === parts.length - 2 ? " dyn" : ""}">${t}</span>`).join("");
+  $("qTags").innerHTML = parts.slice(1).map((t, i) => `<span class="q-tag${q.dynamic && i === parts.length - 2 ? " dyn" : ""}">${t}</span>`).join("") + hanonBestTag(q);
   fitTitle();
   $("playBtn").disabled = false;
   document.querySelectorAll(".mbtn").forEach(b => b.disabled = false);
@@ -329,6 +338,11 @@ function setQuestion(q, tab){
   if (q.apart === 3) notes.push(() => tr("相隔三度:右手比左手高十度(三度 + 八度),左手從主音、右手從第三級開始。", "A third apart: RH plays a tenth above LH — LH starts on the tonic, RH on the 3rd."));
   if (q.apart === 6) notes.push(() => tr("相隔六度:主音在上方 — 右手從主音、左手從低六度的第三級開始。", "A sixth apart: tonic on top — RH starts on the tonic, LH on the 3rd a sixth below."));
   if (q.type === "chromatic" && q.lhStart !== q.rhStart) notes.push(() => tr(`兩手從不同的音開始:左手 ${noteLabelStr(q.lhStart)}、右手 ${noteLabelStr(q.rhStart)}。`, `Hands start on different notes: LH ${noteLabelStr(q.lhStart)}, RH ${noteLabelStr(q.rhStart)}.`));
+  if (q.type === "hanon") {
+    notes.push(() => tr("依原譜(IMSLP #00874)產生:上行 14 小節、下行 14 小節,兩手相隔八度;指法照原譜標在第 1、15 小節。原譜建議 ♩ = 60,慢慢加到 108。彈順了按 ✓:記錄這個速度,下一輪自動 +4。",
+      "Generated from the original (IMSLP #00874): 14 bars up, 14 down, hands an octave apart; fingering as printed in bars 1 and 15. Hanon suggests ♩ = 60 rising to 108. Tap ✓ when it's clean: the tempo is saved and the next round is 4 faster."));
+    if (q.tonic !== "C") notes.push(() => tr("移調:同一個樣式換到這個調的音階;指法照 C 大調原譜,黑鍵上可依手形調整。", "Transposed: same pattern on this key's scale; fingering is from the C major original, so adjust on black keys if needed."));
+  }
   if (!q.free && S.exam) notes.push(() => SY.systems[S.exam.system].mode === "sets" ? tr("速度是大綱的「最低速度」。", "Tempo is the syllabus minimum.") : tr("速度是大綱的「參考速度」。", "Tempo is the syllabus guide speed."));
   $("scoreNote").hidden = !notes.length;
   pairText($("scoreNote"), () => noteFns.map(f => f()).join(" "));
@@ -343,9 +357,24 @@ function syncMastery(){
   const m = cur && S.mastery[cur.key];
   document.querySelectorAll(".mbtn").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.m === m)));
 }
+/* 哈農的速度階梯:按 ✓ = 這個速度彈順了 → 記錄最高速度、下一輪 +4 */
+function hanonBestTag(q){
+  const b = q.type === "hanon" && S.hanonBest[q.no];
+  return b ? `<span class="q-tag best">${tr("最高", "Best")} ♩=${b}</span>` : "";
+}
 document.querySelectorAll(".mbtn").forEach(b => b.onclick = () => {
   if (!cur) return;
   const m = b.dataset.m;
+  if (cur.type === "hanon" && m === "good") {
+    S.hanonBest[cur.no] = Math.max(S.hanonBest[cur.no] || 0, bpm);
+    S.mastery[cur.key] = "good";
+    store.save();
+    setBpm(bpm + 4, true);
+    const parts = questionText(cur);
+    $("qTags").innerHTML = parts.slice(1).map(t => `<span class="q-tag">${t}</span>`).join("") + hanonBestTag(cur);
+    fitTitle(); syncMastery();
+    return;
+  }
   if (S.mastery[cur.key] === m) delete S.mastery[cur.key]; else S.mastery[cur.key] = m;
   store.save(); syncMastery();
   if (S.tab === "exam") renderExam(); else renderQuick(S.tab);
@@ -465,7 +494,7 @@ if (typeof ResizeObserver !== "undefined") new ResizeObserver(() => requestAnima
 /* ── 速度 ──
    考級題目:單位照大綱(♩ 或 𝅗𝅥),一拍幾個八分音符照 NOTES_PER_UNIT;自由練習:♩、一拍兩個八分音符 */
 function unitOf(){ return cur && cur.tempo ? cur.tempo.unit : "q"; }
-function beatsPerBar(){ return unitOf() === "h" ? 2 : 4; }
+function beatsPerBar(){ return unitOf() === "h" || unitOf() === "q16" ? 2 : 4; }
 function syncTempoUI(){
   const u = unitOf();
   $("bpmVal").textContent = bpm; $("bpmRange").value = bpm;
@@ -477,7 +506,8 @@ function syncTempoUI(){
     $("bpmPct").textContent = pct === 100 ? tr("考試速度", "exam") : tr(`考試速度的 ${pct}%`, `${pct}% of exam tempo`);
     $("examTempo").textContent = tr(`考試速度 ${UNIT_SYM[u]} = ${examT.bpm}(八分音符,每拍 ${NOTES_PER_UNIT[u]} 個${u === "q." ? ",三連音" : ""})`,
       `Exam tempo ${UNIT_SYM[u]} = ${examT.bpm} (${NOTES_PER_UNIT[u]} ${u === "q." ? "triplet " : ""}quavers per beat)`);
-  } else { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("每拍 2 個八分音符", "2 quavers per beat"); }
+  } else if (u === "q16") { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("每拍 4 個十六分音符 · 原譜 60–108", "4 semiquavers per beat · Hanon: 60–108"); }
+  else { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("每拍 2 個八分音符", "2 quavers per beat"); }
   $("beats").innerHTML = "<i class=\"first\"></i>" + "<i></i>".repeat(beatsPerBar() - 1);
 }
 function setBpm(v, fromUser){

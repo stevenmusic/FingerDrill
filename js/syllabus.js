@@ -89,5 +89,5 @@ export function drawQuestion(pool, mastery, lastKey, rand = Math.random){
 }
 
 /* 速度:unit q/h/q. → 每分鐘幾拍(畫面顯示用)與「每個音幾秒」(播放用) */
-export const UNIT_SYM = { q: "♩", h: "𝅗𝅥", "q.": "♩." };
-export const NOTES_PER_UNIT = { q: 2, h: 4, "q.": 3 };
+export const UNIT_SYM = { q: "♩", h: "𝅗𝅥", "q.": "♩.", q16: "♩" };
+export const NOTES_PER_UNIT = { q: 2, h: 4, "q.": 3, q16: 4 };   // q16:哈農(一拍 4 個十六分音符)
