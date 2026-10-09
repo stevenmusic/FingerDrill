@@ -415,7 +415,7 @@ async function renderScore(){
     await osmd.load(xml);
     if (seq !== renderSeq) return;
     osmd.zoom = scoreZoom();
-    osmd.render();
+    renderOsmd();
     measureNotes();
   } catch (e) {
     console.error(e);
@@ -424,6 +424,79 @@ async function renderScore(){
   window.__lastXml = xml;
   window.__scoreReady = (window.__scoreReady || 0) + 1;
 }
+/* 指法自己畫(OSMD 的指法有時會被擠到音符左邊,位置不一致):
+   OSMD 只畫音符;每個音的指法數字對準符頭正中央,右手(placement above)放在「譜表上緣、這個音(含符桿)最高點」兩者較高的上方,
+   左手(below)放在下方;雙音兩個數字疊起來(上面的音的指法在外側) */
+function renderOsmd(){
+  osmd.render();
+  drawFingerings();
+}
+function drawFingerings(){
+  const svg = document.querySelector("#osmd svg"); if (!svg) return;
+  // OSMD 畫的指法拿掉(排版時它已經幫指法留好上下空間);三連音的「3」不動
+  svg.querySelectorAll("text").forEach(t => { if (/^[1-5]$/.test(t.textContent.trim()) && !t.closest(".vf-tuplet")) t.remove(); });
+  const NS = "http://www.w3.org/2000/svg", frag = document.createDocumentFragment();
+  // 連桿(符尾的粗線)不在音符的範圍裡:另外量,數字要放在連桿外側
+  // 每一條連桿是一個四邊形(左右兩條直邊):算出在某個 x 位置連桿的上下緣
+  const beams = [];
+  svg.querySelectorAll(".vf-beam path").forEach(pth => {
+    const n = ((pth.getAttribute("d") || "").match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+    if (n.length < 8) return;
+    const pts = [[n[0], n[1]], [n[2], n[3]], [n[4], n[5]], [n[6], n[7]]];
+    const lo = Math.min(...pts.map(p => p[0])), hi = Math.max(...pts.map(p => p[0]));
+    const L = pts.filter(p => Math.abs(p[0] - lo) < 0.5).map(p => p[1]), R = pts.filter(p => Math.abs(p[0] - hi) < 0.5).map(p => p[1]);
+    if (L.length && R.length) beams.push({ lo, hi, lt: Math.min(...L), lb: Math.max(...L), rt: Math.min(...R), rb: Math.max(...R) });
+  });
+  const beamAt = (x0, x1) => {
+    const out = [];
+    for (const b of beams) {
+      if (x1 < b.lo || x0 > b.hi) continue;
+      const x = Math.max(b.lo, Math.min(b.hi, (x0 + x1) / 2)), f = b.hi > b.lo ? (x - b.lo) / (b.hi - b.lo) : 0;
+      out.push([b.lt + (b.rt - b.lt) * f, b.lb + (b.rb - b.lb) * f]);
+    }
+    return out;
+  };
+  for (const mlist of osmd.GraphicSheet.MeasureList) for (const gm of mlist || []) {
+    if (!gm || !gm.getVFStave) continue;
+    const stave = gm.getVFStave(), sp = stave.getSpacingBetweenLines(), top = stave.getYForLine(0), bot = stave.getYForLine(4);
+    const fs = sp * 1.5, gap = sp * 0.5;
+    for (const se of gm.staffEntries) for (const gve of se.graphicalVoiceEntries) {
+      if (!gve.notes.some(n => n.sourceNote.Fingering) || !gve.notes[0].getSVGGElement) continue;
+      const el = gve.notes[0].getSVGGElement(); if (!el) continue;
+      const heads = [...el.querySelectorAll(".vf-notehead")].map(h => h.getBBox()).sort((a, b) => b.y - a.y);   // 低音 → 高音
+      if (!heads.length) continue;
+      const b0 = el.getBBox(), cx = heads[0].x + heads[0].width / 2;
+      let bt = b0.y, bb = b0.y + b0.height;
+      for (const [y0, y1] of beamAt(Math.min(heads[0].x - 1, cx - fs * 0.4), Math.max(heads[0].x + heads[0].width + 1, cx + fs * 0.4))) if (y1 >= top - sp * 8 && y0 <= bot + sp * 8 && y1 >= bt - sp * 9 && y0 <= bb + sp * 9) { bt = Math.min(bt, y0); bb = Math.max(bb, y1); }
+      const box = { y: bt, height: bb - bt };
+      const sorted = gve.notes.slice().sort((a, b) => a.sourceNote.Pitch.getHalfTone() - b.sourceNote.Pitch.getHalfTone());
+      const list = sorted.map((n, k) => ({ n, h: heads[Math.min(k, heads.length - 1)] })).filter(x => x.n.sourceNote.Fingering);
+      const above = list[0].n.sourceNote.Fingering.placement !== 1;
+      if (above) list.sort((a, b) => b.h.y - a.h.y); else list.sort((a, b) => a.h.y - b.h.y);   // 靠近音符的先放
+      let y = above ? Math.min(top, box.y) - gap : Math.max(bot, box.y + box.height) + gap + fs * 0.75;
+      for (const { n, h } of list) {
+        const t = document.createElementNS(NS, "text");
+        t.setAttribute("x", h.x + h.width / 2); t.setAttribute("y", y); t.setAttribute("text-anchor", "middle");
+        t.setAttribute("font-family", "Times New Roman, Times, serif"); t.setAttribute("font-size", fs); t.setAttribute("class", "fd-finger");
+        t.textContent = n.sourceNote.Fingering.value;
+        frag.appendChild(t);
+        y += above ? -fs * 0.82 : fs * 0.82;
+      }
+    }
+  }
+  svg.appendChild(frag);
+  // 指法放到 OSMD 預留的範圍外時,把畫布撐大(不然會被切掉)
+  const vb = svg.viewBox.baseVal, bb = svg.getBBox();
+  if (vb && vb.height) {
+    const k = parseFloat(svg.getAttribute("height")) / vb.height;
+    const y0 = Math.min(vb.y, bb.y - 4), y1 = Math.max(vb.y + vb.height, bb.y + bb.height + 4);
+    if (y0 < vb.y || y1 > vb.y + vb.height) {
+      svg.setAttribute("viewBox", `${vb.x} ${y0} ${vb.width} ${y1 - y0}`);
+      svg.setAttribute("height", (y1 - y0) * k);
+    }
+  }
+}
+
 /* 走一遍 OSMD 游標,記下每一步的拍點與 x(相對 #osmd);再量樂譜上下範圍給播放軸 */
 function measureNotes(){
   noteXs = [];
@@ -501,7 +574,7 @@ const onStageResize = () => {
   fitTitle();
   if (!osmd || !cur) return;
   const z = scoreZoom();
-  if (z !== lastZoom && lastZoom !== null) { lastZoom = z; osmd.zoom = z; osmd.render(); measureNotes(); return; }
+  if (z !== lastZoom && lastZoom !== null) { lastZoom = z; osmd.zoom = z; renderOsmd(); measureNotes(); return; }
   lastZoom = z;
   placePlaylineExtent();
   if (!play) movePlayline(0, false);
