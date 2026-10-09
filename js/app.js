@@ -585,22 +585,33 @@ if (typeof ResizeObserver !== "undefined") new ResizeObserver(() => requestAnima
 /* ── 速度 ──
    考級題目:單位照大綱(♩ 或 𝅗𝅥),一拍幾個八分音符照 NOTES_PER_UNIT;自由練習:♩、一拍兩個八分音符 */
 function unitOf(){ return cur && cur.tempo ? cur.tempo.unit : "q"; }
-function beatsPerBar(){ return ex && ex.time ? ex.time[0] * (unitOf() === "e16" ? 2 : 1) : unitOf() === "h" ? 2 : 4; }
+function beatsPerBar(){
+  if (ex && ex.time) return ex.time[0] * (unitOf() === "e16" ? 2 : 1);
+  if (ex && ex.timeHidden) return Math.max(1, Math.round(8 / NOTES_PER_UNIT[unitOf()]));   // 十六分音符的音階:一小節 8 個音
+  return unitOf() === "h" ? 2 : 4;
+}
+/* 速度的音符符號:音階寫成十六分音符時,拍點落在「每 2 個音」= ♪、「每 4 個音」= ♩(大綱原本的單位寫在說明裡) */
+function unitSym(u){
+  if (ex && ex.timeHidden && ex.sub === 4) return NOTES_PER_UNIT[u] === 4 ? "♩" : NOTES_PER_UNIT[u] === 2 ? "♪" : UNIT_SYM[u];
+  return UNIT_SYM[u];
+}
 function syncTempoUI(){
   const u = unitOf();
   $("bpmRange").max = maxBpm();
   $("bpmVal").textContent = bpm; $("bpmRange").value = bpm;
-  $("bpmUnit").textContent = `${UNIT_SYM[u]} / ${tr("分", "min")}`;
+  $("bpmUnit").textContent = `${unitSym(u)} / ${tr("分", "min")}`;
   const examT = cur && !cur.free ? cur.tempo : null;
   $("bpmReset").hidden = !examT;
   if (examT) {
     const pct = Math.round(100 * bpm / examT.bpm);
     $("bpmPct").textContent = pct === 100 ? tr("考試速度", "exam") : tr(`考試速度的 ${pct}%`, `${pct}% of exam tempo`);
-    $("examTempo").textContent = tr(`考試速度 ${UNIT_SYM[u]} = ${examT.bpm}(八分音符,每拍 ${NOTES_PER_UNIT[u]} 個${u === "q." ? ",三連音" : ""})`,
+    $("examTempo").textContent = unitSym(u) !== UNIT_SYM[u]
+      ? tr(`大綱 ${UNIT_SYM[u]} = ${examT.bpm}(每拍 ${NOTES_PER_UNIT[u]} 個八分音符)= 這裡的 ${unitSym(u)} = ${examT.bpm}`, `Syllabus ${UNIT_SYM[u]} = ${examT.bpm} (${NOTES_PER_UNIT[u]} quavers) = ${unitSym(u)} = ${examT.bpm} here`)
+      : tr(`考試速度 ${UNIT_SYM[u]} = ${examT.bpm}(八分音符,每拍 ${NOTES_PER_UNIT[u]} 個${u === "q." ? ",三連音" : ""})`,
       `Exam tempo ${UNIT_SYM[u]} = ${examT.bpm} (${NOTES_PER_UNIT[u]} ${u === "q." ? "triplet " : ""}quavers per beat)`);
   } else if (u === "e16") { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("拍點打在 ♪(每 2 個音)· 原譜 ♩ 60–108 = ♪ 120–216", "Clicks on ♪ (every 2 notes) · Hanon ♩ 60–108 = ♪ 120–216"); }
   else if (u === "q16") { $("bpmPct").textContent = ""; $("examTempo").textContent = ex && ex.rhythm !== "even" ? tr("每拍 4 個音(附點節奏)· 原譜 60–108", "4 notes per beat (dotted) · Hanon: 60–108") : tr("每拍 4 個十六分音符 · 原譜 60–108", "4 semiquavers per beat · Hanon: 60–108"); }
-  else { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("每拍 2 個八分音符", "2 quavers per beat"); }
+  else { $("bpmPct").textContent = ""; $("examTempo").textContent = ex && ex.timeHidden ? tr("拍點 ♪ = 每 2 個音", "Click ♪ = every 2 notes") : tr("每拍 2 個八分音符", "2 quavers per beat"); }
   $("beats").innerHTML = "<i class=\"first\"></i>" + "<i></i>".repeat(beatsPerBar() - 1);
 }
 /* ♪ 拍點時速度數字是 ♩ 的兩倍:上限放寬到 240(♩ = 120) */

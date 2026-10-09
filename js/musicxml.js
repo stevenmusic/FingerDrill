@@ -178,7 +178,7 @@ export function exerciseToMusicXML(ex, q, show = "both"){
   for (let m = 0; m < nMeasures; m++) {
     body += `<measure number="${m + 1}">`;
     let attrs = "";
-    if (m === 0) attrs += `<divisions>${DIV}</divisions><key><fifths>${ex.fifths}</fifths></key>${ex.time ? `<time><beats>${ex.time[0]}</beats><beat-type>${ex.time[1]}</beat-type></time>` : '<time print-object="no"><beats>4</beats><beat-type>4</beat-type></time>'}` + (staves > 1 ? `<staves>${staves}</staves>` : "");
+    if (m === 0) attrs += `<divisions>${DIV}</divisions><key><fifths>${ex.fifths}</fifths></key>${ex.time ? `<time><beats>${ex.time[0]}</beats><beat-type>${ex.time[1]}</beat-type></time>` : `<time print-object="no"><beats>${ex.timeHidden ? ex.timeHidden[0] : 4}</beats><beat-type>${ex.timeHidden ? ex.timeHidden[1] : 4}</beat-type></time>`}` + (staves > 1 ? `<staves>${staves}</staves>` : "");
     hands.forEach((h, i) => { if (m === 0) { clefNow[i] = plans[i].get(lay[i][0][0]); attrs += clefXml(clefNow[i], i + 1); } });
     if (attrs) body += `<attributes>${attrs}</attributes>`;
     if (m === 0 && q.dynamic) body += `<direction placement="below"><direction-type><dynamics><${q.dynamic}/></dynamics></direction-type><staff>1</staff></direction>`;

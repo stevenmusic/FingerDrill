@@ -271,7 +271,7 @@ function checkQuestion(q, label){
     const xml = exerciseToMusicXML(ex, q, show);
     for (const m of xml.split("<measure ").slice(1)) m.split("<backup>").forEach(p => {
       const sum = [...p.matchAll(/<note>((?:(?!<\/note>).)*?)<\/note>/gs)].filter(x => !/<chord\/>/.test(x[1])).reduce((a, x) => a + Number(/<duration>(\d+)/.exec(x[1])[1]), 0);
-      ok(sum === 48, `${label} ${show}: 小節時值 ${sum} ≠ 48`);
+      ok(sum === (ex.bar || 48), `${label} ${show}: 小節時值 ${sum} ≠ ${ex.bar || 48}`);
     });
     checkNotation(xml, `${label} ${show}`, ex.sub);
     const hands = show === "both" ? ["rh", "lh"] : [show];
