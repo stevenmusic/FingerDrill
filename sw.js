@@ -5,7 +5,7 @@
    - Google 字型:先用快取
    - 鋼琴取樣(raw.githubusercontent)由 js/audio.js 自己存在 fingerdrill-samples-* 快取,這裡不管
    第一次連網打開時會把用到的檔案都存起來,之後沒網路也能開 */
-const CACHE = "fingerdrill-app-v3";   // 換了圖示:改版本讓舊快取的圖示更新
+const CACHE = "fingerdrill-app-v4";   // 換了圖示:改版本讓舊快取的圖示更新
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./", "manifest.webmanifest", "icons/icon-192.png", "icons/apple-touch-icon.png"])).then(() => self.skipWaiting()));
 });
