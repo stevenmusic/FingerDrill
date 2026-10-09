@@ -1,0 +1,280 @@
+/* FingerDrill 樣式。設計代幣、頂欄、按鈕、卡片、分段按鈕照抄 HarmonyHands / HarmonyMap(黑金系列,同一個產品家族) */
+/* ══ 設計代幣:照抄 HarmonyMap(與 ScrollScore 同一套語意變數),同一系列的工具放在一起看是同一個產品 ══ */
+:root{
+  --bg:#0C0A07;
+  --panel:#161209;
+  --panel-2:#201A0F;
+  --gold:#F2B94B;
+  --gold-bright:#EFD48A;
+  --brand-gold:#C9A24B;   /* 品牌名照 ScrollScore 原本的顏色(品牌名的 CSS 要跟 ScrollScore / HarmonyMap 逐項相同) */
+  --note-gold:#F2B94B;
+  --note-teal:#3FBFAE;
+  --gold-fill:#F2B94B;
+  --teal-fill:#3FBFAE;
+  --on-fill:#16110A;
+  --teal:#3FBFAE;
+  --teal-bright:#8FFFF0;
+  --ivory:#F4ECDA;
+  --muted:#8A7D5F;
+  --muted-bright:#B6A576;
+  --line:#2A2415;
+  --shadow-sm:0 4px 14px rgba(0,0,0,.35);
+  --shadow-md:0 10px 26px rgba(0,0,0,.5);
+  --shadow-lg:0 18px 44px rgba(0,0,0,.6);
+  --radius-sm:8px;
+  --radius-md:14px;
+  --radius-lg:18px;
+  --radius-pill:999px;
+  --fs-2xs:11px;
+  --fs-xs:12px;
+  --fs-sm:13px;
+  --fs-md:14px;
+  --fs-lg:16px;
+  --fs-xl:19px;
+  --fs-2xl:26px;
+  --surface-glass:rgba(32,26,15,.88);
+  --surface-inset:rgba(22,18,9,.55);
+  --card-tint:rgba(255,255,255,.035);
+  --stage-glow:#171208;
+  --paper:#FFFDF6;        /* 樂譜紙張:深色/淺色主題都一樣 */
+  color-scheme:dark;
+}
+/* ══ 淺色主題:同一組語意變數換一套值 ══ */
+body.light{
+  --bg:#FBF7EE;
+  --panel:#F4EEE0;
+  --panel-2:#EDE6D4;
+  --gold:#856418;
+  --gold-bright:#6B5115;
+  --brand-gold:#856418;
+  --teal:#0F5F56;
+  --teal-bright:#0B463F;
+  --ivory:#241E12;
+  --muted:#6F6450;
+  --muted-bright:#544B3B;
+  --line:#D8CDB2;
+  --shadow-sm:0 4px 14px rgba(90,72,30,.10);
+  --shadow-md:0 10px 26px rgba(90,72,30,.14);
+  --shadow-lg:0 18px 44px rgba(90,72,30,.18);
+  --surface-glass:rgba(252,249,241,.92);
+  --surface-inset:rgba(255,255,255,.7);
+  --card-tint:rgba(133,100,24,.05);
+  --stage-glow:#FFFDF6;
+  color-scheme:light;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button,[role="button"],.seg,.chips,.dg-wrap{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html{height:100%}
+body{
+  min-height:100%;
+  background:var(--bg);color:var(--ivory);
+  font-family:"Noto Sans TC",sans-serif;
+  display:flex;flex-direction:column;
+}
+/* ── 頂欄(照抄 HarmonyMap)───────────────────────── */
+header{
+  display:flex;align-items:center;flex-wrap:wrap;
+  gap:8px 14px;justify-content:space-between;
+  padding:10px 14px;border-bottom:1px solid var(--line);
+  background:var(--panel);
+  position:sticky;top:0;z-index:20;
+}
+.header-left,.header-right{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px}
+/* 品牌名:這一組數值與 ScrollScore / HarmonyMap 完全相同 */
+header h1{
+  font-family:"Noto Serif TC",serif;
+  font-size:clamp(12px, 3.7vw, var(--fs-lg));
+  letter-spacing:clamp(.02em, .55vw, .12em);
+  font-weight:700;color:var(--brand-gold);white-space:nowrap;
+  flex:none;
+}
+header h1 span{color:var(--ivory);font-weight:600}
+.tagline{color:var(--muted);font-size:var(--fs-xs);letter-spacing:.04em;white-space:nowrap;line-height:17px}
+@media (max-width:600px){ .tagline{display:none} }
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;
+  border:1px solid var(--gold);background:transparent;color:var(--gold);
+  font-family:inherit;font-size:var(--fs-md);font-weight:500;
+  padding:8px 16px;height:38px;border-radius:var(--radius-pill);cursor:pointer;
+  transition:background .2s,color .2s;white-space:nowrap;
+}
+.btn svg{flex:none}
+.btn:active{background:var(--gold-fill);color:var(--on-fill)}
+.btn.primary{background:var(--gold-fill);color:var(--on-fill);font-weight:700}
+.btn.ghost{border-color:var(--line);color:var(--muted-bright)}
+.btn.small{height:32px;padding:0 12px;font-size:var(--fs-sm)}
+.btn[aria-pressed="true"]{background:var(--gold-fill);color:var(--on-fill)}
+#themeToggle[aria-pressed="true"]{background:var(--gold-fill);color:var(--on-fill)}
+#langToggle{aspect-ratio:1;padding:0}
+#langToggle[aria-pressed="true"]{background:var(--gold-fill);color:var(--on-fill)}
+@media (max-width:600px){
+  header{padding:8px clamp(6px, 2.2vw, 10px);gap:clamp(4px, 1.4vw, 6px);flex-wrap:nowrap}
+  .header-left,.header-right{gap:clamp(4px, 1.4vw, 6px)}
+  .btn{padding:0 10px;height:34px;font-size:var(--fs-sm)}
+}
+@media (max-width:380px){ .btn{padding:0 8px;height:32px} }
+@media (max-width:340px){ .btn{padding:0 5px} }
+@media (max-height:420px){
+  header{padding:5px 10px;gap:4px 8px}
+  header h1{font-size:var(--fs-sm)}
+  .btn{padding:0 10px;height:28px;font-size:var(--fs-xs)}
+}
+
+/* ── 版面 ── */
+main{
+  flex:1;display:flex;flex-direction:column;gap:14px;
+  padding:14px;max-width:1400px;width:100%;margin:0 auto;min-width:0;
+}
+.card{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius-md);padding:14px 16px;min-width:0;
+  background-image:linear-gradient(180deg, var(--card-tint), transparent 90px);
+}
+.card-title{
+  font-size:var(--fs-2xs);letter-spacing:.14em;color:var(--muted);
+  text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.card-title b{font-family:"Noto Serif TC",serif;font-size:var(--fs-lg);letter-spacing:.06em;color:var(--gold);text-transform:none;font-weight:700}
+.card-title .sub{letter-spacing:.04em;text-transform:none;font-size:var(--fs-xs);color:var(--muted-bright);flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 分段按鈕(照 HarmonyHands) */
+.seg{display:flex;gap:0;border:1px solid var(--gold);border-radius:var(--radius-pill);overflow:hidden}
+.seg button{flex:1 1 0;min-width:0;height:36px;border:0;background:transparent;color:var(--gold);font-family:inherit;
+  font-size:var(--fs-md);font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 8px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s,color .15s}
+.seg button + button{border-left:1px solid var(--gold)}
+.seg button[aria-pressed="true"]{background:var(--gold-fill);color:var(--on-fill);font-weight:700}
+.seg.small button{height:30px;font-size:var(--fs-sm)}
+
+/* ── 設定 ── */
+.setup{padding:10px 14px 12px}
+.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 12px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field.wide{grid-column:span 2}
+.field.full{grid-column:1 / -1}
+.field label,.field .lbl{font-size:var(--fs-2xs);color:var(--muted-bright);letter-spacing:.04em}
+.field select{
+  width:100%;min-width:0;height:36px;border:1px solid var(--line);border-radius:var(--radius-sm);
+  background:var(--surface-inset);color:var(--ivory);font-family:inherit;font-size:var(--fs-md);padding:0 10px;
+}
+.field select:focus{outline:none;border-color:var(--gold)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{height:32px;padding:0 12px;border-radius:var(--radius-pill);border:1px solid var(--line);background:var(--surface-inset);
+  color:var(--muted-bright);font-family:inherit;font-size:var(--fs-sm);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:rgba(242,185,75,.1);font-weight:700}
+body.light .chip[aria-pressed="true"]{background:rgba(133,100,24,.08)}
+.setup-summary{display:none;width:100%;align-items:center;gap:8px;border:0;background:transparent;color:var(--ivory);
+  font-family:inherit;font-size:var(--fs-sm);text-align:left;cursor:pointer;padding:2px 0;min-height:30px}
+.setup-summary span{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setup-summary svg{flex:none;color:var(--gold)}
+.setup.open .setup-summary .chev{transform:rotate(180deg)}
+.verify-badge{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-2xs);color:#E8A25B;border:1px solid rgba(232,162,91,.5);
+  border-radius:var(--radius-pill);padding:1px 8px;letter-spacing:.02em;white-space:nowrap}
+body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
+.verify-note{font-size:var(--fs-xs);color:var(--muted);line-height:1.6;margin-top:8px}
+@media (max-width:900px){ .fields{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:600px), (max-height:420px){
+  .setup{padding:8px 12px}
+  .setup-summary{display:flex}
+  .setup:not(.open) .setup-body{display:none}
+  .setup.open .setup-body{margin-top:8px}
+}
+
+/* ── 題目卡:學生把 iPhone 放在譜架上看,字要大 ── */
+.quiz{display:flex;flex-direction:column;gap:10px}
+.quiz-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.quiz-top .count{font-size:var(--fs-xs);color:var(--muted);margin-left:auto;white-space:nowrap}
+.q-title{font-family:"Noto Serif TC",serif;font-weight:700;color:var(--gold-bright);
+  font-size:clamp(26px, 7.4vw, 40px);line-height:1.2;letter-spacing:.02em;overflow-wrap:anywhere}
+.q-title.empty{color:var(--muted);font-size:var(--fs-xl);font-family:inherit;font-weight:500}
+.q-tags{display:flex;flex-wrap:wrap;gap:6px}
+.q-tag{font-size:clamp(14px, 4.2vw, 18px);font-weight:700;color:var(--ivory);background:var(--surface-inset);border:1px solid var(--line);
+  border-radius:var(--radius-sm);padding:4px 10px;white-space:nowrap}
+.q-tag.dyn{color:var(--teal);border-color:var(--teal)}
+.q-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.q-actions .grow{flex:1 1 auto}
+#drawBtn{height:46px;font-size:var(--fs-lg);padding:0 22px}
+.mastery{display:flex;gap:8px}
+.mbtn{height:38px;padding:0 14px;border-radius:var(--radius-pill);border:1px solid var(--line);background:transparent;color:var(--muted-bright);
+  font-family:inherit;font-size:var(--fs-md);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.mbtn[data-m="good"][aria-pressed="true"]{background:var(--teal-fill);border-color:var(--teal-fill);color:var(--on-fill);font-weight:700}
+.mbtn[data-m="weak"][aria-pressed="true"]{background:#E8A25B;border-color:#E8A25B;color:var(--on-fill);font-weight:700}
+.loading{font-size:var(--fs-2xs);color:var(--muted);min-height:14px}
+
+/* ── 樂譜 ── */
+.score-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.score-head .seg{flex:0 1 220px}
+.paper{background:var(--paper);border-radius:var(--radius-sm);padding:8px 4px;min-height:160px;overflow:hidden;position:relative;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+#osmd{width:100%;color:#16130D}
+.paper-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#6f6450;font-size:var(--fs-sm);padding:16px;text-align:center}
+.paper-msg:empty{display:none}
+
+/* ── 節拍器 ── */
+.metro{display:grid;grid-template-columns:auto 1fr auto;gap:10px 12px;align-items:center}
+.bpm{display:flex;align-items:baseline;gap:6px;min-width:0}
+.bpm b{font-family:"Noto Serif TC",serif;font-size:clamp(30px, 8vw, 40px);color:var(--gold-bright);line-height:1;font-variant-numeric:tabular-nums}
+.bpm small{font-size:var(--fs-xs);color:var(--muted-bright)}
+.metro input[type=range]{width:100%;accent-color:var(--gold)}
+.metro .row2{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.metro .info{font-size:var(--fs-xs);color:var(--muted-bright);flex:1 1 160px}
+.beats{display:flex;gap:6px}
+.beats i{width:12px;height:12px;border-radius:50%;background:var(--line);transition:background .06s}
+.beats i.on{background:var(--gold)}
+.beats i.on.first{background:var(--teal)}
+.round{width:38px;height:38px;padding:0}
+
+/* ── 本級要求清單 ── */
+details.card > summary{list-style:none;cursor:pointer;margin-bottom:0}
+details.card > summary::-webkit-details-marker{display:none}
+details.card > summary .chev{margin-left:auto;color:var(--gold);transition:transform .2s}
+details.card[open] > summary{margin-bottom:10px}
+details.card[open] > summary .chev{transform:rotate(180deg)}
+.progress{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:2px 0 12px}
+.progress i{display:block;height:100%;background:var(--teal-fill)}
+.group + .group{margin-top:12px}
+.group h3{font-size:var(--fs-sm);color:var(--gold);font-weight:700;margin-bottom:6px;letter-spacing:.04em}
+.qlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}
+.qrow{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--line);
+  background:var(--surface-inset);color:var(--ivory);font-family:inherit;font-size:var(--fs-sm);text-align:left;cursor:pointer;min-width:0}
+.qrow span{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qrow small{color:var(--muted);font-size:var(--fs-2xs);flex:none}
+.qrow.cur{border-color:var(--gold)}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;border:1px solid var(--muted)}
+.dot.good{background:var(--teal-fill);border-color:var(--teal-fill)}
+.dot.weak{background:#E8A25B;border-color:#E8A25B}
+.legend-row{display:flex;gap:14px;flex-wrap:wrap;font-size:var(--fs-xs);color:var(--muted-bright);margin-bottom:8px}
+.legend-row span{display:inline-flex;align-items:center;gap:6px}
+
+footer{max-width:1400px;width:100%;margin:0 auto;padding:6px 16px 28px;font-size:var(--fs-xs);line-height:1.8;color:var(--muted)}
+footer a{color:var(--muted-bright)}
+body{background:
+  radial-gradient(ellipse 70% 45% at 0% 100%, rgba(242,185,75,.075), transparent 70%),
+  radial-gradient(ellipse 60% 40% at 100% 100%, rgba(63,191,174,.06), transparent 70%),
+  var(--bg);background-attachment:fixed}
+body.light{background:
+  radial-gradient(ellipse 70% 45% at 0% 100%, rgba(242,185,75,.16), transparent 70%),
+  radial-gradient(ellipse 60% 40% at 100% 100%, rgba(63,191,174,.12), transparent 70%),
+  var(--bg);background-attachment:fixed}
+.btn.primary{box-shadow:0 6px 22px -8px rgba(242,185,75,.8)}
+.btn,.seg button,.chip,.mbtn{transition-property:background,color,border-color,box-shadow,transform;transition-duration:.15s,.15s,.15s,.2s,.09s}
+.btn:active,.seg button:active,.chip:active,.mbtn:active{transform:scale(.95)}
+.btn:disabled{opacity:.45;pointer-events:none}
+@media (prefers-reduced-motion:reduce){ *{animation:none !important;transition:none !important} }
+@media (max-width:600px){
+  main{padding:10px;gap:10px}
+  .card{padding:12px}
+  .qlist{grid-template-columns:1fr}
+  .q-actions .btn-label{display:none}
+  #drawBtn .btn-label{display:inline}
+}
+/* 手機橫向 */
+@media (max-height:420px){
+  .q-title{font-size:24px}
+  #drawBtn{height:38px}
+}
+/* iPhone 瀏海/底部安全區 */
+header{padding-top:max(10px, env(safe-area-inset-top))}
+main{padding-left:max(14px, env(safe-area-inset-left));padding-right:max(14px, env(safe-area-inset-right))}
+footer{padding-bottom:max(28px, env(safe-area-inset-bottom))}
+@media (max-width:600px){ main{padding-left:max(10px, env(safe-area-inset-left));padding-right:max(10px, env(safe-area-inset-right))} }
