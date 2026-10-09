@@ -196,7 +196,7 @@ function buildDouble(FG, q){
   return out;
 }
 
-export const SIXTEENTH_TYPES = ["scale", "chromatic", "wholetone", "thirds", "sixths"];
+export const SIXTEENTH_TYPES = ["scale", "chromatic", "wholetone", "thirds", "sixths", "arpeggio", "dom7", "dim7"];
 export function buildExercise(FG, q){
   if (q.type === "hanon") return buildHanon(q.no, q.tonic, q.rhythm);
   const b = {
@@ -208,7 +208,7 @@ export function buildExercise(FG, q){
   const { rh, lh } = b(FG, q);
   const noKey = ["chromatic", "dim7", "wholetone"].includes(q.type);
   const fifths = noKey ? 0 : keyFifths(q.tonic, q.quality || "major");
-  // 音階類(使用者要求,跟哈農一樣):寫成十六分音符、2/4 一小節 8 個音(拍號不顯示);速度與拍點不變
+  // 音階、琶音(使用者要求,跟哈農一樣;分解和弦的三連音不變):寫成十六分音符、2/4 一小節 8 個音(拍號不顯示);速度與拍點不變
   if (SIXTEENTH_TYPES.includes(q.type) && (q.sub || 2) === 2) return { rh, lh, fifths, sub: 4, bar: 24, timeHidden: [2, 4] };
   return { rh, lh, fifths, sub: q.sub || 2 };
 }
