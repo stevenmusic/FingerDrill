@@ -71,9 +71,10 @@ for (const vp of [{ name: "phone", viewport: { width: 390, height: 844 }, mobile
   await page.screenshot({ path: OUT + vp.name + "-english.png" });
   await page.click("#langToggle");
   check(await page.evaluate(() => document.documentElement.lang) === "zh-Hant", `${vp.name}: 切回中文失敗`);
-  // 哈農分頁:隱藏練習面板
+  // 哈農分頁:練習面板、2/4 拍的樂譜
   await page.click('#tabbar button[data-tab="hanon"]');
-  check(await page.isHidden("#quizCard"), `${vp.name}: 哈農分頁應該隱藏練習面板`);
+  await page.waitForFunction(() => window.__app.cur && window.__app.cur.type === "hanon" && document.querySelector("#osmd svg"), null, { timeout: 20000 });
+  check(await page.isVisible("#quizCard"), `${vp.name}: 哈農分頁應該有練習面板`);
   await page.click('#tabbar button[data-tab="scale"]');
   // 播放
   await page.click("#playBtn");

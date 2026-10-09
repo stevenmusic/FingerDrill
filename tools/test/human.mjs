@@ -70,17 +70,17 @@ async function run(vpName, vp){
       if (!s.play && !s.starting && !playTxt.includes(playLbl)) out.push(`沒在播放但按鈕寫「${playLbl}」`);
       if (s.starting && !prepTxt.includes(playLbl)) out.push(`準備中但按鈕寫「${playLbl}」`);
       const pl = document.getElementById("playline");
-      if (A.cur && A.S.tab !== "hanon" && s.noteXs && pl.hidden) out.push("有樂譜但沒有播放軸");
+      if (A.cur && s.noteXs && pl.hidden) out.push("有樂譜但沒有播放軸");
       if (pl && !pl.hidden) { const r = pl.getBoundingClientRect(), st = document.getElementById("stage").getBoundingClientRect(); if (r.left < st.left - 2 || r.right > st.right + 2) out.push("播放軸跑出樂譜紙張"); }
       if (!(s.bpm >= 30 && s.bpm <= 200)) out.push(`速度超出範圍 ${s.bpm}`);
       if (String(s.bpm) !== document.getElementById("bpmVal").textContent || String(s.bpm) !== document.getElementById("bpmRange").value) out.push(`速度顯示不一致 ${s.bpm} / ${document.getElementById("bpmVal").textContent} / ${document.getElementById("bpmRange").value}`);
       const tab = A.S.tab, selTab = document.querySelector('#tabbar [aria-selected="true"]').dataset.tab;
       if (tab !== selTab) out.push(`分頁不一致 ${tab} / ${selTab}`);
-      if ((tab === "hanon") === vis("quizCard")) out.push("練習面板顯示錯誤");
+      if (!vis("quizCard")) out.push("練習面板沒有顯示");
       if (document.documentElement.scrollWidth > window.innerWidth + 1) out.push("橫向捲動");
       try { JSON.parse(localStorage.getItem("fingerdrill.v1")); } catch (e) { out.push("localStorage 壞掉"); }
       // 樂譜:等畫完再比
-      if (A.cur && tab !== "hanon") {
+      if (A.cur) {
         for (let t = 0; t < 60 && !document.querySelector("#osmd svg"); t++) await new Promise(r => setTimeout(r, 50));
         const ex = A.ex, hands = s.show === "both" ? ["rh", "lh"] : [s.show];
         const want = hands.reduce((n, h) => n + ex[h].filter(x => x.finger).length, 0);
