@@ -1,0 +1,17 @@
+{
+  "name": "FingerDrill 手指特訓",
+  "short_name": "手指特訓",
+  "description": "鋼琴音階、琶音、哈農練習與 ABRSM / Trinity 考級抽考",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0C0A07",
+  "theme_color": "#0C0A07",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -667,4 +667,8 @@ async function init(){
   else switchTab(S.tab || (S.exam ? "exam" : "scale"));
   window.__stageReady = 1;
 }
+/* 離線使用:註冊 Service Worker(sw.js);本機開發(localhost)也註冊,方便測試 */
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
 init().catch(e => { console.error(e); $("qTitle").textContent = tr("資料載入失敗:", "Could not load data: ") + e.message; });
