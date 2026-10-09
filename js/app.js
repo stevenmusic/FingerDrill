@@ -710,7 +710,7 @@ async function startPlayback(){
       const next = arr.find(x => x.beat > e.beat + 1e-6);   // 同一隻手下一個「不同時」的音(雙音的兩個音同時按)
       const legatoEnd = next ? t0 + next.beat * beatSec + 0.015 : on + e.len * beatSec;
       const off = stacc && next ? on + Math.min(0.12, (next.beat - e.beat) * beatSec * 0.45) : legatoEnd;
-      audio.playPianoNote(e.midi, on, off, off, velAt(e.beat) + (e.idx === 0 ? 6 : 0) + (Math.random() * 6 - 3), false);
+      if (!S.clickOnly) audio.playPianoNote(e.midi, on, off, off, velAt(e.beat) + (e.idx === 0 ? 6 : 0) + (Math.random() * 6 - 3), false);
     });
   }
   const totalClicks = Math.ceil(endBeat * beatSec / clickSec);
@@ -724,7 +724,12 @@ async function startPlayback(){
     const beat = (now - play.t0) / play.beatSec;
     showBeat((now - play.t0) / play.clickSec);
     movePlayline(Math.max(0, beat), true);
-    if (beat > play.endBeat + 0.5) { const sec = play.endBeat * play.beatSec; stopPlayback(true); logPractice(sec); return; }
+    if (beat > play.endBeat + 0.5) {
+      const sec = play.endBeat * play.beatSec; stopPlayback(true); logPractice(sec);
+      // 循環:再來一輪(有預備拍);勾了「每輪 +4」就每輪快 4(拍點 ♪ 時快 8,等於 ♩ +4)
+      if (S.loop && cur) { if (S.ramp) setBpm(bpm + (unitOf() === "e16" ? 8 : 4), true); startPlayback(); }
+      return;
+    }
     play.raf = requestAnimationFrame(tick);
   };
   play.raf = requestAnimationFrame(tick);
@@ -754,6 +759,33 @@ function showBeat(click){
   const k = click == null || click < -n ? -1 : ((Math.floor(click + 1e-6) % n) + n) % n;
   for (let i = 0; i < dots.length; i++) dots[i].classList.toggle("on", i === k);
 }
+
+/* ══ 播放選項 ══ */
+function syncPlayOpts(){
+  $("optLoop").setAttribute("aria-pressed", String(!!S.loop));
+  $("optRamp").setAttribute("aria-pressed", String(!!S.ramp));
+  $("optRamp").disabled = !S.loop;
+  $("optClick").setAttribute("aria-pressed", String(!!S.clickOnly));
+}
+for (const [id, k] of [["optLoop", "loop"], ["optRamp", "ramp"], ["optClick", "clickOnly"]]) $(id).onclick = () => { S[k] = !S[k]; store.save(); syncPlayOpts(); };
+syncPlayOpts();
+
+/* 練習時螢幕不要暗掉(手機放在譜架上):App 在前景時一直保持亮著 */
+let wakeLock = null;
+async function keepAwake(){
+  try { if ("wakeLock" in navigator && document.visibilityState === "visible" && !wakeLock) { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => { wakeLock = null; }); } } catch (e) {}
+}
+document.addEventListener("visibilitychange", keepAwake);
+document.addEventListener("pointerdown", keepAwake, { once: true });
+
+/* 桌機快捷鍵:空白鍵 播放/停止、↑↓ 速度 ±1、N 下一題(考級) */
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input, select, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.code === "Space") { e.preventDefault(); $("playBtn").click(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); setBpm(bpm + 1, true); }
+  else if (e.key === "ArrowDown") { e.preventDefault(); setBpm(bpm - 1, true); }
+  else if ((e.key === "n" || e.key === "N") && S.tab === "exam") { const b = !$("nextBtn").hidden ? $("nextBtn") : $("drawBtn"); if (!b.hidden && !b.disabled) b.click(); }
+});
 
 /* ══ 練習紀錄 ══
    算一次練習:示範完整播完、或按了 ✓ / ⚠ 標記。S.log = { "YYYY-MM-DD": { n: 次數, sec: 秒數 } }(只留最近 400 天) */

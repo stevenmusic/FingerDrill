@@ -10,7 +10,8 @@ const DEFAULTS = {
   freeBpm: { scale: 60, arp: 60 },   // 自由練習的速度(♩)
   quickOn: true,          // 音階/琶音分頁上方列出考試級數的要求
   mastery: {},            // masteryKey → "good" | "weak"
-  theme: "dark"
+  theme: "dark",
+  loop: false, ramp: false, clickOnly: false   // 播放選項
 };
 let state = null;
 export function load(){

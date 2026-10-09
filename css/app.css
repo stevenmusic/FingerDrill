@@ -252,6 +252,10 @@ body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
 .metro .row2{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .metro .info{font-size:var(--fs-xs);color:var(--muted-bright);flex:1 1 160px}
 .beats{display:flex;gap:6px}
+/* 播放選項:固定三格(中英文排法一樣) */
+.play-opts{grid-column:1 / -1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.play-opts .chip{justify-content:center;min-height:34px;padding:0 6px;white-space:nowrap}
+.play-opts .chip:disabled{opacity:.35}
 .beats i{width:12px;height:12px;border-radius:50%;background:var(--line);transition:background .06s}
 .beats i.on{background:var(--gold)}
 .beats i.on.first{background:var(--teal)}
