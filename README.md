@@ -78,6 +78,7 @@ node tools/test/verify.mjs                  # 不需要瀏覽器
 cd tools/test && npm i && node smoke.mjs    # 瀏覽器整合測試(手機 + 桌機)
 cd tools/test && node notation.mjs          # 大綱每一題實際用 OSMD 畫出來比對
 cd tools/test && node layout.mjs            # 19 種裝置尺寸 × 每個畫面的版面檢查
+cd tools/test && node bilingual.mjs         # 中英文版面一致(各尺寸 × 各畫面 + 大綱每一題的題目與標籤)
 cd tools/test && node human.mjs 200 1       # 模擬真人觸控亂點 200 步(種子 1),每一步檢查狀態
 node tools/build/stamp.mjs                  # 改了 css/js/data 之後更新版本指紋(verify 會檢查)
 cd tools/test && node shot.mjs '<題目 JSON>' 名稱   # 截圖
@@ -91,6 +92,8 @@ cd tools/test && node shot.mjs '<題目 JSON>' 名稱   # 截圖
 - `notation.mjs`:大綱 443 題實際畫譜,OSMD 畫出的臨時記號、指法數字、8va 與我們寫的一致
 - `layout.mjs`:折疊機 280、SE 320、各種 iPhone/Android 直橫、iPad 各尺寸直橫、筆電、桌機、1080p、窄視窗:沒有橫向捲動、元素不出界、
   按鈕文字不被截斷、點擊區域夠大、頂欄不重疊、底部分頁列不蓋住內容、對話框放得下、樂譜短的置中 / 長的可左右滑
+- `bilingual.mjs`:11 種尺寸 × 對話框/考級/音階/琶音/哈農,中文與英文各量一次每個元素的高度與頁面總高,要完全相同;
+  大綱每一題的題目與標籤也逐題比對行數(英文太長就縮短)
 - `human.mjs`:iPhone、SE、iPad(觸控)與桌機,隨機切分頁、點選擇器、抽題、連點播放、按住 ±、拖速度、中英切換、改考試、旋轉螢幕、重新整理、播放中做別的事……
   每一步檢查:沒有錯誤、播放狀態跟按鈕一致且不會兩份同時播、題目清空時不再播、樂譜指法數字都在、播放軸在紙張裡、速度一致、分頁一致、沒有橫向捲動
 

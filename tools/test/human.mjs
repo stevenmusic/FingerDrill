@@ -65,7 +65,7 @@ async function run(vpName, vp){
       const A = window.__app, s = A.state, out = [];
       const vis = id => { const e = document.getElementById(id); return e && !e.hidden && e.offsetParent !== null; };
       const playLbl = document.getElementById("playLabel").textContent;
-      const stopTxt = ["停止", "Stop"], playTxt = ["播放示範", "Play demo"], prepTxt = ["準備中…", "Preparing…"];
+      const stopTxt = ["停止", "Stop"], playTxt = ["播放示範", "Play"], prepTxt = ["準備中…", "Preparing…"];
       if (s.play && !stopTxt.includes(playLbl)) out.push(`播放中但按鈕寫「${playLbl}」`);
       if (!s.play && !s.starting && !playTxt.includes(playLbl)) out.push(`沒在播放但按鈕寫「${playLbl}」`);
       if (s.starting && !prepTxt.includes(playLbl)) out.push(`準備中但按鈕寫「${playLbl}」`);

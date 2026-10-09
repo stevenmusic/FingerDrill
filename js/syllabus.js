@@ -60,9 +60,9 @@ export function questionsFor(SY, system, g, prefs = {}){
 
 /* 分類(篩選與清單分組) */
 export const CATEGORIES = [
-  { id: "scale", zh: "音階", en: "Scales" }, { id: "contrary", zh: "反向音階", en: "Contrary motion" }, { id: "apart", zh: "相隔三度/六度", en: "A 3rd / 6th apart" },
+  { id: "scale", zh: "音階", en: "Scales" }, { id: "contrary", zh: "反向音階", en: "Contrary" }, { id: "apart", zh: "相隔三度/六度", en: "A 3rd / 6th apart" },
   { id: "double", zh: "雙音音階", en: "Double notes" }, { id: "chromatic", zh: "半音階", en: "Chromatic" }, { id: "wholetone", zh: "全音音階", en: "Whole-tone" },
-  { id: "arpeggio", zh: "琶音", en: "Arpeggios" }, { id: "seventh", zh: "屬七/減七", en: "Dom. / dim. 7ths" }, { id: "broken", zh: "分解和弦", en: "Broken chords" }
+  { id: "arpeggio", zh: "琶音", en: "Arpeggios" }, { id: "seventh", zh: "屬七/減七", en: "7th chords" }, { id: "broken", zh: "分解和弦", en: "Broken chords" }
 ];
 
 /* filter = { quality: "all"|"major"|"minor", cats: Set, excludeMastered: bool } */

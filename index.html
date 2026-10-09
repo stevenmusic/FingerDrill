@@ -14,7 +14,7 @@
 <title>FingerDrill 手指特訓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=ed0d3a1759">
+<link rel="stylesheet" href="css/app.css?v=b2bda83a0a">
 </head>
 <body>
 <header>
@@ -46,7 +46,7 @@
   <!-- 哈農(第二階段) -->
   <section class="card pane" data-pane="hanon" id="paneHanon" hidden>
     <div class="card-title"><b data-i18n="hanonTitle">哈農 · 第一部分(1–20 首)</b></div>
-    <p class="soon" data-i18n="hanonSoon">製作中(第二階段)。會用「樣式 + 移位規則」產生全部 20 首,並對照原譜驗證每首前兩小節與轉折處;
+    <p class="soon" data-i18n="hanonSoon" data-i18n-pair>製作中(第二階段)。會用「樣式 + 移位規則」產生全部 20 首,並對照原譜驗證每首前兩小節與轉折處;
       支援 12 個調、速度階梯(每輪 +4 BPM 到目標速度)、附點/反附點/三連音等節奏變化,以及每首練到的最高速度紀錄。</p>
   </section>
 
@@ -157,7 +157,7 @@
     <div id="qGroups"></div>
   </details>
 
-  <footer data-i18n="footer"></footer>
+  <footer data-i18n="footer" data-i18n-pair></footer>
 </main>
 
 <!-- 底部分頁 -->
@@ -176,7 +176,7 @@
 <div class="modal" id="onboard" hidden role="dialog" aria-modal="true" aria-labelledby="onboardTitle">
   <div class="modal-card">
     <h2 id="onboardTitle" data-i18n="obTitle">你在準備鋼琴考級嗎?</h2>
-    <p class="modal-sub" data-i18n="obSub">選了考試和級數,App 會直接打開「考級」分頁,音階、琶音分頁也會先列出這一級的要求。之後隨時可以在「考級」分頁更改。</p>
+    <p class="modal-sub" data-i18n="obSub" data-i18n-pair>選了考試和級數,App 會直接打開「考級」分頁,音階、琶音分頁也會先列出這一級的要求。之後隨時可以在「考級」分頁更改。</p>
     <div class="field"><span class="lbl" data-i18n="lblSystem">考試系統</span>
       <div class="seg" id="obSystem" role="group">
         <button data-v="abrsm" aria-pressed="true">ABRSM</button>
@@ -190,9 +190,9 @@
   </div>
 </div>
 
-<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=916840e4b8","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=18e6cbccfc","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/i18n.js":"./js/i18n.js?v=e1f178a5d0","./js/musicxml.js":"./js/musicxml.js?v=da0302b9be","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=a0655b1f7d","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
+<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=4a426b0dba","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=8406a4ab8a","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/i18n.js":"./js/i18n.js?v=c90064898c","./js/musicxml.js":"./js/musicxml.js?v=da0302b9be","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=33ba27966e","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
 <script type="application/json" id="fdVersions">{"data/fingerings.json":"c5b57cffa5","data/syllabus.json":"30b5443db2"}</script>
 <script src="vendor/opensheetmusicdisplay.min.js?v=fe43ac6f19"></script>
-<script type="module" src="js/app.js?v=916840e4b8"></script>
+<script type="module" src="js/app.js?v=4a426b0dba"></script>
 </body>
 </html>

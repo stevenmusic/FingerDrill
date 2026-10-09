@@ -4,7 +4,7 @@ import { gradeOf, questionsFor, applyFilter, drawQuestion, CATEGORIES, masteryKe
 import { buildExercise, questionText } from "./exercise.js";
 import { exerciseToMusicXML, playbackEvents } from "./musicxml.js";
 import { noteLabelStr } from "./theory.js";
-import { tr, T, applyStatic, setLang, getLang } from "./i18n.js";
+import { tr, T, applyStatic, setLang, getLang, pairText, unpair } from "./i18n.js";
 import * as audio from "./audio.js";
 
 const $ = id => document.getElementById(id);
@@ -29,7 +29,7 @@ applyStatic();
 $("langToggle").onclick = () => {
   setLang(getLang() === "zh" ? "en" : "zh");
   if (!SY) return;
-  if (!$("onboard").hidden) { fillGrades($("obGrade"), obState.system, Number($("obGrade").value)); return; }
+  if (!$("onboard").hidden) fillGrades($("obGrade"), obState.system, Number($("obGrade").value));
   const keep = cur, tab = S.tab;
   if (S.exam) renderExam();
   switchTab(tab);
@@ -56,7 +56,7 @@ const STARTS = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
 const keyOpts = list => list.map(k => [k, noteLabelStr(k)]);
 const HANDS = () => [["RH", tr("右手", "RH")], ["LH", tr("左手", "LH")], ["HT", tr("雙手", "Both")]];
 const ARTS = () => [["legato", tr("圓滑", "Legato")], ["staccato", tr("斷奏", "Staccato")]];
-const OCTS = n => [1, 2, 3, 4].slice(0, n).map(o => [o, tr(o + " 八度", o + (o > 1 ? " octaves" : " octave"))]);
+const OCTS = n => [1, 2, 3, 4].slice(0, n).map(o => [o, tr(o + "八度", o + " oct.")]);
 /* 級數名稱:初級 / 1 級(Initial / Grade 1) */
 const gradeLabel = g => g.grade === 0 ? tr("初級", "Initial") : tr(g.grade + " 級", "Grade " + g.grade);
 
@@ -97,7 +97,7 @@ const PICKERS = {
   arp: {
     defaults: { kind: "major", inv: 0, key: "C", octaves: 2, hands: "HT", art: "legato" },
     rows: p => [
-      ["kind", tr("種類", "Type"), [["major", tr("大三和弦", "Major")], ["minor", tr("小三和弦", "Minor")], ["dom7", tr("屬七", "Dom. 7th")], ["dim7", tr("減七", "Dim. 7th")], ["broken", tr("分解和弦", "Broken chord")]]],
+      ["kind", tr("種類", "Type"), [["major", tr("大三和弦", "Major")], ["minor", tr("小三和弦", "Minor")], ["dom7", tr("屬七", "Dom. 7th")], ["dim7", tr("減七", "Dim. 7th")], ["broken", tr("分解和弦", "Broken")]]],
       (p.kind === "major" || p.kind === "minor") && ["inv", tr("轉位", "Position"), [[0, tr("原位", "Root")], [1, tr("第一轉位", "1st inv.")], [2, tr("第二轉位", "2nd inv.")]]],
       ["key", p.kind === "dim7" ? tr("起音", "Start") : tr("調", "Key"), keyOpts(p.kind === "minor" ? MIN_KEYS : p.kind === "dim7" ? STARTS : MAJ_KEYS)],
       p.kind !== "broken" && ["octaves", tr("範圍", "Range"), OCTS(4)],
@@ -158,9 +158,9 @@ function renderQuick(tab){
   const qs = examQuestions().filter(q => TAB_CATS[tab].includes(q.cat));
   box.hidden = false;
   const on = S.quickOn !== false;
-  box.innerHTML = `<div class="qhead"><b>${sys.name} ${gradeLabel(g)}${sys.mode === "sets" ? " " + setName(S.exam.set) : ""}</b>${tr("的要求", " requirements")}(${qs.length})` +
+  box.innerHTML = `<div class="qhead"><b>${sys.name} ${gradeLabel(g)}${sys.mode === "sets" ? " " + setName(S.exam.set) : ""}</b>${tr("的要求", "")}(${qs.length})` +
     `<button class="chip" aria-pressed="${on}">${on ? tr("收起", "Hide") : tr("展開", "Show")}</button></div>` +
-    (on ? `<div class="opts">` + (qs.length ? qs.map((q, i) => `<button class="opt" data-i="${i}" aria-pressed="${!!(cur && !cur.free && cur.key === q.key)}"><i class="dot ${S.mastery[q.key] || ""}"></i>${shortLabel(q)}</button>`).join("") : `<span class="lbl">${tr("這一級沒有這類項目", "None at this grade")}</span>`) + `</div>` : "");
+    (on ? `<div class="opts">` + (qs.length ? qs.map((q, i) => `<button class="opt" data-i="${i}" aria-pressed="${!!(cur && !cur.free && cur.key === q.key)}"><i class="dot ${S.mastery[q.key] || ""}"></i><span>${shortLabel(q)}</span></button>`).join("") : `<span class="lbl">${tr("這一級沒有這類項目", "None at this grade")}</span>`) + `</div>` : "");
   box.onclick = e => {
     if (e.target.closest(".chip")) { S.quickOn = !on; store.save(); renderQuick(tab); return; }
     const b = e.target.closest(".opt[data-i]"); if (!b) return;
@@ -170,7 +170,9 @@ function renderQuick(tab){
 function shortLabel(q){
   const t = questionText(q);
   const hand = q.hands === "RH" ? tr(" 右", " RH") : q.hands === "LH" ? tr(" 左", " LH") : "";
-  return t[0] + hand + (q.articulation === "staccato" ? tr(" 斷", " stacc.") : "");
+  // 英文比較長:快速清單用縮寫,行數才會跟中文一樣
+  const name = getLang() === "en" ? t[0].replace(/ scale$/, "").replace("harmonic minor", "harm. minor").replace("melodic minor", "mel. minor").replace(" arpeggio", " arp.") : t[0];
+  return name + hand + (q.articulation === "staccato" ? tr(" 斷", " stacc.") : "");
 }
 const setName = k => tr(k + " 組", "Set " + k);
 function sourceText(g){ return getLang() === "en" && g.sourceEn ? g.sourceEn : g.source;
@@ -204,10 +206,10 @@ function renderExam(){
   $("catChips").innerHTML = CATEGORIES.filter(c => present.has(c.id)).map(c =>
     `<button class="chip" data-cat="${c.id}" aria-pressed="${S.filter.cats.includes(c.id)}">${tr(c.zh, c.en)}</button>`).join("");
   $("excludeMastered").setAttribute("aria-pressed", String(S.filter.excludeMastered));
-  $("verifyNote").textContent = tr("資料來源:", "Source: ") + sourceText(g) + tr("。", ". ")
-    + (g.verified ? tr("已逐項核對官方大綱。", "Checked item by item against the official syllabus.") : tr("尚未核對。", "Not yet checked."))
-    + (sets ? tr(" Trinity:考生準備 A 組或 B 組,整組都要彈;每一項的手、力度、奏法是固定的。", " Trinity: prepare Set A or Set B and play every item; hands, dynamics and touch are fixed for each item.")
-            : tr(" ABRSM:考官從清單點題,分手的項目會指定左手或右手。", " ABRSM: the examiner asks for items from the list and names the hand for hands-separately items."));
+  pairText($("verifyNote"), () => tr("資料來源:", "Source: ") + sourceText(g) + tr("。", ". ")
+    + (g.verified ? tr("已逐項核對官方大綱。", "Verified.") : tr("尚未核對。", "Not yet checked."))
+    + (sets ? tr(" Trinity:整組都要彈,每一項的手、力度、奏法固定。", " Trinity: play all of Set A or B; hands, dynamics and touch are fixed.")
+            : tr(" ABRSM:考官從清單點題,分手的項目會指定左手或右手。", " ABRSM: the examiner picks items and names the hand.")));
   $("examSummary").textContent = `${sys.name} · ${gradeLabel(g)}` + (sets ? ` · ${setName(S.exam.set)}` : "") + " · " + tr(`${examPool().length} 題`, `${examPool().length} items`);
   $("examChip").hidden = false; $("examChip").textContent = `${sys.name} ${gradeLabel(g)}`;
   renderList();
@@ -234,7 +236,7 @@ function onExamChange(keepCur){
 }
 function syncExamButtons(){
   const sets = SY.systems[S.exam.system].mode === "sets";
-  $("drawBtn").hidden = false; $("drawLabel").textContent = sets ? tr("隨機抽一項", "Random item") : tr("隨機抽考", "Random question");
+  $("drawBtn").hidden = false; $("drawLabel").textContent = sets ? tr("隨機抽一項", "Random") : tr("隨機抽考", "Random");
   $("nextBtn").hidden = !sets;
   $("drawBtn").disabled = examPool().length === 0;
 }
@@ -248,7 +250,7 @@ function renderList(){
   const sys = SY.systems[S.exam.system], qs = examQuestions();
   const good = qs.filter(q => S.mastery[q.key] === "good").length;
   $("listTitle").textContent = sys.mode === "sets" ? tr(`${S.exam.set} 組要求(依序)`, `Set ${S.exam.set} (in order)`) : T("listTitle");
-  $("listSub").textContent = tr(`熟練 ${good} / ${qs.length}`, `Mastered ${good} / ${qs.length}`);
+  $("listSub").textContent = tr(`熟練 ${good} / ${qs.length}`, `Solid ${good} / ${qs.length}`);
   $("progressBar").style.width = (qs.length ? 100 * good / qs.length : 0) + "%";
   const row = (q, i) => {
     const m = S.mastery[q.key] || "", hands = q.motion === "contrary" ? tr("反向", "contrary") : { RH: tr("右手", "RH"), LH: tr("左手", "LH"), HT: tr("雙手", "HT") }[q.hands];
@@ -288,8 +290,9 @@ $("tabbar").onclick = e => { const b = e.target.closest("button[data-tab]"); if 
 function showEmpty(){
   stopPlayback();
   cur = null; ex = null;
-  $("qTitle").textContent = tr("按「" + $("drawLabel").textContent + "」開始,或從下面的清單選一項", "Tap “" + $("drawLabel").textContent + "” or pick an item from the list below");
-  $("qTitle").classList.add("empty"); $("qTags").innerHTML = "";
+  $("qTitle").classList.add("empty"); $("qTitle").style.fontSize = "";
+  const sets = S.exam && SY.systems[S.exam.system].mode === "sets";
+  pairText($("qTitle"), () => { const d = sets ? tr("隨機抽一項", "Random") : tr("隨機抽考", "Random"); return tr("按「" + d + "」開始,或從下面的清單選一項", "Tap “" + d + "” or pick from the list below"); }); $("qTags").innerHTML = "";
   $("playBtn").disabled = true; document.querySelectorAll(".mbtn").forEach(b => { b.disabled = true; b.setAttribute("aria-pressed", "false"); });
   $("verifyBadge").hidden = true; $("poolCount").textContent = S.exam ? tr(`抽考範圍 ${examPool().length} 題`, `${examPool().length} items in range`) : "";
   if (osmd) { try { osmd.clear(); } catch (e) {} }
@@ -305,8 +308,9 @@ function setQuestion(q, tab){
   show = q.hands === "RH" ? "rh" : q.hands === "LH" ? "lh" : "both";
   syncHandSeg();
   const parts = questionText(q);
-  $("qTitle").textContent = parts[0]; $("qTitle").classList.remove("empty");
+  unpair($("qTitle")); $("qTitle").textContent = parts[0]; $("qTitle").classList.remove("empty");
   $("qTags").innerHTML = parts.slice(1).map((t, i) => `<span class="q-tag${q.dynamic && i === parts.length - 2 ? " dyn" : ""}">${t}</span>`).join("");
+  fitTitle();
   $("playBtn").disabled = false;
   document.querySelectorAll(".mbtn").forEach(b => b.disabled = false);
   syncMastery();
@@ -318,15 +322,16 @@ function setQuestion(q, tab){
     $("poolCount").textContent = tab === "exam" ? tr(`抽考範圍 ${examPool().length} 題`, `${examPool().length} items in range`) : `${SY.systems[S.exam.system].name} ${gradeLabel(g)}`;
   } else { $("verifyBadge").hidden = true; $("poolCount").textContent = tr("自由練習", "Free practice"); }
   // 樂譜下方說明
-  const notes = [];
-  if (q.type === "thirds" || q.type === "sixths") notes.push(tr("雙音音階的指法有好幾種系統(各版本不同),這裡只標音、不標指法;請依老師或考試用書的指法練習。", "Double-note fingerings differ between editions, so only the notes are shown; use your teacher's or exam book's fingering."));
-  if (q.type === "broken") notes.push(tr("分解和弦的型態依一般教材的寫法(原位 → 第一轉位 → 第二轉位再下行),請以 Trinity《Piano Scales & Arpeggios》核對。", "Broken-chord pattern follows common teaching books (root → 1st → 2nd inversion and back); check it against Trinity's Piano Scales & Arpeggios."));
-  if (q.type === "dom7") notes.push(tr("屬七和弦琶音最後解決到主音(照 ABRSM 大綱的譜例)。", "The dominant 7th resolves on the tonic (as in the ABRSM syllabus example)."));
-  if (q.apart === 3) notes.push(tr("相隔三度:右手比左手高十度(三度 + 八度),左手從主音、右手從第三級開始。", "A third apart: RH plays a tenth above LH — LH starts on the tonic, RH on the 3rd."));
-  if (q.apart === 6) notes.push(tr("相隔六度:主音在上方 — 右手從主音、左手從低六度的第三級開始。", "A sixth apart: tonic on top — RH starts on the tonic, LH on the 3rd a sixth below."));
-  if (q.type === "chromatic" && q.lhStart !== q.rhStart) notes.push(tr(`兩手從不同的音開始:左手 ${noteLabelStr(q.lhStart)}、右手 ${noteLabelStr(q.rhStart)}。`, `Hands start on different notes: LH ${noteLabelStr(q.lhStart)}, RH ${noteLabelStr(q.rhStart)}.`));
-  if (!q.free && S.exam) notes.push(SY.systems[S.exam.system].mode === "sets" ? tr("速度是大綱的「最低速度」。", "Tempo is the syllabus minimum.") : tr("速度是大綱的「參考速度」。", "Tempo is the syllabus guide speed."));
-  $("scoreNote").hidden = !notes.length; $("scoreNote").textContent = notes.join(" ");
+  const notes = [], noteFns = notes;   // 每一則是函式:中英文各跑一次
+  if (q.type === "thirds" || q.type === "sixths") notes.push(() => tr("雙音音階的指法有好幾種系統(各版本不同),這裡只標音、不標指法;請依老師或考試用書的指法練習。", "Double-note fingerings differ between editions, so only the notes are shown; use your teacher's or exam book's fingering."));
+  if (q.type === "broken") notes.push(() => tr("分解和弦的型態依一般教材的寫法(原位 → 第一轉位 → 第二轉位再下行),請以 Trinity《Piano Scales & Arpeggios》核對。", "Broken-chord pattern follows common teaching books (root → 1st → 2nd inversion and back); check it against Trinity's Piano Scales & Arpeggios."));
+  if (q.type === "dom7") notes.push(() => tr("屬七和弦琶音最後解決到主音(照 ABRSM 大綱的譜例)。", "The dominant 7th resolves on the tonic (as in the ABRSM syllabus example)."));
+  if (q.apart === 3) notes.push(() => tr("相隔三度:右手比左手高十度(三度 + 八度),左手從主音、右手從第三級開始。", "A third apart: RH plays a tenth above LH — LH starts on the tonic, RH on the 3rd."));
+  if (q.apart === 6) notes.push(() => tr("相隔六度:主音在上方 — 右手從主音、左手從低六度的第三級開始。", "A sixth apart: tonic on top — RH starts on the tonic, LH on the 3rd a sixth below."));
+  if (q.type === "chromatic" && q.lhStart !== q.rhStart) notes.push(() => tr(`兩手從不同的音開始:左手 ${noteLabelStr(q.lhStart)}、右手 ${noteLabelStr(q.rhStart)}。`, `Hands start on different notes: LH ${noteLabelStr(q.lhStart)}, RH ${noteLabelStr(q.rhStart)}.`));
+  if (!q.free && S.exam) notes.push(() => SY.systems[S.exam.system].mode === "sets" ? tr("速度是大綱的「最低速度」。", "Tempo is the syllabus minimum.") : tr("速度是大綱的「參考速度」。", "Tempo is the syllabus guide speed."));
+  $("scoreNote").hidden = !notes.length;
+  pairText($("scoreNote"), () => noteFns.map(f => f()).join(" "));
   bpm = q.free ? q.tempo.bpm : Math.max(30, Math.min(200, Math.round(q.tempo.bpm * S.tempoPct / 100)));
   syncTempoUI();
   renderScore();
@@ -432,7 +437,21 @@ function movePlayline(beat, follow){
 $("scroll").addEventListener("scroll", () => { if (!play) movePlayline(0, false); }, { passive: true });
 /* 旋轉螢幕 / 改視窗大小:縮放改了就重畫;播放軸位置重算 */
 let lastZoom = null;
+/* 題目固定一行(高度固定):太長就把字縮小,中英文的版面才會一樣 */
+function fitTitle(){
+  const el = $("qTitle");
+  el.style.fontSize = "";
+  if (el.classList.contains("empty")) return;
+  let fs = parseFloat(getComputedStyle(el).fontSize);
+  const min = Math.max(14, fs * 0.55);
+  while (el.scrollWidth > el.clientWidth + 1 && fs > min) { fs -= 1; el.style.fontSize = fs + "px"; }
+  // 標籤也固定一行:放不下就整排一起縮小
+  const g = $("qTags");
+  let k = 1; g.style.setProperty("--tag-scale", 1);
+  while (g.scrollWidth > g.clientWidth + 1 && k > 0.6) { k -= 0.04; g.style.setProperty("--tag-scale", k); }
+}
 const onStageResize = () => {
+  fitTitle();
   if (!osmd || !cur) return;
   const z = scoreZoom();
   if (z !== lastZoom && lastZoom !== null) { lastZoom = z; osmd.zoom = z; osmd.render(); measureNotes(); return; }
@@ -455,7 +474,7 @@ function syncTempoUI(){
   $("bpmReset").hidden = !examT;
   if (examT) {
     const pct = Math.round(100 * bpm / examT.bpm);
-    $("bpmPct").textContent = pct === 100 ? tr("考試速度", "exam tempo") : tr(`考試速度的 ${pct}%`, `${pct}% of exam tempo`);
+    $("bpmPct").textContent = pct === 100 ? tr("考試速度", "exam") : tr(`考試速度的 ${pct}%`, `${pct}% of exam tempo`);
     $("examTempo").textContent = tr(`考試速度 ${UNIT_SYM[u]} = ${examT.bpm}(八分音符,每拍 ${NOTES_PER_UNIT[u]} 個${u === "q." ? ",三連音" : ""})`,
       `Exam tempo ${UNIT_SYM[u]} = ${examT.bpm} (${NOTES_PER_UNIT[u]} ${u === "q." ? "triplet " : ""}quavers per beat)`);
   } else { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("每拍 2 個八分音符", "2 quavers per beat"); }
@@ -613,7 +632,7 @@ async function init(){
   if (window.innerWidth < 600) $("listCard").open = false;
   if (S.exam) renderExam();
   window.__app = { get cur(){ return cur; }, get ex(){ return ex; }, get osmd(){ return osmd; },
-    get state(){ return { play: !!play, starting: !!starting, bpm, show, scheduled: audio.scheduledCount(), noteXs: noteXs.length }; }, setQuestion, examQuestions, examPool, switchTab, S, SY };
+    get state(){ return { play: !!play, starting: !!starting, bpm, show, scheduled: audio.scheduledCount(), noteXs: noteXs.length }; }, setQuestion, examQuestions, examPool, switchTab, fitTitle, S, SY };
   if (!S.onboarded) { switchTab("scale"); showOnboard(); }
   else switchTab(S.tab || (S.exam ? "exam" : "scale"));
   window.__stageReady = 1;

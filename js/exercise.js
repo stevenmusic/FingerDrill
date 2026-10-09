@@ -5,7 +5,7 @@ import {
   INTERVALS, parseNote, spellScale, startOctave, triadTones, dom7Tones, dim7Tones, inversionTones,
   midiOf, keyFifths, noteLabelStr, pcOf, placeAtLeast, walkCycle, wholeToneCycle, chromaticRun
 } from "./theory.js";
-import { tr } from "./i18n.js";
+import { tr, getLang } from "./i18n.js";
 import {
   scaleFingersFrom, triadFingers, fourNoteFingers, chromaticFingers, arpGroupFingers, cyclicFingers, BROKEN_FINGERS
 } from "./fingering.js";
@@ -207,11 +207,11 @@ export function buildExercise(FG, q){
 }
 
 /* ── 題目文字(考官點題的說法;中英雙語)── */
-const OCT = [["", ""], ["一個八度", "One octave"], ["兩個八度", "Two octaves"], ["三個八度", "Three octaves"], ["四個八度", "Four octaves"]];
-const FORM = { harmonic: ["和聲小調", "harmonic minor"], melodic: ["旋律小調", "melodic minor"], natural: ["自然小調", "natural minor"] };
-const INV = [["", ""], ["第一轉位", "first inversion"], ["第二轉位", "second inversion"]];
-const HAND = { RH: ["右手", "Right hand"], LH: ["左手", "Left hand"], HT: ["雙手同時", "Hands together"] };
-const DYN = { f: ["強(f)", "f (forte)"], p: ["弱(p)", "p (piano)"], mf: ["中強(mf)", "mf (mezzo-forte)"], "cresc-dim": ["漸強再漸弱(p–f–p)", "cresc./dim. (p–f–p)"] };
+const OCT = [["", ""], ["一個八度", "1 octave"], ["兩個八度", "2 octaves"], ["三個八度", "3 octaves"], ["四個八度", "4 octaves"]];
+const FORM = { harmonic: ["和聲小調", "harmonic minor", "harm. minor"], melodic: ["旋律小調", "melodic minor", "mel. minor"], natural: ["自然小調", "natural minor", "nat. minor"] };
+const INV = [["", ""], ["第一轉位", "1st inv."], ["第二轉位", "2nd inv."]];
+const HAND = { RH: ["右手", "RH"], LH: ["左手", "LH"], HT: ["雙手", "HT"] };
+const DYN = { f: ["f", "f"], p: ["p", "p"], mf: ["mf", "mf"], "cresc-dim": ["p–f–p", "p–f–p"] };
 const pick = pair => tr(pair[0], pair[1]);
 const nm = s => noteLabelStr(s);
 const qual = q => q.quality === "minor" ? tr(" 小調", " minor") : tr(" 大調", " major");
@@ -219,24 +219,27 @@ const keyQ = q => q.quality === "minor" && q.form ? nm(q.tonic) + " " + pick(FOR
 export function keyName(q){
   switch (q.type) {
     case "chromatic":
-      if (q.lhStart && q.rhStart && q.lhStart !== q.rhStart) return tr(`半音階(左手 ${nm(q.lhStart)}、右手 ${nm(q.rhStart)} 開始)`, `Chromatic scale (LH on ${nm(q.lhStart)}, RH on ${nm(q.rhStart)})`);
-      return tr("從 " + nm(q.tonic) + " 開始的半音階", "Chromatic scale starting on " + nm(q.tonic));
-    case "wholetone": return tr("從 " + nm(q.tonic) + " 開始的全音音階", "Whole-tone scale starting on " + nm(q.tonic));
-    case "dim7": return tr("從 " + nm(q.tonic) + " 開始的減七和弦琶音", "Diminished 7th starting on " + nm(q.tonic));
-    case "dom7": return tr(nm(q.tonic) + qual(q) + "的屬七和弦琶音", "Dominant 7th in the key of " + nm(q.tonic) + (q.quality === "minor" ? " minor" : ""));
-    case "arpeggio": return nm(q.tonic) + qual(q) + tr("琶音", " arpeggio") + (q.inversion ? tr("(" + INV[q.inversion][0] + ")", " (" + INV[q.inversion][1] + ")") : "");
+      if (q.lhStart && q.rhStart && q.lhStart !== q.rhStart) return tr(`半音階(左 ${nm(q.lhStart)}、右 ${nm(q.rhStart)})`, `Chromatic, LH ${nm(q.lhStart)} RH ${nm(q.rhStart)}`);
+      return tr("從 " + nm(q.tonic) + " 開始的半音階", "Chromatic on " + nm(q.tonic));
+    case "wholetone": return tr("從 " + nm(q.tonic) + " 開始的全音音階", "Whole-tone on " + nm(q.tonic));
+    case "dim7": return tr(nm(q.tonic) + " 減七和弦琶音", "Dim. 7th on " + nm(q.tonic));
+    case "dom7": return tr(nm(q.tonic) + qual(q) + "的屬七和弦琶音", "Dom. 7th in " + nm(q.tonic) + (q.quality === "minor" ? " minor" : ""));
+    case "arpeggio": return nm(q.tonic) + qual(q) + (q.inversion ? tr("琶音(" + INV[q.inversion][0] + ")", " arp. " + INV[q.inversion][1]) : tr("琶音", " arpeggio"));
     case "broken": return nm(q.tonic) + qual(q) + (q.range === "5th" ? tr("分解三和弦", " broken triad") : tr("分解和弦", " broken chord"));
-    case "thirds": return keyQ(q) + tr("三度雙音音階", " scale in thirds");
-    case "sixths": return keyQ(q) + tr("六度雙音音階", " scale in sixths");
+    case "thirds": return keyQ(q) + tr("三度雙音音階", " in 3rds");
+    case "sixths": return keyQ(q) + tr("六度雙音音階", " in 6ths");
   }
-  const apart = q.apart === 3 ? tr("(雙手相隔三度)", " (hands a third apart)") : q.apart === 6 ? tr("(雙手相隔六度)", " (hands a sixth apart)") : "";
-  return keyQ(q) + (q.motion === "contrary" ? tr("反向音階", " contrary-motion scale") : tr("音階", " scale")) + apart;
+  const apart = q.apart === 3 ? tr("(相隔三度)", "3rd apart") : q.apart === 6 ? tr("(相隔六度)", "6th apart") : "";
+  if (q.motion === "contrary") return q.quality === "minor" && q.form ? nm(q.tonic) + tr(" " + FORM[q.form][0] + "反向音階", " " + FORM[q.form][2] + " contrary") : keyQ(q) + tr("反向音階", " contrary");
+  if (apart) return getLang() === "en" ? nm(q.tonic) + (q.quality === "minor" && q.form ? " " + FORM[q.form][2] : " major") + ", " + apart : keyQ(q) + (q.quality === "minor" && q.form ? "" : "音階") + apart;
+  return keyQ(q) + tr("音階", " scale");
 }
 export const keyNameZh = keyName;
 export function questionText(q){
-  const parts = [keyName(q)];
-  parts.push(q.motion === "contrary" ? tr("雙手反向", "Contrary motion") : pick(HAND[q.hands] || HAND.HT));
-  parts.push(q.range === "5th" ? tr("五度範圍", "Range of a 5th") : pick(OCT[q.octaves] || [q.octaves + " 個八度", q.octaves + " octaves"]));
+  // 相隔三度/六度放在標籤(取代「雙手」),題目才不會比另一種語言多一行
+  const parts = [keyName(q.apart ? { ...q, apart: 0 } : q)];
+  parts.push(q.motion === "contrary" ? tr("反向", "Contrary") : q.apart === 3 ? tr("相隔三度", "3rd apart") : q.apart === 6 ? tr("相隔六度", "6th apart") : pick(HAND[q.hands] || HAND.HT));
+  parts.push(q.range === "5th" ? tr("五度範圍", "5th range") : pick(OCT[q.octaves] || [q.octaves + " 個八度", q.octaves + " octaves"]));
   parts.push(q.articulation === "staccato" ? tr("斷奏", "Staccato") : tr("圓滑奏", "Legato"));
   if (q.dynamic) parts.push(DYN[q.dynamic] ? pick(DYN[q.dynamic]) : q.dynamic);
   return parts;

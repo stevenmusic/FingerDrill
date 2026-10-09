@@ -69,8 +69,10 @@ body{
   min-height:100%;
   background:var(--bg);color:var(--ivory);
   font-family:"Noto Sans TC",sans-serif;
+  line-height:1.4;   /* 固定行高:中文、英文字型的預設行高不同,固定後兩種語言版面一樣高 */
   display:flex;flex-direction:column;
 }
+button,input,select,textarea{line-height:inherit}
 /* ── 頂欄(照抄 HarmonyMap)───────────────────────── */
 header{
   display:flex;align-items:center;flex-wrap:wrap;
@@ -159,6 +161,7 @@ main{
 }
 .field select:focus{outline:none;border-color:var(--gold)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+#catChips{display:grid;grid-template-columns:repeat(auto-fill, minmax(124px, 1fr))}   /* 固定格子:中英文排法一樣 */
 .chip{height:32px;padding:0 12px;border-radius:var(--radius-pill);border:1px solid var(--line);background:var(--surface-inset);
   color:var(--muted-bright);font-family:inherit;font-size:var(--fs-sm);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .chip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:rgba(242,185,75,.1);font-weight:700}
@@ -186,9 +189,11 @@ body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
 .quiz-top .count{font-size:var(--fs-xs);color:var(--muted);margin-left:auto;white-space:nowrap}
 .q-title{font-family:"Noto Serif TC",serif;font-weight:700;color:var(--gold-bright);
   font-size:clamp(26px, 7.4vw, 40px);line-height:1.2;letter-spacing:.02em;overflow-wrap:anywhere}
+.q-title:not(.empty){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;
+  height:calc(clamp(26px, 7.4vw, 40px) * 1.2);display:flex;align-items:center}
 .q-title.empty{color:var(--muted);font-size:var(--fs-xl);font-family:inherit;font-weight:500}
-.q-tags{display:flex;flex-wrap:wrap;gap:6px}
-.q-tag{font-size:clamp(14px, 4.2vw, 18px);font-weight:700;color:var(--ivory);background:var(--surface-inset);border:1px solid var(--line);
+.q-tags{display:flex;flex-wrap:nowrap;gap:6px;overflow:hidden;align-items:center;min-height:calc(clamp(14px, 4.2vw, 18px) * 1.4 + 10px)}
+.q-tag{flex:none;font-size:calc(clamp(14px, 4.2vw, 18px) * var(--tag-scale, 1));font-weight:700;color:var(--ivory);background:var(--surface-inset);border:1px solid var(--line);
   border-radius:var(--radius-sm);padding:4px 10px;white-space:nowrap}
 .q-tag.dyn{color:var(--teal);border-color:var(--teal)}
 .q-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -307,9 +312,12 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 .quick .qhead{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:var(--fs-xs);color:var(--muted-bright)}
 .quick .qhead b{color:var(--gold);font-weight:700}
 .quick .qhead .chip{height:26px;font-size:var(--fs-xs);margin-left:auto}
-.quick .opts{flex-wrap:wrap;overflow:visible}
-.quick .opt{height:30px;font-size:var(--fs-sm)}
-.quick .opt .dot{display:inline-block;margin-right:6px;vertical-align:middle}
+/* 固定格子(不跟字寬走):中文、英文的排版一樣;每格放得下兩行 */
+.quick .opts{display:grid;grid-template-columns:repeat(auto-fill, minmax(128px, 1fr));overflow:visible}
+.quick .opt{height:42px;font-size:var(--fs-sm);display:flex;align-items:center;gap:6px;padding:0 10px;text-align:left;
+  border-radius:var(--radius-sm);white-space:normal;min-width:0}
+.quick .opt .dot{flex:none}
+.quick .opt span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25;overflow-wrap:anywhere}
 .picker .setup-summary{display:none}
 @media (max-width:600px), (max-height:420px){
   .picker .setup-summary{display:flex}
