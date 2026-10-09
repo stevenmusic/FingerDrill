@@ -336,7 +336,8 @@ function setQuestion(q, tab){
   $("playBtn").disabled = false;
   document.querySelectorAll(".mbtn").forEach(b => b.disabled = false);
   syncMastery();
-  if (!q.free && S.exam) {
+  // 上方那一列(官方大綱標記、抽考範圍)只在考級分頁出現:音階/琶音分頁點「本級要求」的題目時不出現,題目才不會往下跳
+  if (!q.free && S.exam && tab === "exam") {
     const g = examGrade();
     $("verifyBadge").hidden = false;
     $("verifyBadge").classList.toggle("ok", !!g.verified);
