@@ -207,8 +207,32 @@ function setBpm(v, fromUser){
   if (fromUser && cur) { S.tempoPct = Math.round(100 * bpm / cur.bpm); store.save(); }
   syncTempo();
 }
-$("bpmDown").onclick = () => setBpm(bpm - 2, true);
-$("bpmUp").onclick = () => setBpm(bpm + 2, true);
+/* − / +:點一下 ±1;按住 0.4 秒後開始連續增減,越按越快(每次 ±1 → 0.6 秒後 ±2 → 1.6 秒後 ±5) */
+function holdRepeat(btn, dir){
+  let timer = 0, t0 = 0, fired = false;
+  const step = () => {
+    const held = performance.now() - t0;
+    const amt = held > 1600 ? 5 : held > 1000 ? 2 : 1;
+    setBpm(bpm + dir * amt, true);
+    timer = setTimeout(step, held > 1000 ? 70 : 110);
+  };
+  const start = e => {
+    if (e.button > 0) return;
+    e.preventDefault();
+    fired = true; t0 = performance.now();
+    setBpm(bpm + dir, true);
+    timer = setTimeout(() => { t0 = performance.now() - 400; step(); }, 400);
+    try { btn.setPointerCapture(e.pointerId); } catch (err) {}
+  };
+  const stop = () => { clearTimeout(timer); timer = 0; };
+  btn.addEventListener("pointerdown", start);
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => btn.addEventListener(ev, stop));
+  btn.addEventListener("contextmenu", e => e.preventDefault());
+  // 鍵盤(Enter / 空白鍵)沒有 pointer 事件:照一般點擊 ±1
+  btn.addEventListener("click", e => { if (fired) { fired = false; return; } setBpm(bpm + dir, true); });
+}
+holdRepeat($("bpmDown"), -1);
+holdRepeat($("bpmUp"), +1);
 $("bpmRange").oninput = () => setBpm(Number($("bpmRange").value), true);
 $("bpmReset").onclick = () => { if (cur) { S.tempoPct = 100; store.save(); setBpm(cur.bpm); } };
 
@@ -339,7 +363,7 @@ async function init(){
   if (window.innerWidth < 600) $("listCard").open = false;   // 手機:清單很長,預設收起來
   fillGrades(); renderCats(); refreshMeta();
   syncTempo();
-  window.__app = { get cur(){ return cur; }, get ex(){ return ex; }, setQuestion, allQuestions, pool, S };
+  window.__app = { get cur(){ return cur; }, get ex(){ return ex; }, get osmd(){ return osmd; }, setQuestion, allQuestions, pool, S };
   window.__stageReady = 1;
 }
 init().catch(e => { console.error(e); $("qTitle").textContent = "資料載入失敗:" + e.message; });

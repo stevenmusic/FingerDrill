@@ -222,7 +222,7 @@ body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
 .beats i{width:12px;height:12px;border-radius:50%;background:var(--line);transition:background .06s}
 .beats i.on{background:var(--gold)}
 .beats i.on.first{background:var(--teal)}
-.round{width:38px;height:38px;padding:0}
+.round{width:44px;height:44px;padding:0;touch-action:none}
 
 /* ── 本級要求清單 ── */
 details.card > summary{list-style:none;cursor:pointer;margin-bottom:0}

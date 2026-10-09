@@ -61,16 +61,20 @@ function ascendDegrees(spelled, startOct, octaves, startDeg = 0){
   return out;
 }
 /* 主音放在哪個八度:右手從中央 C 那個八度起(3~4 個八度時低一個八度),左手再低一個八度 */
-export function startOctave(hand, octaves, motion){
+export function startOctave(hand, octaves, motion, tonic){
   if (motion === "contrary") return 4;
-  const rh = octaves >= 3 ? 3 : 4;
+  // 3~4 個八度從低一個八度起;4 個八度的 F~B 再低一個八度(最高音不超過 E7,鍵盤兩端也還在範圍內)
+  // 右手起音放在中央 C 附近:一、兩個八度從 C4~F4 或 G3~B3 起(G~B 從 4 起會到 B6,要 8va);
+  // 三個八度從 C3~B3 起;四個八度 C~E 從 3、F~B 從 2 起(最高不超過 E7)
+  const L = tonic ? (typeof tonic === "string" ? parseNote(tonic) : tonic).letter : 0;
+  let rh = octaves >= 3 ? 3 : (L >= 4 ? 3 : 4);
+  if (octaves >= 4 && L >= 3) rh = 2;
   return hand === "rh" ? rh : rh - 1;
 }
-
 /* 同向音階:上行再下行(旋律小調下行用自然小調) */
 export function scaleRun(tonic, quality, form, hand, octaves, opts = {}){
   const iv = opts.iv || (quality === "major" ? INTERVALS.major : INTERVALS[form]);
-  const so = opts.startOct != null ? opts.startOct : startOctave(hand, octaves);
+  const so = opts.startOct != null ? opts.startOct : startOctave(hand, octaves, "similar", tonic);
   const up = ascendDegrees(spellScale(tonic, iv), so, octaves);
   const downIv = !opts.iv && quality !== "major" && form === "melodic" ? INTERVALS.natural : iv;
   const down = ascendDegrees(spellScale(tonic, downIv), so, octaves).slice(0, -1).reverse();

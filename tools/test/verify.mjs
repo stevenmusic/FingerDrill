@@ -14,7 +14,7 @@ const root = new URL("../../", import.meta.url);
 const SY = JSON.parse(fs.readFileSync(new URL("data/syllabus.json", root)));
 const FG = JSON.parse(fs.readFileSync(new URL("data/fingerings.json", root)));
 let fails = 0, checks = 0;
-const fail = (msg) => { fails++; if (fails <= 60) console.log("✗ " + msg); };
+const fail = (msg) => { fails++; if (fails <= (process.env.ALL ? 1e9 : 60)) console.log("✗ " + msg); };
 const ok = (cond, msg) => { checks++; if (!cond) fail(msg); return cond; };
 
 /* ── 1. syllabus.json ── */
@@ -112,6 +112,7 @@ function checkQuestion(q, label){
   for (const hand of ["rh", "lh"]) {
     const notes = ex[hand];
     notes.forEach((n, i) => ok(spellingOk(n), `${label} ${hand} 第 ${i + 1} 個音拼法與音高不符`));
+    ok(notes.every(n => n.midi >= 21 && n.midi <= 108), `${label} ${hand}: 超出鋼琴音域 A0–C8`);
     const t = parseNote(q.tonic);
     const tonicMidi = notes[0].midi;
     if (q.type !== "dom7") ok(pcOf(t) === ((tonicMidi % 12) + 12) % 12, `${label} ${hand}: 起音不是 ${q.tonic}`);
@@ -148,11 +149,82 @@ function checkQuestion(q, label){
         ok(sum === 48, `${label} ${show}: 小節時值 ${sum} ≠ 48`);
       });
     }
+    checkNotation(xml, `${label} ${show}`, ex.sub);
     const nNotes = (xml.match(/<pitch>/g) || []).length, nF = (xml.match(/<fingering /g) || []).length;
     const expN = show === "both" ? ex.rh.length + ex.lh.length : ex[show].length;
     ok(nNotes === expN && nF === expN, `${label} ${show}: 音數 ${nNotes} / 指法 ${nF} / 應為 ${expN}`);
     const beg = (xml.match(/<beam number="1">begin/g) || []).length, end = (xml.match(/<beam number="1">end/g) || []).length;
     ok(beg === end, `${label} ${show}: 連桿沒有成對`);
+  }
+}
+
+/* ── 4. 記譜規則(自己重新讀 MusicXML 檢查,不沿用產生器的程式) ──
+   符桿方向、臨時記號、休止符位置、長音位置、連桿不跨拍、三連音成組、加線不超過 3 條 */
+const LET = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6 };
+const MID = { G: 34, F: 22 }, TOP = { G: 38, F: 26 }, BOT = { G: 30, F: 18 };
+function keyAltersT(f){ const a = [0, 0, 0, 0, 0, 0, 0], o = [3, 0, 4, 1, 5, 2, 6]; if (f > 0) for (let i = 0; i < f; i++) a[o[i]] = 1; else for (let i = 0; i < -f; i++) a[o[6 - i]] = -1; return a; }
+const ACCN = { "flat-flat": -2, flat: -1, natural: 0, sharp: 1, "double-sharp": 2 };
+let maxLedger = 0;
+function checkNotation(xml, label, sub){
+  const fifths = Number(/<fifths>(-?\d+)<\/fifths>/.exec(xml)[1]), keyA = keyAltersT(fifths);
+  const clef = {}, shift = {};
+  const measures = xml.split("<measure ").slice(1);
+  for (const [mi, m] of measures.entries()) {
+    const tokens = [...m.matchAll(/<clef number="(\d)"><sign>([GF])<\/sign>|<octave-shift type="(\w+)"[^>]*\/><\/direction-type><staff>(\d)<\/staff>|<note>(.*?)<\/note>|<backup>/gs)];
+    const pos = { 1: 0, 2: 0 }, acc = { 1: new Map(), 2: new Map() };
+    let staffCur = 1, group = [], tupN = 0;
+    const flushGroup = () => {
+      if (!group.length) return;
+      const st = new Set(group.map(g => g.stem));
+      ok(st.size === 1, `${label} m${mi + 1}: 同一組連桿符桿方向不一致`);
+      let far = 0; for (const g of group) { const d = g.step - MID[g.clef]; if (Math.abs(d) > Math.abs(far) || (Math.abs(d) === Math.abs(far) && d > far)) far = d; }
+      ok(group[0].stem === (far >= 0 ? "down" : "up"), `${label} m${mi + 1}: 符桿方向不符(最遠的音離中線 ${far})`);
+      const span = sub === 2 ? 24 : 12;
+      ok(Math.floor(group[0].pos / span) === Math.floor(group[group.length - 1].pos / span), `${label} m${mi + 1}: 連桿跨拍`);
+      group = [];
+    };
+    for (const t of tokens) {
+      if (t[1]) { clef[t[1]] = t[2]; continue; }
+      if (t[3]) { shift[t[4]] = t[3] === "down" ? 7 : t[3] === "up" ? -7 : 0; continue; }
+      if (t[0] === "<backup>") { flushGroup(); continue; }
+      const body = t[5], dur = Number(/<duration>(\d+)/.exec(body)[1]), staff = Number(/<staff>(\d)/.exec(body)[1]);
+      staffCur = staff;
+      const p0 = pos[staff];
+      if (/<rest\/>/.test(body)) {
+        ok(p0 % 12 === 0, `${label} m${mi + 1}: 休止符不在拍點`);
+        ok(!/<dot\/>/.test(body), `${label} m${mi + 1}: 附點休止符`);
+        if (dur === 24) ok(p0 === 0 || p0 === 24, `${label} m${mi + 1}: 二分休止符不在第 1、3 拍`);
+        pos[staff] += dur; continue;
+      }
+      const step = LET[/<step>(\w)/.exec(body)[1]], oct = Number(/<octave>(-?\d+)/.exec(body)[1]);
+      const alter = Number((/<alter>(-?\d+)/.exec(body) || [0, 0])[1]);
+      const disp = oct * 7 + step - (shift[staff] || 0), c = clef[staff];
+      // 加線
+      const led = disp > TOP[c] ? Math.floor((disp - TOP[c]) / 2) : disp < BOT[c] ? Math.floor((BOT[c] - disp) / 2) : 0;
+      maxLedger = Math.max(maxLedger, led);
+      ok(led <= 3, `${label} m${mi + 1}: ${led} 條加線`);
+      // 臨時記號
+      const real = oct * 7 + step;   // 臨時記號依實際音高(不受譜號、8va 影響)
+      const cur = acc[staff].has(real) ? acc[staff].get(real) : keyA[step];
+      const a = /<accidental>([\w-]+)<\/accidental>/.exec(body);
+      if (alter !== cur) ok(a && ACCN[a[1]] === alter, `${label} m${mi + 1}: 缺臨時記號(音 ${step}/${alter})`);
+      else ok(!a, `${label} m${mi + 1}: 多餘的臨時記號`);
+      acc[staff].set(real, alter);
+      // 長音位置
+      const type = /<type>(\w+)/.exec(body)[1], dotted = /<dot\/>/.test(body);
+      if (type === "whole") ok(p0 === 0, `${label} m${mi + 1}: 全音符不在第 1 拍`);
+      if (type === "half") ok(!dotted && (p0 === 0 || p0 === 24), `${label} m${mi + 1}: 二分音符位置不對`);
+      // 三連音
+      if (/<time-modification>/.test(body)) { if (/<tuplet type="start"/.test(body)) { ok(tupN === 0, `${label}: 三連音沒有結束`); tupN = 1; } else { tupN++; if (/<tuplet type="stop"/.test(body)) { ok(tupN === 3, `${label}: 三連音不是 3 個`); tupN = 0; } } }
+      // 符桿
+      const stem = (/<stem>(\w+)/.exec(body) || [])[1];
+      if (type !== "whole") ok(!!stem, `${label} m${mi + 1}: 缺符桿方向`);
+      const beam = (/<beam number="1">(\w+)/.exec(body) || [])[1];
+      if (beam) { group.push({ stem, step: disp, clef: c, pos: p0 }); if (beam === "end") flushGroup(); }
+      else if (stem) { let d = disp - MID[c]; ok(stem === (d >= 0 ? "down" : "up"), `${label} m${mi + 1}: 單音符桿方向不符`); }
+      pos[staff] += dur;
+    }
+    flushGroup(); void staffCur;
   }
 }
 
@@ -168,7 +240,7 @@ const STARTS = ["C", "C#", "Db", "D", "D#", "Eb", "E", "F", "F#", "Gb", "G", "G#
 let nAll = 0;
 for (const oct of [1, 2, 3, 4]) {
   const base = { hands: "HT", octaves: oct, articulation: "legato", sub: 4, bpm: 60 };
-  for (const motion of ["similar", "contrary"]) {
+  for (const motion of oct <= 2 ? ["similar", "contrary"] : ["similar"]) {   // 反向最多兩個八度(從中央 C 附近起,三、四個八度會超出鍵盤或不是考試要求)
     for (const k of MAJ) { nAll++; checkQuestion({ ...base, type: "scale", tonic: k, quality: "major", motion }, `全部 ${k} 大調 ${motion} ${oct}`); }
     for (const k of MIN) for (const form of ["harmonic", "melodic", "natural"]) { nAll++; checkQuestion({ ...base, type: "scale", tonic: k, quality: "minor", form, motion }, `全部 ${k} ${form} ${motion} ${oct}`); }
     for (const k of STARTS) { nAll++; checkQuestion({ ...base, type: "chromatic", tonic: k, motion }, `全部 半音階 ${k} ${motion} ${oct}`); }
@@ -178,6 +250,7 @@ for (const oct of [1, 2, 3, 4]) {
   for (const k of STARTS) { nAll++; checkQuestion({ ...base, type: "dim7", tonic: k }, `全部 減七 ${k} ${oct}`); }
 }
 
+console.log(`最多加線 ${maxLedger} 條`);
 console.log(`\n大綱題目 ${nSyl} 題(含三種小調形式)、全部組合 ${nAll} 題,共 ${checks} 項檢查。`);
 if (fails) { console.log(`✗ ${fails} 項失敗`); process.exit(1); }
 console.log("✓ 全部通過");

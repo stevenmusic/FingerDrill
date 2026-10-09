@@ -26,28 +26,28 @@ function buildScaleHand(FG, q, hand){
     const back = withF(upNotes.slice(1), f.up.slice(1));
     return out.concat(back);
   }
-  const startOct = startOctave(hand, q.octaves, q.motion);
+  const startOct = startOctave(hand, q.octaves, q.motion, q.tonic);
   const run = scaleRun(q.tonic, q.quality, q.form, hand, q.octaves, { startOct });
   const f = scaleFingers(FG, t, q.quality, q.form, hand, q.octaves);
   return withF(run.up, f.up).concat(withF(run.down, f.down));
 }
 
 function buildArpHand(FG, q, hand){
-  const so = startOctave(hand, q.octaves, "similar");
+  const so = startOctave(hand, q.octaves, "similar", q.tonic);
   if (q.type === "arpeggio") {
     const run = chordRun(triadTones(q.tonic, q.quality), so, q.octaves);
     const f = triadFingers(FG, parseNote(q.tonic), q.quality, hand, q.octaves);
     return withF(run.up, f.up).concat(withF(run.down, f.down));
   }
   const tones = q.type === "dom7" ? dom7Tones(q.tonic, q.quality) : dim7Tones(q.tonic);
-  const run = chordRun(tones, so, q.octaves);
+  const run = chordRun(tones, startOctave(hand, q.octaves, "similar", tones[0]), q.octaves);   // 屬七從屬音起,八度照起音算
   const f = fourNoteFingers(tones, hand, q.octaves);
   return withF(run.up, f.up).concat(withF(run.down, f.down));
 }
 
 function buildChromaticHand(q, hand){
   const contrary = q.motion === "contrary";
-  const so = contrary ? 4 : startOctave(hand, q.octaves, "similar");
+  const so = contrary ? 4 : startOctave(hand, q.octaves, "similar", q.tonic);
   const run = chromaticRun(q.tonic, so, q.octaves, contrary && hand === "lh" ? "down" : "up");
   return withF(run.notes, chromaticFingers(run.notes, hand));
 }
