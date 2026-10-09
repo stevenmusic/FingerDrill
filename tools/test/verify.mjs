@@ -8,6 +8,7 @@ import fs from "node:fs";
 import { buildExercise } from "../../js/exercise.js";
 import { questionsFor, masteryKey } from "../../js/syllabus.js";
 import { exerciseToMusicXML } from "../../js/musicxml.js";
+import { buildHanon, HANON_KEYS, HANON_RHYTHMS } from "../../js/hanon.js";
 import { INTERVALS, parseNote, pcOf, midiOf, isBlack } from "../../js/theory.js";
 
 const root = new URL("../../", import.meta.url);
@@ -327,6 +328,36 @@ for (const [lh, rh, motion, tenth] of [["F#", "A#", "contrary"], ["C#", "E", "co
   if (motion === "contrary" && oct > 2) continue;
   T({ type: "chromatic", tonic: lh, lhStart: lh, rhStart: rh, motion, octaves: oct, apartTenth: !!tenth });
 }
+
+// 哈農:20 首 × 12 個調 × 3 種節奏 —— 移位規則、兩手八度、調內音、指法位置、音域、記譜
+let nHanon = 0;
+{
+  const stepOf = n => n.octave * 7 + n.letter;
+  for (let no = 1; no <= 20; no++) for (const key of HANON_KEYS) for (const rhythm of HANON_RHYTHMS) {
+    const ex = buildHanon(no, key, rhythm), label = `哈農 ${no} ${key} ${rhythm}`, scalePcs = new Set(INTERVALS.major.map(iv => (pcOf(parseNote(key)) + iv) % 12));
+    nHanon++;
+    for (const h of ["rh", "lh"]) {
+      const ns = ex[h];
+      ok(ns.length === 225, `${label} ${h}: 音數 ${ns.length}`);
+      for (let b = 1; b < 14; b++) for (let i = 0; i < 8; i++) {
+        ok(stepOf(ns[b * 8 + i]) - stepOf(ns[(b - 1) * 8 + i]) === 1, `${label} ${h}: 上行第 ${b + 1} 小節沒有整組往上一級`);
+        ok(stepOf(ns[112 + b * 8 + i]) - stepOf(ns[112 + (b - 1) * 8 + i]) === -1, `${label} ${h}: 下行第 ${b + 15} 小節沒有整組往下一級`);
+      }
+      ns.forEach((n, i) => {
+        ok(scalePcs.has(pcOf(n)) && n.midi === midiOf(n), `${label} ${h} #${i}: 不是調內音`);
+        ok(n.midi >= 21 && n.midi <= 108, `${label} ${h} #${i}: 超出鋼琴音域`);
+        ok(!!n.finger === (i < 8 || (i >= 112 && i < 120)), `${label} ${h} #${i}: 指法位置不對`);
+      });
+    }
+    for (let i = 0; i < 224; i++) ok(stepOf(ex.rh[i]) - stepOf(ex.lh[i]) === 7, `${label} #${i}: 兩手不是相隔八度`);
+    for (const show of ["both", "rh", "lh"]) {
+      const xml = exerciseToMusicXML(ex, { articulation: "legato" }, show);
+      ok((xml.match(/<measure /g) || []).length === 29, `${label} ${show}: 小節數不對`);
+      checkNotation(xml, `${label} ${show}`, 4);
+    }
+  }
+}
+console.log(`哈農 ${nHanon} 種組合`);
 
 // 版本指紋(快取):index.html 裡的 ?v= 要跟檔案內容一致
 {
