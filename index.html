@@ -14,7 +14,7 @@
 <title>FingerDrill 手指特訓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=381e49d09a">
+<link rel="stylesheet" href="css/app.css?v=ed0d3a1759">
 </head>
 <body>
 <header>
@@ -128,12 +128,12 @@
         <button data-v="both" aria-pressed="true" data-i18n="handBoth">雙手</button>
       </div>
     </div>
-    <div class="paper"><div id="osmd"></div><div class="paper-msg" id="paperMsg"></div></div>
+    <div class="paper" id="stage"><div id="scroll"><div id="osmd"></div></div><div id="playline" hidden></div><div class="paper-msg" id="paperMsg"></div></div>
     <p class="score-note" id="scoreNote" hidden></p>
   </section>
 
   <section class="card" id="metroCard">
-    <div class="card-title"><b data-i18n="metroTitle">節拍器</b><span class="sub" id="examTempo"></span></div>
+    <div class="card-title"><b data-i18n="metroTitle">速度</b><span class="sub" id="examTempo"></span></div>
     <div class="metro">
       <button class="btn round" id="bpmDown" data-i18n-attr="aria-label:bpmDown,title:bpmDown" aria-label="慢 1(按住連續減少)" title="慢 1(按住連續減少)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
@@ -142,12 +142,8 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
       <input type="range" id="bpmRange" min="30" max="200" step="1" value="60" data-i18n-attr="aria-label:tempo" aria-label="速度" style="grid-column:1 / -1">
       <div class="row2">
-        <button class="btn" id="metroBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l4 18H5z"/><path d="m12 15 6-9"/></svg>
-          <span id="metroLabel" data-i18n="metroStart">開始</span></button>
         <button class="btn ghost small" id="bpmReset" data-i18n="bpmReset">回到考試速度</button>
         <div class="beats" id="beats"><i class="first"></i><i></i><i></i><i></i></div>
-        <span class="info" id="metroInfo"></span>
       </div>
     </div>
   </section>
@@ -194,9 +190,9 @@
   </div>
 </div>
 
-<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=c17f874874","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=18e6cbccfc","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/i18n.js":"./js/i18n.js?v=f7b46b0078","./js/musicxml.js":"./js/musicxml.js?v=da0302b9be","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=a0655b1f7d","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
-<script type="application/json" id="fdVersions">{"data/fingerings.json":"c5b57cffa5","data/syllabus.json":"44f00617de"}</script>
+<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=916840e4b8","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=18e6cbccfc","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/i18n.js":"./js/i18n.js?v=e1f178a5d0","./js/musicxml.js":"./js/musicxml.js?v=da0302b9be","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=a0655b1f7d","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
+<script type="application/json" id="fdVersions">{"data/fingerings.json":"c5b57cffa5","data/syllabus.json":"30b5443db2"}</script>
 <script src="vendor/opensheetmusicdisplay.min.js?v=fe43ac6f19"></script>
-<script type="module" src="js/app.js?v=c17f874874"></script>
+<script type="module" src="js/app.js?v=916840e4b8"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 // 瀏覽器整合測試(手機直式 + 桌機):
 // 第一次打開的問題、四個分頁、音階/琶音選擇器每個選項都畫得出樂譜、考級(ABRSM 抽考、Trinity A/B 組依序)、
-// 播放、節拍器 ±1 與按住連續、熟練標記存起來、沒有橫向捲動、沒有 console 錯誤。截圖放 tools/test/out/
+// 播放、速度 ±1 與按住連續、熟練標記存起來、沒有橫向捲動、沒有 console 錯誤。截圖放 tools/test/out/
 import { open } from "./harness.mjs";
 import fs from "node:fs";
 const OUT = new URL("./out/", import.meta.url).pathname; fs.mkdirSync(OUT, { recursive: true });
@@ -93,10 +93,6 @@ for (const vp of [{ name: "phone", viewport: { width: 390, height: 844 }, mobile
   check(b0 - b2 >= 8, `${vp.name}: 按住 − 1.5 秒應該連續減少(${b0} → ${b2})`);
   await page.waitForTimeout(300);
   check(await bv() === b2, `${vp.name}: 放開後還在減少`);
-  // 節拍器
-  await page.click("#metroBtn"); await page.waitForTimeout(800);
-  check(await page.evaluate(() => document.getElementById("metroLabel").textContent) === "停止", `${vp.name}: 節拍器沒有開始`);
-  await page.click("#metroBtn");
   // 熟練標記 → 重新整理後還在,也不會再問考試
   const key = await page.evaluate(() => window.__app.cur.key);
   await page.click('.mbtn[data-m="good"]');

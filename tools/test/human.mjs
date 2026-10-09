@@ -1,5 +1,5 @@
 // 模擬真人操作:用觸控(手機)或滑鼠(桌機)隨機做各種事,每一步之後檢查狀態一致、沒有錯誤。
-//   動作:切分頁、點選擇器、抽題、下一項、播放/停止(含連點)、節拍器(含連點)、按住 ±、拖速度、
+//   動作:切分頁、點選擇器、抽題、下一項、播放/停止(含連點)、按住 ±、拖速度、
 //         熟練標記、中英切換、主題、改考試系統/級數/組別、收起清單、點清單、換顯示的手、旋轉螢幕、重新整理、播放中做別的事
 //   檢查:沒有 console 錯誤;播放/節拍器狀態跟按鈕文字一致、不會兩份同時播;樂譜跟題目一致(指法數字都在);
 //         速度在 30–200 且跟滑桿一致;選到的分頁跟顯示的畫面一致;沒有橫向捲動;localStorage 讀得回來
@@ -34,8 +34,6 @@ async function run(vpName, vp){
     [10, "播放/停止", async () => tap("#playBtn")],
     [3, "連點播放", async () => { await tap("#playBtn"); await page.waitForTimeout(60); return tap("#playBtn"); }],
     [3, "連點播放三下", async () => { await tap("#playBtn"); await tap("#playBtn"); return tap("#playBtn"); }],
-    [5, "節拍器", async () => tap("#metroBtn")],
-    [2, "連點節拍器", async () => { await tap("#metroBtn"); return tap("#metroBtn"); }],
     [5, "速度 ±", async () => tap(pickOne(["#bpmUp", "#bpmDown"]))],
     [2, "按住速度", async () => { const b = await page.locator(pickOne(["#bpmUp", "#bpmDown"])).boundingBox(); if (!b) return false; await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await page.mouse.down(); await page.waitForTimeout(300 + rnd() * 1500); await page.mouse.up(); return true; }],
     [2, "拖速度", async () => { const b = await page.locator("#bpmRange").boundingBox(); if (!b) return false; await page.mouse.click(b.x + rnd() * b.width, b.y + b.height / 2); return true; }],
@@ -66,15 +64,14 @@ async function run(vpName, vp){
     const st = await page.evaluate(async () => {
       const A = window.__app, s = A.state, out = [];
       const vis = id => { const e = document.getElementById(id); return e && !e.hidden && e.offsetParent !== null; };
-      const playLbl = document.getElementById("playLabel").textContent, metroLbl = document.getElementById("metroLabel").textContent;
+      const playLbl = document.getElementById("playLabel").textContent;
       const stopTxt = ["停止", "Stop"], playTxt = ["播放示範", "Play demo"], prepTxt = ["準備中…", "Preparing…"];
       if (s.play && !stopTxt.includes(playLbl)) out.push(`播放中但按鈕寫「${playLbl}」`);
       if (!s.play && !s.starting && !playTxt.includes(playLbl)) out.push(`沒在播放但按鈕寫「${playLbl}」`);
       if (s.starting && !prepTxt.includes(playLbl)) out.push(`準備中但按鈕寫「${playLbl}」`);
-      if ((s.metro || s.metroStarting) && !stopTxt.includes(metroLbl)) out.push(`節拍器在跑但按鈕寫「${metroLbl}」`);
-      if (!s.metro && !s.metroStarting && stopTxt.includes(metroLbl)) out.push(`節拍器沒在跑但按鈕寫「${metroLbl}」`);
-      if (s.play && (s.metro || s.metroStarting)) out.push("示範和節拍器同時在跑");
-      if (!s.play && s.cursorOn) out.push("沒在播放但樂譜游標還亮著");
+      const pl = document.getElementById("playline");
+      if (A.cur && A.S.tab !== "hanon" && s.noteXs && pl.hidden) out.push("有樂譜但沒有播放軸");
+      if (pl && !pl.hidden) { const r = pl.getBoundingClientRect(), st = document.getElementById("stage").getBoundingClientRect(); if (r.left < st.left - 2 || r.right > st.right + 2) out.push("播放軸跑出樂譜紙張"); }
       if (!(s.bpm >= 30 && s.bpm <= 200)) out.push(`速度超出範圍 ${s.bpm}`);
       if (String(s.bpm) !== document.getElementById("bpmVal").textContent || String(s.bpm) !== document.getElementById("bpmRange").value) out.push(`速度顯示不一致 ${s.bpm} / ${document.getElementById("bpmVal").textContent} / ${document.getElementById("bpmRange").value}`);
       const tab = A.S.tab, selTab = document.querySelector('#tabbar [aria-selected="true"]').dataset.tab;

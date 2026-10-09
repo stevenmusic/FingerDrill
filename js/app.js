@@ -13,7 +13,7 @@ let SY = null, FG = null;
 const tabCur = {};       // 每個分頁目前的題目
 let cur = null, ex = null, show = "both", lastKey = null;
 let bpm = 60;
-let osmd = null, cursorSteps = [], cursorIdx = 0, cursorOn = false;
+let osmd = null;
 
 /* ── 主題 ── */
 function applyTheme(){
@@ -205,7 +205,7 @@ function renderExam(){
     `<button class="chip" data-cat="${c.id}" aria-pressed="${S.filter.cats.includes(c.id)}">${tr(c.zh, c.en)}</button>`).join("");
   $("excludeMastered").setAttribute("aria-pressed", String(S.filter.excludeMastered));
   $("verifyNote").textContent = tr("資料來源:", "Source: ") + sourceText(g) + tr("。", ". ")
-    + (g.verified ? tr("已由你核對。", "Checked by you.") : tr("依官方大綱逐項整理,尚待你核對(核對後把 data/syllabus.json 這一級的 verified 改成 true)。", "Transcribed item by item from the official syllabus; not yet checked by you (set verified to true in data/syllabus.json once checked)."))
+    + (g.verified ? tr("已逐項核對官方大綱。", "Checked item by item against the official syllabus.") : tr("尚未核對。", "Not yet checked."))
     + (sets ? tr(" Trinity:考生準備 A 組或 B 組,整組都要彈;每一項的手、力度、奏法是固定的。", " Trinity: prepare Set A or Set B and play every item; hands, dynamics and touch are fixed for each item.")
             : tr(" ABRSM:考官從清單點題,分手的項目會指定左手或右手。", " ABRSM: the examiner asks for items from the list and names the hand for hands-separately items."));
   $("examSummary").textContent = `${sys.name} · ${gradeLabel(g)}` + (sets ? ` · ${setName(S.exam.set)}` : "") + " · " + tr(`${examPool().length} 題`, `${examPool().length} items`);
@@ -271,7 +271,7 @@ $("examChip").onclick = () => switchTab("exam");
 
 /* ══ 分頁切換 ══ */
 function switchTab(tab){
-  stopPlayback(); stopMetronome();
+  stopPlayback();
   S.tab = tab; store.save();
   document.querySelectorAll("#tabbar button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
@@ -293,7 +293,7 @@ function showEmpty(){
   $("playBtn").disabled = true; document.querySelectorAll(".mbtn").forEach(b => { b.disabled = true; b.setAttribute("aria-pressed", "false"); });
   $("verifyBadge").hidden = true; $("poolCount").textContent = S.exam ? tr(`抽考範圍 ${examPool().length} 題`, `${examPool().length} items in range`) : "";
   if (osmd) { try { osmd.clear(); } catch (e) {} }
-  $("osmd").innerHTML = ""; osmd = null;
+  $("osmd").innerHTML = ""; osmd = null; noteXs = []; $("playline").hidden = true;
   $("paperMsg").textContent = tr("選一題之後,這裡會顯示五線譜與指法", "Pick an item to see the score and fingering here");
   $("scoreNote").hidden = true;
   syncTempoUI();
@@ -314,7 +314,7 @@ function setQuestion(q, tab){
     const g = examGrade();
     $("verifyBadge").hidden = false;
     $("verifyBadge").classList.toggle("ok", !!g.verified);
-    $("verifyBadge").textContent = g.verified ? tr("大綱已核對", "Syllabus checked") : tr("依官方大綱 · 待你核對", "From official syllabus · to check");
+    $("verifyBadge").textContent = g.verified ? tr("官方大綱", "Official syllabus") : tr("大綱未核對", "Syllabus not checked");
     $("poolCount").textContent = tab === "exam" ? tr(`抽考範圍 ${examPool().length} 題`, `${examPool().length} items in range`) : `${SY.systems[S.exam.system].name} ${gradeLabel(g)}`;
   } else { $("verifyBadge").hidden = true; $("poolCount").textContent = tr("自由練習", "Free practice"); }
   // 樂譜下方說明
@@ -346,28 +346,32 @@ document.querySelectorAll(".mbtn").forEach(b => b.onclick = () => {
   if (S.tab === "exam") renderExam(); else renderQuick(S.tab);
 });
 
-/* ── 樂譜 ── */
+/* ── 樂譜:一整行 + 播放軸(照 ScrollScore)──
+   noteXs:每一步(OSMD 游標的每個位置)的拍點與 x 座標;播放時依拍點在兩步之間內插,播放軸平順移動。
+   比畫面短的樂譜置中(#osmd margin:auto),比畫面長的可以左右滑;播放時讓目前的音停在畫面 25%(到結尾才讓播放軸走完) */
+const PLAYLINE_RATIO = 0.25;
+let noteXs = [];
 const syncHandSeg = segBind("handSeg", () => show, v => { show = v; stopPlayback(); renderScore(); });
 let renderSeq = 0;
+const scoreZoom = () => window.innerWidth < 600 ? 0.85 : window.innerWidth < 1000 ? 0.95 : 1.05;
 async function renderScore(){
   if (!cur) return;
   const seq = ++renderSeq;
   const xml = exerciseToMusicXML(ex, cur, show);
   if (!osmd) {
     osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay($("osmd"), {
-      backend: "svg", autoResize: true, drawTitle: false, drawSubtitle: false, drawComposer: false, drawPartNames: false,
-      drawMeasureNumbers: false, drawingParameters: "compacttight", followCursor: true,
-      cursorsOptions: [{ type: 0, color: "#F2B94B", alpha: 0.45, follow: true }]
+      backend: "svg", autoResize: false, drawTitle: false, drawSubtitle: false, drawComposer: false, drawPartNames: false,
+      drawMeasureNumbers: false, drawingParameters: "compacttight", renderSingleHorizontalStaffline: true,
+      cursorsOptions: [{ type: 0, color: "#F2B94B", alpha: 0, follow: false }]
     });
-    osmd.EngravingRules.StretchLastSystemLine = true;   // 最後一行也撐滿寬度(短的音階只有一行)
   }
   $("paperMsg").textContent = "";
   try {
     await osmd.load(xml);
     if (seq !== renderSeq) return;
-    osmd.zoom = window.innerWidth < 600 ? 0.72 : 0.9;
+    osmd.zoom = scoreZoom();
     osmd.render();
-    buildCursorSteps();
+    measureNotes();
   } catch (e) {
     console.error(e);
     $("paperMsg").textContent = tr("樂譜繪製失敗:", "Could not draw the score: ") + e.message;
@@ -375,23 +379,69 @@ async function renderScore(){
   window.__lastXml = xml;
   window.__scoreReady = (window.__scoreReady || 0) + 1;
 }
-function buildCursorSteps(){
-  cursorSteps = [];
+/* 走一遍 OSMD 游標,記下每一步的拍點與 x(相對 #osmd);再量樂譜上下範圍給播放軸 */
+function measureNotes(){
+  noteXs = [];
   const c = osmd.cursor;
-  c.reset();
+  c.show(); c.reset();
   let guard = 0;
-  while (!c.Iterator.EndReached && guard++ < 3000) { cursorSteps.push(c.Iterator.currentTimeStamp.RealValue * 4); c.next(); }
-  c.reset(); c.hide(); cursorOn = false;
+  while (!c.Iterator.EndReached && guard++ < 3000) {
+    const el = c.cursorElement;
+    noteXs.push({ beat: c.Iterator.currentTimeStamp.RealValue * 4, x: parseFloat(el.style.left) + parseFloat(el.style.width || 0) / 2 });
+    c.next();
+  }
+  c.reset(); c.hide();
+  $("scroll").scrollLeft = 0;
+  placePlaylineExtent();
+  movePlayline(0, false);
 }
-/* 旋轉螢幕 / 改視窗大小:樂譜重畫;播放中的話游標接回目前的位置 */
-window.addEventListener("resize", () => {
+/* 播放軸的上下:貼著譜線與音符(含加線、符桿)再往外留 1.2 個譜線間距(ScrollScore 的規則) */
+function placePlaylineExtent(){
+  const stage = $("stage"), pl = $("playline"), svg = document.querySelector("#osmd svg");
+  if (!svg) { pl.hidden = true; return; }
+  const sr = stage.getBoundingClientRect();
+  let top = Infinity, bot = -Infinity, space = 8;
+  const lines = svg.querySelectorAll(".staffline");
+  lines.forEach(g => { const r = g.getBoundingClientRect(); top = Math.min(top, r.top); bot = Math.max(bot, r.bottom); space = r.height / 4 || space; });
+  svg.querySelectorAll(".vf-stavenote, .vf-ledgers").forEach(g => { const r = g.getBoundingClientRect(); if (r.height) { top = Math.min(top, r.top); bot = Math.max(bot, r.bottom); } });
+  if (!isFinite(top)) { pl.hidden = true; return; }
+  const pad = space * 1.2;
+  pl.style.top = Math.max(0, top - sr.top - pad) + "px";
+  pl.style.bottom = Math.max(0, sr.bottom - bot - pad) + "px";
+  pl.hidden = false;
+}
+function xAtBeat(beat){
+  if (!noteXs.length) return 0;
+  if (beat <= noteXs[0].beat) return noteXs[0].x;
+  for (let i = 0; i + 1 < noteXs.length; i++) {
+    const a = noteXs[i], b = noteXs[i + 1];
+    if (beat < b.beat) return a.x + (b.x - a.x) * (beat - a.beat) / (b.beat - a.beat);
+  }
+  return noteXs[noteXs.length - 1].x;
+}
+/* follow = true:播放中,讓目前位置停在 25%(能捲才捲) */
+function movePlayline(beat, follow){
+  const scroll = $("scroll"), o = $("osmd"), pl = $("playline");
+  const x = o.offsetLeft + xAtBeat(beat);
+  if (follow) {
+    const max = scroll.scrollWidth - scroll.clientWidth;
+    scroll.scrollLeft = Math.max(0, Math.min(max, x - scroll.clientWidth * PLAYLINE_RATIO));
+  }
+  pl.style.transform = `translateX(${x - scroll.scrollLeft - 1}px)`;
+}
+$("scroll").addEventListener("scroll", () => { if (!play) movePlayline(0, false); }, { passive: true });
+/* 旋轉螢幕 / 改視窗大小:縮放改了就重畫;播放軸位置重算 */
+let lastZoom = null;
+const onStageResize = () => {
   if (!osmd || !cur) return;
-  const z = window.innerWidth < 600 ? 0.72 : 0.9;
-  if (osmd.zoom === z) return;
-  const wasOn = cursorOn, idx = cursorIdx;
-  osmd.zoom = z; osmd.render(); buildCursorSteps();
-  if (play && wasOn) { osmd.cursor.reset(); osmd.cursor.show(); for (let i = 0; i < idx; i++) osmd.cursor.next(); cursorIdx = idx; cursorOn = true; }
-});
+  const z = scoreZoom();
+  if (z !== lastZoom && lastZoom !== null) { lastZoom = z; osmd.zoom = z; osmd.render(); measureNotes(); return; }
+  lastZoom = z;
+  placePlaylineExtent();
+  if (!play) movePlayline(0, false);
+};
+window.addEventListener("resize", onStageResize);
+if (typeof ResizeObserver !== "undefined") new ResizeObserver(() => requestAnimationFrame(onStageResize)).observe($("stage"));
 
 /* ── 速度 ──
    考級題目:單位照大綱(♩ 或 𝅗𝅥),一拍幾個八分音符照 NOTES_PER_UNIT;自由練習:♩、一拍兩個八分音符 */
@@ -474,7 +524,6 @@ async function startPlayback(){
   if (!cur || starting) return;
   const token = starting = Date.now() + Math.random();
   const q0 = cur, show0 = show;
-  stopMetronome();
   const ctx = audio.ensureAudio();
   if (ctx.state === "suspended") await ctx.resume();
   $("playLabel").textContent = tr("準備中…", "Preparing…");
@@ -507,7 +556,6 @@ async function startPlayback(){
   }
   const totalClicks = Math.ceil(endBeat * beatSec / clickSec);
   for (let b = -count; b < totalClicks; b++) audio.playClick(t0 + b * clickSec, ((b % count) + count) % count === 0);
-  if (osmd) { osmd.cursor.reset(); osmd.cursor.show(); cursorIdx = 0; cursorOn = true; }
   play = { t0, beatSec, clickSec, endBeat, raf: 0 };
   $("playLabel").textContent = T("stop");
   $("playIcon").innerHTML = '<rect x="6" y="6" width="12" height="12" rx="1.5"/>';
@@ -516,7 +564,7 @@ async function startPlayback(){
     const now = audio.audioNow();
     const beat = (now - play.t0) / play.beatSec;
     showBeat((now - play.t0) / play.clickSec);
-    if (cursorOn) while (cursorIdx + 1 < cursorSteps.length && cursorSteps[cursorIdx + 1] <= beat + 0.02) { osmd.cursor.next(); cursorIdx++; }
+    movePlayline(Math.max(0, beat), true);
     if (beat > play.endBeat + 0.5) { stopPlayback(true); return; }
     play.raf = requestAnimationFrame(tick);
   };
@@ -525,55 +573,19 @@ async function startPlayback(){
 function stopPlayback(natural){
   starting = 0;
   if (play) { cancelAnimationFrame(play.raf); play = null; if (!natural) audio.stopAll(); }
-  if (osmd && cursorOn) { try { osmd.cursor.hide(); } catch (e) {} cursorOn = false; }
+  if (osmd && noteXs.length) { $("scroll").scrollLeft = 0; movePlayline(0, false); }
   $("playLabel").textContent = T("play");
   $("playIcon").innerHTML = '<path d="M7 4v16l13-8z"/>';
   showBeat(null);
 }
 $("playBtn").onclick = () => { if (play || starting) stopPlayback(); else startPlayback(); };
 
-/* ── 節拍器(獨立使用;排程往前看 0.12 秒)── */
-let metro = null, metroStarting = 0;
+/* ── 拍點燈號(示範播放時亮)── */
 function showBeat(click){
   const dots = $("beats").children, n = dots.length;
   const k = click == null || click < -n ? -1 : ((Math.floor(click + 1e-6) % n) + n) % n;
   for (let i = 0; i < dots.length; i++) dots[i].classList.toggle("on", i === k);
 }
-async function startMetronome(){
-  if (metro || metroStarting) return;
-  const token = metroStarting = Date.now() + Math.random();
-  stopPlayback();
-  const ctx = audio.ensureAudio();
-  if (ctx.state === "suspended") await ctx.resume();
-  try { await audio.loadClick(); } catch (e) { $("metroInfo").textContent = tr("節拍器音色載入失敗(需要網路)", "Could not load the metronome sound (needs internet)"); return; }
-  await audio.masterReady;
-  if (metroStarting !== token) return;   // 準備期間按了停止或開始播放
-  metroStarting = 0;
-  metro = { next: ctx.currentTime + 0.1, n: 0, timer: 0, raf: 0 };
-  const pump = () => {
-    if (!metro) return;
-    const spb = 60 / bpm, per = beatsPerBar();
-    while (metro.next < audio.audioNow() + 0.12) { audio.playClick(metro.next, metro.n % per === 0); metro.n++; metro.next += spb; }
-    audio.pruneScheduled();
-  };
-  pump();
-  metro.timer = setInterval(pump, 25);
-  const draw = () => {
-    if (!metro) return;
-    const spb = 60 / bpm, since = audio.audioNow() - (metro.next - spb);
-    showBeat(since >= 0 && since < spb * 0.5 ? (metro.n - 1) : null);
-    metro.raf = requestAnimationFrame(draw);
-  };
-  metro.raf = requestAnimationFrame(draw);
-  $("metroLabel").textContent = T("stop");
-}
-function stopMetronome(){
-  metroStarting = 0;
-  if (!metro) { $("metroLabel").textContent = T("metroStart"); return; }
-  clearInterval(metro.timer); cancelAnimationFrame(metro.raf); metro = null;
-  $("metroLabel").textContent = T("metroStart"); showBeat(null);
-}
-$("metroBtn").onclick = () => { if (metro || metroStarting) stopMetronome(); else { $("metroLabel").textContent = T("stop"); startMetronome(); } };
 
 /* ══ 第一次打開:在準備考試嗎? ══ */
 const obState = { system: "abrsm", grade: 1 };
@@ -601,7 +613,7 @@ async function init(){
   if (window.innerWidth < 600) $("listCard").open = false;
   if (S.exam) renderExam();
   window.__app = { get cur(){ return cur; }, get ex(){ return ex; }, get osmd(){ return osmd; },
-    get state(){ return { play: !!play, starting: !!starting, metro: !!metro, metroStarting: !!metroStarting, bpm, cursorOn, show, scheduled: audio.scheduledCount() }; }, setQuestion, examQuestions, examPool, switchTab, S, SY };
+    get state(){ return { play: !!play, starting: !!starting, bpm, show, scheduled: audio.scheduledCount(), noteXs: noteXs.length }; }, setQuestion, examQuestions, examPool, switchTab, S, SY };
   if (!S.onboarded) { switchTab("scale"); showOnboard(); }
   else switchTab(S.tab || (S.exam ? "exam" : "scale"));
   window.__stageReady = 1;

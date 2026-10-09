@@ -25,7 +25,7 @@ async function audit(page, vp, state){
     if (document.documentElement.scrollWidth > W + 1) out.push(`橫向捲動 ${document.documentElement.scrollWidth} > ${W}`);
     // 可見元素超出畫面(橫向捲動的 .opts 容器裡的除外;樂譜紙張 overflow hidden)
     for (const e of document.querySelectorAll("body *")) {
-      if (!vis(e) || e.closest(".opts") || e.closest("#osmd") || e.closest(".modal") && !e.closest(".modal-card")) continue;
+      if (!vis(e) || e.closest(".opts") || e.closest("#scroll") || e.id === "playline" || e.closest(".modal") && !e.closest(".modal-card")) continue;
       const r = e.getBoundingClientRect();
       if (r.left < -1 || r.right > W + 1) { out.push(`超出畫面:${e.tagName.toLowerCase()}${e.id ? "#" + e.id : ""}.${[...e.classList].join(".")} [${Math.round(r.left)},${Math.round(r.right)}]`); if (out.length > 12) break; }
     }
@@ -45,7 +45,13 @@ async function audit(page, vp, state){
     if (h1.right > hr.left + 1 && h1.bottom > hr.top && h1.top < hr.bottom) out.push(`頂欄重疊:品牌名到 ${Math.round(h1.right)},按鈕從 ${Math.round(hr.left)}`);
     // 樂譜不超出紙張
     const svg = document.querySelector("#osmd svg"), paper = document.querySelector(".paper");
-    if (svg && vis(paper) && svg.getBoundingClientRect().width > paper.getBoundingClientRect().width + 2) out.push(`樂譜比紙張寬 ${Math.round(svg.getBoundingClientRect().width)} > ${Math.round(paper.getBoundingClientRect().width)}`);
+    // 樂譜一整行:比紙張長時要能左右滑(#scroll),比紙張短時要置中
+    if (svg && vis(paper)) {
+      const sc = document.getElementById("scroll"), pr = paper.getBoundingClientRect(), gr = svg.getBoundingClientRect();
+      if (pr.right > W + 1) out.push("樂譜紙張超出畫面");
+      if (gr.width <= sc.clientWidth && Math.abs((gr.left + gr.right) / 2 - (pr.left + pr.right) / 2) > 3) out.push(`樂譜沒有置中(差 ${Math.round((gr.left + gr.right) / 2 - (pr.left + pr.right) / 2)}px)`);
+      if (gr.width > sc.clientWidth + 2 && sc.scrollWidth <= sc.clientWidth) out.push("樂譜比紙張長卻不能左右滑");
+    }
     // 對話框
     const mc = document.querySelector(".modal-card");
     if (mc && vis(mc)) { const r = mc.getBoundingClientRect(), m = document.querySelector(".modal"); if ((r.height > H + 1) && m.scrollHeight <= m.clientHeight) out.push(`對話框放不下又不能捲 ${Math.round(r.height)} > ${H}`); }

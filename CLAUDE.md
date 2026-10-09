@@ -13,7 +13,8 @@
 ## 絕不能做的事
 - **不要有 build step**:可以多檔(data/ 放 JSON、js/ 放 ES modules),但要能直接部署 GitHub Pages(main 根目錄)
 - **考試要求只能照官方大綱**:改 `tools/build/syllabus_src.py` 再執行它產生 `data/syllabus.json`;每一級有 source(頁碼)與 official;
-  `verified` 只有使用者核對過才改 true;README 的核對清單用 `node tools/build/checklist.mjs --fingerings` 重新產生
+  核對由我們自己做(使用者要求,不用請使用者核對):改了大綱資料要跑 `python3 tools/build/crosscheck.py <ABRSM txt> <Trinity txt>`(PDF 轉文字)
+  並對照 PDF 頁面圖片逐格核對手、力度、奏法、八度、速度,都對了才設 verified = true;README 的清單用 `node tools/build/checklist.mjs --fingerings` 重新產生
 - 官方大綱 PDF:ABRSM https://www.abrsm.org/en-gb/piano(Cloudflare 擋 curl,要用 Playwright 開頁面再在頁內 fetch);Trinity https://www.trinitycollege.com/resource/?id=9079
 - **不要用合成鋼琴音**:鋼琴讀 ScrollScore 的 Salamander 取樣(`raw.githubusercontent.com/stevenmusic/ScrollScore/main/piano/`),引擎照 HarmonyHands;節拍器用 Naked Drums 的 xstick 取樣
 - **哈農不要逐音手打**:用「樣式 + 移位規則」生成,再對照原譜驗證每首前兩小節與轉折處
@@ -23,6 +24,13 @@
 - 音名不查表:字母照級數推、升降照音高差算(`js/theory.js`)
 - 指法:音階、三和弦琶音查 `data/fingerings.json`(兩個八度上行字串),屬七/減七/半音階用 `js/fingering.js` 的規則
 - 旋律小調下行 = 自然小調,指法表另外寫 `rhDesc` / `lhDesc`
+
+## 版面與操作(使用者要求,適用所有工具)
+- 版面要適配所有尺寸:折疊機 280、SE 320 到 iPad、桌機、1080p,手機直式與橫式;`node layout.mjs` 19 種尺寸全部通過才 push
+- 要模擬真人操作確認沒有 bug:`node human.mjs 200 <種子>`(觸控亂點 + 每步狀態檢查),換幾個種子跑
+- 不做獨立節拍器(這是題庫練習,播放鈕就有預備拍與拍點);速度卡只調速度
+- 樂譜一律置中;排成一整行,播放軸照 ScrollScore(半透明金線 #B8860B、頂端三角、上下貼著樂譜 +1.2 譜線間距、停在 25%、樂譜捲動)
+- 快取:改了 css/js/data 要跑 `node tools/build/stamp.mjs`(index.html 的 ?v= 版本指紋;verify 會檢查),不然手機會拿到新舊混雜的檔案、按鈕失效
 
 ## 驗證(push 前)
 - `node tools/test/verify.mjs`:JSON 結構、所有調 × 題型 × 1–4 八度的音高/拼法/指法可彈性、MusicXML 時值

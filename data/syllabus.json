@@ -1,5 +1,5 @@
 {
- "_doc": ["考試系統的音階/琶音要求:依官方大綱逐項抄寫(official = true,來源與頁碼在每一級的 source);verified 等使用者核對後才改成 true。",
+ "_doc": ["考試系統的音階/琶音要求:依官方大綱逐項抄寫並核對(official / verified = true,來源與頁碼在每一級的 source;核對方式見 README)。",
   "ABRSM(mode = examiner):考官從清單點題。hands HS = 分手(考官指定左手或右手)、HT = 雙手同時;examinerForms = 小調形式由考官指定(6–8 級),否則考生自選 forms 之一;articulation 有兩種 = 考官選。",
   "Trinity(mode = sets):考生準備 A 組或 B 組,整組都要彈;每一項固定手(RH/LH/HT)、力度(dynamic)、奏法(articulation)、最低速度(tempo)。",
   "type:scale(motion similar/contrary;apart 3 = 相隔三度(十度)、6 = 相隔六度)、arpeggio(inversion 0/1/2;range 5th = 五度範圍)、chromatic(lhStart/rhStart;apartTenth = 右手高十度)、dom7(解決到主音)、dim7、wholetone、broken(分解和弦)、thirds/sixths(雙音音階)",
@@ -9,7 +9,7 @@
   "abrsm": {
    "name": "ABRSM", "fullName": "英國皇家音樂學院 ABRSM", "mode": "examiner", "syllabus": "Piano Practical Grades 2025 & 2026(2027 & 2028 要求相同)", "url": "https://www.abrsm.org/en-gb/piano", "tempoNote": "參考速度",
    "grades": [
-    {"grade": 0, "label": "初級(Initial)", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 20 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 20 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 54}, "arpeggio": {"unit": "q", "bpm": 52}},
+    {"grade": 0, "label": "初級(Initial)", "verified": true, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 20 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 20 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 54}, "arpeggio": {"unit": "q", "bpm": 52}},
      "items": [
       {"id": "maj", "cat": "scale", "type": "scale", "keys": ["C"], "quality": "major", "hands": "HS", "octaves": 1, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
       {"id": "min", "cat": "scale", "type": "scale", "keys": ["D"], "quality": "minor", "hands": "HS", "octaves": 1, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["natural", "harmonic", "melodic"], "examinerForms": false},
@@ -17,7 +17,7 @@
       {"id": "arp-maj", "cat": "arpeggio", "type": "arpeggio", "keys": ["C"], "quality": "major", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "range": "5th"},
       {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["D"], "quality": "minor", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "range": "5th"}
      ] },
-    {"grade": 1, "label": "1 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 23 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 23 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 60}, "arpeggio": {"unit": "q", "bpm": 58}},
+    {"grade": 1, "label": "1 級", "verified": true, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 23 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 23 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 60}, "arpeggio": {"unit": "q", "bpm": 58}},
      "items": [
       {"id": "maj-ht", "cat": "scale", "type": "scale", "keys": ["C"], "quality": "major", "hands": "HT", "octaves": 1, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
       {"id": "maj", "cat": "scale", "type": "scale", "keys": ["G", "F"], "quality": "major", "hands": "HS", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
@@ -26,7 +26,7 @@
       {"id": "arp-maj", "cat": "arpeggio", "type": "arpeggio", "keys": ["G"], "quality": "major", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 1},
       {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["A"], "quality": "minor", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 1}
      ] },
-    {"grade": 2, "label": "2 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 26 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 26 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 66}, "arpeggio": {"unit": "q", "bpm": 63}},
+    {"grade": 2, "label": "2 級", "verified": true, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 26 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 26 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 66}, "arpeggio": {"unit": "q", "bpm": 63}},
      "items": [
       {"id": "maj-ht", "cat": "scale", "type": "scale", "keys": ["G", "F"], "quality": "major", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
       {"id": "min-ht", "cat": "scale", "type": "scale", "keys": ["A", "D"], "quality": "minor", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["natural", "harmonic", "melodic"], "examinerForms": false},
@@ -37,7 +37,7 @@
       {"id": "arp-maj", "cat": "arpeggio", "type": "arpeggio", "keys": ["D", "A"], "quality": "major", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
       {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["E", "G"], "quality": "minor", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2}
      ] },
-    {"grade": 3, "label": "3 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 29 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 29 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 80}, "arpeggio": {"unit": "q", "bpm": 72}},
+    {"grade": 3, "label": "3 級", "verified": true, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 29 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 29 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 80}, "arpeggio": {"unit": "q", "bpm": 72}},
      "items": [
       {"id": "maj-ht", "cat": "scale", "type": "scale", "keys": ["D", "A"], "quality": "major", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
       {"id": "min-ht", "cat": "scale", "type": "scale", "keys": ["E", "G"], "quality": "minor", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": false},
@@ -50,7 +50,7 @@
       {"id": "arp-maj-hs", "cat": "arpeggio", "type": "arpeggio", "keys": ["Bb", "Eb"], "quality": "major", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
       {"id": "arp-min-hs", "cat": "arpeggio", "type": "arpeggio", "keys": ["B", "C"], "quality": "minor", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2}
      ] },
-    {"grade": 4, "label": "4 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 32 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 32 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 100}, "arpeggio": {"unit": "q", "bpm": 80}},
+    {"grade": 4, "label": "4 級", "verified": true, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 32 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 32 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "q", "bpm": 100}, "arpeggio": {"unit": "q", "bpm": 80}},
      "items": [
       {"id": "maj-ht", "cat": "scale", "type": "scale", "keys": ["Bb", "Eb"], "quality": "major", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
       {"id": "min-ht", "cat": "scale", "type": "scale", "keys": ["B", "C"], "quality": "minor", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": false},
@@ -64,7 +64,7 @@
       {"id": "arp-maj-hs", "cat": "arpeggio", "type": "arpeggio", "keys": ["B", "F#", "Ab"], "quality": "major", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
       {"id": "arp-min-hs", "cat": "arpeggio", "type": "arpeggio", "keys": ["F#", "F"], "quality": "minor", "hands": "HS", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2}
      ] },
-    {"grade": 5, "label": "5 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 35 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 35 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 60}, "arpeggio": {"unit": "h", "bpm": 44}},
+    {"grade": 5, "label": "5 級", "verified": true, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 35 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 35 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 60}, "arpeggio": {"unit": "h", "bpm": 44}},
      "items": [
       {"id": "maj", "cat": "scale", "type": "scale", "keys": ["A", "E", "B", "F#", "Db"], "quality": "major", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale"},
       {"id": "min", "cat": "scale", "type": "scale", "keys": ["F#", "C#", "G#", "Eb", "Bb"], "quality": "minor", "hands": "HT", "octaves": 2, "articulation": ["legato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": false},
@@ -77,7 +77,7 @@
       {"id": "arp-min", "cat": "arpeggio", "type": "arpeggio", "keys": ["F#", "C#", "G#", "Eb", "F", "Bb"], "quality": "minor", "hands": "HT", "articulation": ["legato"], "inversion": 0, "tempo": "arpeggio", "octaves": 2},
       {"id": "dim7", "cat": "seventh", "type": "dim7", "keys": ["B"], "hands": "HS", "octaves": 2, "articulation": ["legato"], "tempo": "arpeggio"}
      ] },
-    {"grade": 6, "label": "6 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 38 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 38 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 72}, "arpeggio": {"unit": "h", "bpm": 50}},
+    {"grade": 6, "label": "6 級", "verified": true, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 38 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 38 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 72}, "arpeggio": {"unit": "h", "bpm": 50}},
      "items": [
       {"id": "maj", "cat": "scale", "type": "scale", "keys": ["D", "F", "Ab", "B"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale"},
       {"id": "min", "cat": "scale", "type": "scale", "keys": ["D", "F", "G#", "B"], "quality": "minor", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": true},
@@ -90,7 +90,7 @@
       {"id": "dom7", "cat": "seventh", "type": "dom7", "keys": ["D", "F", "Ab", "B"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato"], "tempo": "arpeggio"},
       {"id": "dim7", "cat": "seventh", "type": "dim7", "keys": ["G#", "B"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "tempo": "arpeggio"}
      ] },
-    {"grade": 7, "label": "7 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 41 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 41 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 80}, "arpeggio": {"unit": "h", "bpm": 56}, "apart": {"unit": "h", "bpm": 60}, "thirdsLegato": {"unit": "h", "bpm": 46}, "doubleStaccato": {"unit": "h", "bpm": 54}},
+    {"grade": 7, "label": "7 級", "verified": true, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 41 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 41 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 80}, "arpeggio": {"unit": "h", "bpm": 56}, "apart": {"unit": "h", "bpm": 60}, "thirdsLegato": {"unit": "h", "bpm": 46}, "doubleStaccato": {"unit": "h", "bpm": 54}},
      "items": [
       {"id": "maj", "cat": "scale", "type": "scale", "keys": ["Db", "E", "G", "Bb"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale"},
       {"id": "min", "cat": "scale", "type": "scale", "keys": ["C#", "E", "G", "Bb"], "quality": "minor", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": true},
@@ -106,7 +106,7 @@
       {"id": "dom7", "cat": "seventh", "type": "dom7", "keys": ["Db", "E", "G", "Bb"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato"], "tempo": "arpeggio"},
       {"id": "dim7", "cat": "seventh", "type": "dim7", "keys": ["Bb", "E"], "hands": "HT", "octaves": 4, "articulation": ["legato"], "tempo": "arpeggio"}
      ] },
-    {"grade": 8, "label": "8 級", "verified": false, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 44 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 44 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 88}, "arpeggio": {"unit": "h", "bpm": 66}, "apart": {"unit": "h", "bpm": 60}, "thirdsLegato": {"unit": "h", "bpm": 52}, "doubleStaccato": {"unit": "h", "bpm": 54}},
+    {"grade": 8, "label": "8 級", "verified": true, "official": true, "source": "ABRSM Piano Practical Grades 2025 & 2026 第 44 頁(2027 & 2028 版相同)", "sourceEn": "ABRSM Piano Practical Grades 2025 & 2026, p. 44 (same in 2027 & 2028)", "tempo": {"scale": {"unit": "h", "bpm": 88}, "arpeggio": {"unit": "h", "bpm": 66}, "apart": {"unit": "h", "bpm": 60}, "thirdsLegato": {"unit": "h", "bpm": 52}, "doubleStaccato": {"unit": "h", "bpm": 54}},
      "items": [
       {"id": "maj", "cat": "scale", "type": "scale", "keys": ["C", "Eb", "F#", "A"], "quality": "major", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale"},
       {"id": "min", "cat": "scale", "type": "scale", "keys": ["C", "Eb", "F#", "A"], "quality": "minor", "hands": "HT", "octaves": 4, "articulation": ["legato", "staccato"], "motion": "similar", "tempo": "scale", "forms": ["harmonic", "melodic"], "examinerForms": true},
@@ -128,7 +128,7 @@
   "trinity": {
    "name": "Trinity", "fullName": "聖三一學院 Trinity College London", "mode": "sets", "syllabus": "Piano Syllabus from 2023(Technical work pathway)", "url": "https://www.trinitycollege.com/qualifications/music/grade-exams/piano", "tempoNote": "最低速度",
    "grades": [
-    {"grade": 0, "label": "初級(Initial)", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 29 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 29",
+    {"grade": 0, "label": "初級(Initial)", "verified": true, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 29 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 29",
      "sets": {
       "A": [
        {"type": "scale", "key": "C", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 1, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
@@ -143,7 +143,7 @@
        {"type": "broken", "key": "A", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "range": "5th", "quality": "minor", "cat": "broken", "id": "B4"}
       ]
      } },
-    {"grade": 1, "label": "1 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 31 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 31",
+    {"grade": 1, "label": "1 級", "verified": true, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 31 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 31",
      "sets": {
       "A": [
        {"type": "scale", "key": "F", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 1, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
@@ -160,7 +160,7 @@
        {"type": "broken", "key": "E", "hands": "LH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q.", "bpm": 50}, "octaves": 1, "quality": "minor", "cat": "broken", "id": "B5"}
       ]
      } },
-    {"grade": 2, "label": "2 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 33 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 33",
+    {"grade": 2, "label": "2 級", "verified": true, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 33 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 33",
      "sets": {
       "A": [
        {"type": "scale", "key": "Bb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
@@ -177,7 +177,7 @@
        {"type": "arpeggio", "key": "B", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 60}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B5"}
       ]
      } },
-    {"grade": 3, "label": "3 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 35 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 35",
+    {"grade": 3, "label": "3 級", "verified": true, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 35 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 35",
      "sets": {
       "A": [
        {"type": "scale", "key": "Eb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
@@ -194,7 +194,7 @@
        {"type": "arpeggio", "key": "C", "hands": "RH", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 70}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B5"}
       ]
      } },
-    {"grade": 4, "label": "4 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 37 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 37",
+    {"grade": 4, "label": "4 級", "verified": true, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 37 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 37",
      "sets": {
       "A": [
        {"type": "scale", "key": "E", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
@@ -213,7 +213,7 @@
        {"type": "arpeggio", "key": "C#", "hands": "RH", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 80}, "octaves": 2, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B6"}
       ]
      } },
-    {"grade": 5, "label": "5 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 39–40 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 39–40",
+    {"grade": 5, "label": "5 級", "verified": true, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 39–40 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 39–40",
      "sets": {
       "A": [
        {"type": "scale", "key": "Db", "hands": "HT", "dynamic": "f", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
@@ -234,7 +234,7 @@
        {"type": "dim7", "key": "B", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 90}, "octaves": 2, "cat": "seventh", "id": "B7"}
       ]
      } },
-    {"grade": 6, "label": "6 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 41–42 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 41–42",
+    {"grade": 6, "label": "6 級", "verified": true, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 41–42 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 41–42",
      "sets": {
       "A": [
        {"type": "scale", "key": "Bb", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
@@ -261,7 +261,7 @@
        {"type": "dom7", "key": "D", "hands": "HT", "dynamic": "p", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 100}, "octaves": 4, "quality": "major", "cat": "seventh", "id": "B10"}
       ]
      } },
-    {"grade": 7, "label": "7 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 43–44 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 43–44",
+    {"grade": 7, "label": "7 級", "verified": true, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 43–44 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 43–44",
      "sets": {
       "A": [
        {"type": "scale", "key": "E", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 130}, "octaves": 4, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
@@ -288,7 +288,7 @@
        {"type": "scale", "key": "E", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 110}, "octaves": 2, "quality": "major", "motion": "contrary", "cat": "contrary", "id": "B10"}
       ]
      } },
-    {"grade": 8, "label": "8 級", "verified": false, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 45–46 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 45–46",
+    {"grade": 8, "label": "8 級", "verified": true, "official": true, "source": "Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 45–46 頁", "sourceEn": "Trinity Piano Syllabus from 2023 (online edition, Feb 2026), Technical work p. 45–46",
      "sets": {
       "A": [
        {"type": "scale", "key": "F#", "hands": "HT", "dynamic": "cresc-dim", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 140}, "octaves": 4, "quality": "major", "motion": "similar", "cat": "scale", "id": "A1"},
@@ -314,7 +314,7 @@
        {"type": "arpeggio", "key": "B", "hands": "HT", "dynamic": "cresc-dim", "articulation": "staccato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "minor", "inversion": 0, "cat": "arpeggio", "id": "B8"},
        {"type": "dim7", "key": "Eb", "hands": "HT", "dynamic": "f", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "cat": "seventh", "id": "B9"},
        {"type": "dom7", "key": "F#", "hands": "HT", "dynamic": "cresc-dim", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 4, "quality": "major", "cat": "seventh", "id": "B10"},
-       {"type": "scale", "key": "F#", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 2, "quality": "minor", "motion": "contrary", "cat": "contrary", "forms": ["harmonic"], "id": "B11"}
+       {"type": "scale", "key": "F#", "hands": "HT", "dynamic": "mf", "articulation": "legato", "tempo": {"unit": "q", "bpm": 120}, "octaves": 2, "quality": "minor", "motion": "contrary", "cat": "contrary", "forms": ["harmonic", "melodic"], "id": "B11"}
       ]
      } }
    ]

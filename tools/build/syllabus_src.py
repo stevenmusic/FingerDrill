@@ -104,7 +104,7 @@ abrsm = [
 ]
 for g in abrsm:
     g["label"] = "初級(Initial)" if g["grade"] == 0 else f"{g['grade']} 級"
-    g["verified"] = False   # 你核對過才改 True(官方 PDF 逐項抄寫,official = True 表示來源是官方大綱)
+    g["verified"] = True    # 已核對:tools/build/crosscheck.py(PDF 文字逐級比對)+ 對照 PDF 頁面圖片逐格人工核對
     g["official"] = True
     pg = g.pop('page')
     g["source"] = f"ABRSM Piano Practical Grades 2025 & 2026 第 {pg} 頁(2027 & 2028 版相同)"
@@ -204,11 +204,11 @@ trinity = [
          T("thirds", "B", "LH", "mf", "legato", 2, 80, quality=MAJ), T("thirds", "C", "RH", "mf", "legato", 2, 80, quality=MIN, forms=["harmonic"]),
          ar("F#", MAJ, "HT", "p", "legato", 4, 120), ar("B", MIN, "HT", CD, "staccato", 4, 120),
          T("dim7", "Eb", "HT", "f", "legato", 4, 120), T("dom7", "F#", "HT", CD, "legato", 4, 120, quality=MAJ),
-         sc("F#", MIN, "HT", "mf", "legato", 2, 120, form="harmonic", motion="contrary")]}},
+         sc("F#", MIN, "HT", "mf", "legato", 2, 120, motion="contrary")]}},
 ]
 for g in trinity:
     g["label"] = "初級(Initial)" if g["grade"] == 0 else f"{g['grade']} 級"
-    g["verified"] = False   # 你核對過才改 True(官方 PDF 逐項抄寫,official = True 表示來源是官方大綱)
+    g["verified"] = True    # 已核對:tools/build/crosscheck.py(PDF 文字逐級比對)+ 對照 PDF 頁面圖片逐格人工核對
     g["official"] = True
     pg = g.pop('page')
     g["source"] = f"Trinity Piano Syllabus from 2023(2026 年 2 月線上版)Technical work 第 {pg} 頁"
@@ -218,7 +218,7 @@ for g in trinity:
     g["sets"] = g.pop("sets")
 
 doc = [
- "考試系統的音階/琶音要求:依官方大綱逐項抄寫(official = true,來源與頁碼在每一級的 source);verified 等使用者核對後才改成 true。",
+ "考試系統的音階/琶音要求:依官方大綱逐項抄寫並核對(official / verified = true,來源與頁碼在每一級的 source;核對方式見 README)。",
  "ABRSM(mode = examiner):考官從清單點題。hands HS = 分手(考官指定左手或右手)、HT = 雙手同時;examinerForms = 小調形式由考官指定(6–8 級),否則考生自選 forms 之一;articulation 有兩種 = 考官選。",
  "Trinity(mode = sets):考生準備 A 組或 B 組,整組都要彈;每一項固定手(RH/LH/HT)、力度(dynamic)、奏法(articulation)、最低速度(tempo)。",
  "type:scale(motion similar/contrary;apart 3 = 相隔三度(十度)、6 = 相隔六度)、arpeggio(inversion 0/1/2;range 5th = 五度範圍)、chromatic(lhStart/rhStart;apartTenth = 右手高十度)、dom7(解決到主音)、dim7、wholetone、broken(分解和弦)、thirds/sixths(雙音音階)",

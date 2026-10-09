@@ -27,7 +27,7 @@ const STR = {
   draw: ["隨機抽考", "Random question"], next: ["下一項", "Next"], play: ["播放示範", "Play demo"], stop: ["停止", "Stop"],
   good: ["熟練", "Mastered"], weak: ["待加強", "Needs work"],
   scoreTitle: ["樂譜與指法", "Score & fingering"], handRH: ["右手", "RH"], handLH: ["左手", "LH"], handBoth: ["雙手", "Both"],
-  metroTitle: ["節拍器", "Metronome"], metroStart: ["開始", "Start"], bpmReset: ["回到考試速度", "Exam tempo"],
+  metroTitle: ["速度", "Tempo"], bpmReset: ["回到考試速度", "Exam tempo"],
   bpmDown: ["慢 1(按住連續減少)", "Slower by 1 (hold to repeat)"], bpmUp: ["快 1(按住連續增加)", "Faster by 1 (hold to repeat)"],
   tempo: ["速度", "Tempo"],
   listTitle: ["本級要求", "Grade requirements"],
