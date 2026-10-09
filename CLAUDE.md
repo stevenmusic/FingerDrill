@@ -26,18 +26,15 @@
 - 旋律小調下行 = 自然小調,指法表另外寫 `rhDesc` / `lhDesc`
 
 ## 版面與操作(使用者要求,適用所有工具)
-- 版面要適配所有尺寸:折疊機 280、SE 320 到 iPad、桌機、1080p,手機直式與橫式;`node layout.mjs` 19 種尺寸全部通過才 push
-- 中英文版面要一模一樣(使用者要求):英文比較長就縮短文字(縮寫、拿掉重複的字),中文也可以精簡;固定行高 1.4;會跟著字寬換行的清單改用固定格子。`node bilingual.mjs` 全部通過才 push
-- 要模擬真人操作確認沒有 bug:`node human.mjs 200 <種子>`(觸控亂點 + 每步狀態檢查),換幾個種子跑
+- 版面要適配所有尺寸:折疊機 280、SE 320 到 iPad、桌機、1080p,手機直式與橫式;可用 `node layout.mjs` 檢查 19 種尺寸
+- 中英文版面要一模一樣(使用者要求):英文比較長就縮短文字(縮寫、拿掉重複的字),中文也可以精簡;固定行高 1.4;會跟著字寬換行的清單改用固定格子。可用 `node bilingual.mjs` 檢查
 - 不做獨立節拍器(這是題庫練習,播放鈕就有預備拍與拍點);速度卡只調速度
 - 樂譜一律置中;排成一整行,播放軸照 ScrollScore(半透明金線 #B8860B、頂端三角、上下貼著樂譜 +1.2 譜線間距、停在 25%、樂譜捲動)
 - 快取:改了 css/js/data 要跑 `node tools/build/stamp.mjs`(index.html 的 ?v= 版本指紋;verify 會檢查),不然手機會拿到新舊混雜的檔案、按鈕失效
 
-## 驗證(push 前)
-- `node tools/test/verify.mjs`:JSON 結構、所有調 × 題型 × 1–4 八度的音高/拼法/指法可彈性、MusicXML 時值
-- `cd tools/test && node smoke.mjs`:手機/桌機,ABRSM/Trinity 1–8 級抽題、畫譜(每個指法數字都畫出來)、播放、節拍器、localStorage、沒有橫向捲動
-- `cd tools/test && node notation.mjs`:大綱每一題實際用 OSMD 畫出來,比對臨時記號/指法/8va
-- 改畫面要用 `node shot.mjs '<題目 JSON>' 名稱` 截圖看過(手機直式、橫向、桌機)
+## 工作方式(使用者要求:省 token)
+- 改好就 push,不用每次跑整套測試、不用審查;只有改了 css/js/data 一定要跑 `node tools/build/stamp.mjs`(版本指紋,不然手機拿到新舊混雜的檔案)
+- 測試工具留著備用(大改動或使用者要求時才跑):`tools/test/` 的 verify / smoke / notation / layout / bilingual / human / shot
 
 ## 記譜規則(js/musicxml.js,verify.mjs 另外獨立檢查)
 - 符桿:一組連桿看離中線最遠的音,中線以上(含)朝下;指法右手在上、左手在下(不跟符桿走)

@@ -186,7 +186,8 @@ body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
 /* ── 題目卡:學生把 iPhone 放在譜架上看,字要大 ── */
 .quiz{display:flex;flex-direction:column;gap:10px}
 .quiz-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.quiz-top .count{font-size:var(--fs-xs);color:var(--muted);margin-left:auto;white-space:nowrap}
+.quiz-top .count{font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;margin-left:auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.quiz-top{flex-wrap:nowrap;min-height:36px}
 .q-title{font-family:"Noto Serif TC",serif;font-weight:700;color:var(--gold-bright);
   font-size:clamp(26px, 7.4vw, 40px);line-height:1.2;letter-spacing:.02em;overflow-wrap:anywhere}
 .q-title:not(.empty){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;
@@ -204,15 +205,20 @@ body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
 .play-round:disabled{opacity:.35}
 .play-round svg{fill:currentColor}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.q-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
+.q-actions{display:flex;gap:6px;align-items:center;flex:none;margin-left:auto}
+.q-actions .btn{height:36px;padding:0 14px;font-size:var(--fs-md)}
 .q-actions:not(:has(> button:not([hidden]))){display:none}
-#drawBtn{height:46px;font-size:var(--fs-lg);padding:0 22px}
+#drawBtn{height:36px}
 .mastery{display:flex;gap:6px;flex:none}
 .mbtn{width:40px;height:40px;padding:0;justify-content:center;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--muted-bright);
   font-family:inherit;font-size:var(--fs-md);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .mbtn[data-m="good"][aria-pressed="true"]{background:var(--teal-fill);border-color:var(--teal-fill);color:var(--on-fill);font-weight:700}
 .mbtn[data-m="weak"][aria-pressed="true"]{background:#E8A25B;border-color:#E8A25B;color:var(--on-fill);font-weight:700}
-.loading{font-size:var(--fs-2xs);color:var(--muted)}
+.quiz{position:relative}
+/* 載入取樣的提示浮在卡片右上角,不佔版面 */
+.loading{position:absolute;top:6px;right:16px;font-size:var(--fs-2xs);color:var(--muted);pointer-events:none}
+/* 自由練習:上方這一列沒有東西就整列收掉(題目直接在最上面) */
+.quiz-top:not(:has(#verifyBadge:not([hidden]))):not(:has(.q-actions button:not([hidden]))):has(.count:empty){display:none}
 
 /* ── 樂譜 ── */
 .score-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
@@ -284,7 +290,6 @@ body.light{background:
 /* 手機橫向 */
 @media (max-height:420px){
   .q-title{font-size:24px}
-  #drawBtn{height:38px}
 }
 /* iPhone 瀏海/底部安全區 */
 header{padding-top:max(10px, env(safe-area-inset-top))}
@@ -365,8 +370,13 @@ header{z-index:60}
   .fields{grid-template-columns:1fr}
   .seg button{padding:0 4px;font-size:var(--fs-sm)}
   .q-actions{gap:6px}
-  .mbtn{width:36px;height:36px}
+  .mbtn{width:34px;height:34px}
+  .mastery{gap:4px}
+  .q-row{gap:6px}
+  .q-tags{gap:4px}
+  .q-tag{padding:3px 6px}
   .play-round{width:46px;height:46px}
+  .quiz-top .count{display:none}
 }
 /* 選項全部看得到:換行,不橫向捲(捲動看不出還有東西) */
 .opts{flex-wrap:wrap;overflow:visible}

@@ -14,7 +14,7 @@
 <title>FingerDrill 手指特訓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=ca45290b00">
+<link rel="stylesheet" href="css/app.css?v=4dc57675a6">
 </head>
 <body>
 <header>
@@ -95,6 +95,14 @@
       <span class="verify-badge" id="verifyBadge" hidden></span>
       <span class="loading" id="loadingMsg"></span>
       <span class="count" id="poolCount"></span>
+      <div class="q-actions">
+      <button class="btn primary" id="drawBtn" hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>
+        <span class="btn-label" id="drawLabel">隨機抽考</span></button>
+      <button class="btn" id="nextBtn" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        <span class="btn-label" data-i18n="next">下一項</span></button>
+    </div>
     </div>
     <!-- 右撇子:播放鈕在題目右邊,通過/待加強在標籤右邊(只用圖示) -->
     <div class="q-head">
@@ -111,14 +119,6 @@
         <button class="mbtn" data-m="weak" aria-pressed="false" disabled data-i18n-attr="aria-label:weak,title:weak">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18.4A2 2 0 0 0 3.5 21h17a2 2 0 0 0 1.7-2.6L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></button>
       </div>
-    </div>
-    <div class="q-actions">
-      <button class="btn primary" id="drawBtn" hidden>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>
-        <span class="btn-label" id="drawLabel">隨機抽考</span></button>
-      <button class="btn" id="nextBtn" hidden>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
-        <span class="btn-label" data-i18n="next">下一項</span></button>
     </div>
   </section>
 
@@ -194,9 +194,9 @@
   </div>
 </div>
 
-<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=9e867e2b7e","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=8406a4ab8a","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/i18n.js":"./js/i18n.js?v=5edf1bb796","./js/musicxml.js":"./js/musicxml.js?v=da0302b9be","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=33ba27966e","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
+<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=1abc72a8f0","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=8406a4ab8a","./js/fingering.js":"./js/fingering.js?v=c2c27a6754","./js/i18n.js":"./js/i18n.js?v=5edf1bb796","./js/musicxml.js":"./js/musicxml.js?v=da0302b9be","./js/store.js":"./js/store.js?v=ce42266a71","./js/syllabus.js":"./js/syllabus.js?v=33ba27966e","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
 <script type="application/json" id="fdVersions">{"data/fingerings.json":"c5b57cffa5","data/syllabus.json":"30b5443db2"}</script>
 <script src="vendor/opensheetmusicdisplay.min.js?v=fe43ac6f19"></script>
-<script type="module" src="js/app.js?v=9e867e2b7e"></script>
+<script type="module" src="js/app.js?v=1abc72a8f0"></script>
 </body>
 </html>

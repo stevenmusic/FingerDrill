@@ -320,7 +320,7 @@ function setQuestion(q, tab){
     $("verifyBadge").classList.toggle("ok", !!g.verified);
     $("verifyBadge").textContent = g.verified ? tr("官方大綱", "Official syllabus") : tr("大綱未核對", "Syllabus not checked");
     $("poolCount").textContent = tab === "exam" ? tr(`抽考範圍 ${examPool().length} 題`, `${examPool().length} items in range`) : `${SY.systems[S.exam.system].name} ${gradeLabel(g)}`;
-  } else { $("verifyBadge").hidden = true; $("poolCount").textContent = tr("自由練習", "Free practice"); }
+  } else { $("verifyBadge").hidden = true; $("poolCount").textContent = ""; }
   // 樂譜下方說明
   const notes = [], noteFns = notes;   // 每一則是函式:中英文各跑一次
   if (q.type === "thirds" || q.type === "sixths") notes.push(() => tr("雙音音階的指法有好幾種系統(各版本不同),這裡只標音、不標指法;請依老師或考試用書的指法練習。", "Double-note fingerings differ between editions, so only the notes are shown; use your teacher's or exam book's fingering."));
