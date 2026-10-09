@@ -31,7 +31,8 @@ function layoutHand(notes, sub){
   let pos = 0;
   notes.forEach((n, i) => {
     const last = i === notes.length - 1;
-    if (!last) { events.push({ n, pos, dur: step, short: true }); pos += step; return; }
+    // 音可以自己帶時值(哈農的附點節奏:n.dur 幾個 division、n.ntype / n.ndots 音符種類、n.hook 十六分音符的半截連桿)
+    if (!last) { const d = n.dur || step; events.push({ n, pos, dur: d, short: true, ntype: n.ntype, ndots: n.ndots || 0, hook: n.hook }); pos += d; return; }
     const { len, rests } = finalAndRests(pos);
     const [type, dots] = typeOf(len);
     events.push({ n, pos, dur: len, type, dots, short: false, offbeat: (pos % DIV) !== 0 });
@@ -59,8 +60,8 @@ export function ledgers(step, clef){
   return step > TOP[clef] ? Math.floor((step - TOP[clef]) / 2) : step < BOT[clef] ? Math.floor((BOT[clef] - step) / 2) : 0;
 }
 /* 一組音(連桿一組、或最後的長音)= 換譜號與 8va 的單位 */
-function unitsOf(measures, sub){
-  const g = sub === 2 ? 24 : 12, units = [];
+function unitsOf(measures, sub, perBar){
+  const g = perBar ? 1e9 : sub === 2 ? 24 : 12, units = [];
   measures.forEach((evs, mi) => {
     const groups = new Map();
     for (const e of evs) if (!e.rest) { const k = e.short ? "s" + Math.floor(e.pos / g) : "l" + e.pos; (groups.get(k) || groups.set(k, []).get(k)).push(e); }
@@ -71,11 +72,11 @@ function unitsOf(measures, sub){
 /* 譜號:預設右手高音、左手低音;目前的譜號要超過 2 條加線、另一個譜號比較少才換;
    換走之後,原本的譜號只要 1 條加線以內就換回來(不會來回跳)
    還是超過 3 條加線 → 8va(往上)/ 8vb(往下),譜上畫低/高一個八度 */
-function clefPlan(measures, hand, sub){
+function clefPlan(measures, hand, sub, perBar){
   const home = hand === "rh" ? "G" : "F", other = c => c === "G" ? "F" : "G";
   let cur = home;
   const plan = new Map(), shift = new Map();
-  for (const u of unitsOf(measures, sub)) {
+  for (const u of unitsOf(measures, sub, perBar)) {
     const steps = u.flatMap(e => e.n.with ? [staffStep(e.n), staffStep(e.n.with)] : [staffStep(e.n)]);
     const led = c => Math.max(...steps.map(st => ledgers(st, c)));
     if (cur !== home && led(home) <= 1) cur = home;
@@ -102,14 +103,19 @@ function noteXml(e, opts){
   const n = e.n;
   x += `<pitch><step>${LETTERS[n.letter]}</step>${n.alter ? `<alter>${n.alter}</alter>` : ""}<octave>${n.octave}</octave></pitch>`;
   x += `<duration>${e.dur}</duration><voice>${voice}</voice>`;
-  if (e.short) {
+  if (e.short && e.ntype) x += `<type>${e.ntype}</type>` + "<dot/>".repeat(e.ndots);
+  else if (e.short) {
     x += `<type>${sub === 4 ? "16th" : "eighth"}</type>`;
     if (sub === 3) x += "<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>";
   } else x += `<type>${e.type}</type>` + "<dot/>".repeat(e.dots);
   if (accidental) x += `<accidental>${accidental}</accidental>`;
   if (e.type !== "whole") x += `<stem>${stem}</stem>`;
   x += `<staff>${staff}</staff>`;
-  if (beam) { x += `<beam number="1">${beam}</beam>`; if (sub === 4) x += `<beam number="2">${beam}</beam>`; }
+  if (beam) {
+    x += `<beam number="1">${beam}</beam>`;
+    if (e.ntype) { if (e.hook) x += `<beam number="2">${e.hook}</beam>`; }
+    else if (sub === 4) x += `<beam number="2">${beam}</beam>`;
+  }
   x += "<notations>";
   // 三連音的「3」只標在每隻手的第一組,之後照慣例省略(simile),不跟指法數字擠在一起
   if (tuplet === "start" || tuplet === "stop") x += `<tuplet type="${tuplet}" bracket="no" show-number="${tuplet === "start" && opts.firstTuplet ? "actual" : "none"}" placement="${stem === "up" ? "above" : "below"}"/>`;
@@ -159,7 +165,7 @@ export function exerciseToMusicXML(ex, q, show = "both"){
   BAR = ex.bar || 48;
   const hands = show === "both" ? ["rh", "lh"] : [show];
   const lay = hands.map(h => layoutHand(ex[h], ex.sub));
-  const cp = hands.map((h, i) => clefPlan(lay[i], h, ex.sub));
+  const cp = hands.map((h, i) => clefPlan(lay[i], h, ex.sub, ex.clefPerBar));   // 哈農:一小節一個譜號(不在小節中間來回換)
   const plans = cp.map(c => c.plan);
   const clefNow = hands.map(() => null);
   const tupletShown = hands.map(() => false);
@@ -226,11 +232,13 @@ export function exerciseToMusicXML(ex, q, show = "both"){
 /* 播放時間表:每個音的起點(拍)與長度(拍),兩手同一份時間軸;雙音兩個音一起 */
 export function playbackEvents(ex, q, show = "both"){
   const out = [], step = 1 / ex.sub;
-  const handEvents = (notes, hand) => notes.forEach((n, i) => {
-    const last = i === notes.length - 1, ev = { beat: i * step, len: last ? 2 : step, hand, idx: i };
+  const handEvents = (notes, hand) => { let pos = 0; notes.forEach((n, i) => {
+    const d = n.dur ? n.dur / DIV : step;
+    const last = i === notes.length - 1, ev = { beat: pos, len: last ? 2 : d, hand, idx: i };
+    pos += d;
     out.push({ ...ev, midi: n.midi });
     if (n.with) out.push({ ...ev, midi: n.with.midi, chord: true });
-  });
+  }); };
   for (const h of show === "both" ? ["rh", "lh"] : [show]) handEvents(ex[h], h);
   return out;
 }

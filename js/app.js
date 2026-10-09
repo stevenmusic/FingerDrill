@@ -115,13 +115,14 @@ const PICKERS = {
   },
   /* 哈農:曲目 1–20、調(12 個大調,同一個樣式移調)、手 */
   hanon: {
-    defaults: { no: 1, key: "C", hands: "HT" },
+    defaults: { no: 1, key: "C", hands: "HT", rhythm: "even" },
     rows: () => [
       ["no", tr("曲目", "No."), Array.from({ length: 20 }, (_, i) => [i + 1, String(i + 1)])],
       ["key", tr("調", "Key"), keyOpts(MAJ_KEYS)],
-      ["hands", tr("手", "Hands"), HANDS()]
+      ["hands", tr("手", "Hands"), HANDS()],
+      ["rhythm", tr("節奏", "Rhythm"), [["even", tr("原譜", "Even")], ["dotted", tr("附點", "Dotted")], ["reverse", tr("反附點", "Rev. dotted")]]]
     ],
-    toQ: p => ({ type: "hanon", no: Number(p.no), tonic: p.key, hands: p.hands, articulation: "legato", motion: "similar", cat: "hanon" })
+    toQ: p => ({ type: "hanon", no: Number(p.no), tonic: p.key, hands: p.hands, rhythm: p.rhythm, articulation: "legato", motion: "similar", cat: "hanon" })
   }
 };
 S.pick = S.pick || {};
@@ -151,7 +152,7 @@ for (const tab of ["scale", "arp", "hanon"]) {
 function freeQuestion(tab){
   const q = PICKERS[tab].toQ(S.pick[tab]);
   q.tempo = { unit: tab === "hanon" ? "q16" : "q", bpm: S.freeBpm[tab] }; q.free = true; q.sub = tab === "hanon" ? 4 : 2;
-  q.key = tab === "hanon" ? `hanon|${q.no}|${q.tonic}|${q.hands}` : masteryKey(q);
+  q.key = tab === "hanon" ? `hanon|${q.no}|${q.tonic}|${q.hands}|${q.rhythm}` : masteryKey(q);
   return q;
 }
 function loadFree(tab){ setQuestion(freeQuestion(tab), tab); }
@@ -495,7 +496,7 @@ if (typeof ResizeObserver !== "undefined") new ResizeObserver(() => requestAnima
 /* ── 速度 ──
    考級題目:單位照大綱(♩ 或 𝅗𝅥),一拍幾個八分音符照 NOTES_PER_UNIT;自由練習:♩、一拍兩個八分音符 */
 function unitOf(){ return cur && cur.tempo ? cur.tempo.unit : "q"; }
-function beatsPerBar(){ return unitOf() === "h" || unitOf() === "q16" ? 2 : 4; }
+function beatsPerBar(){ return ex && ex.time ? ex.time[0] : unitOf() === "h" ? 2 : 4; }
 function syncTempoUI(){
   const u = unitOf();
   $("bpmVal").textContent = bpm; $("bpmRange").value = bpm;
@@ -507,7 +508,7 @@ function syncTempoUI(){
     $("bpmPct").textContent = pct === 100 ? tr("考試速度", "exam") : tr(`考試速度的 ${pct}%`, `${pct}% of exam tempo`);
     $("examTempo").textContent = tr(`考試速度 ${UNIT_SYM[u]} = ${examT.bpm}(八分音符,每拍 ${NOTES_PER_UNIT[u]} 個${u === "q." ? ",三連音" : ""})`,
       `Exam tempo ${UNIT_SYM[u]} = ${examT.bpm} (${NOTES_PER_UNIT[u]} ${u === "q." ? "triplet " : ""}quavers per beat)`);
-  } else if (u === "q16") { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("每拍 4 個十六分音符 · 原譜 60–108", "4 semiquavers per beat · Hanon: 60–108"); }
+  } else if (u === "q16") { $("bpmPct").textContent = ""; $("examTempo").textContent = ex && ex.rhythm !== "even" ? tr("每拍 2 個音(附點節奏)", "2 notes per beat (dotted)") : tr("每拍 4 個十六分音符 · 原譜 60–108", "4 semiquavers per beat · Hanon: 60–108"); }
   else { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("每拍 2 個八分音符", "2 quavers per beat"); }
   $("beats").innerHTML = "<i class=\"first\"></i>" + "<i></i>".repeat(beatsPerBar() - 1);
 }

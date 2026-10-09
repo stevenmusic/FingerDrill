@@ -46,7 +46,18 @@ function noteAt(scale, tonicOct, deg){
 function tonicOctave(t){ return [4, 5, 6].includes(t.letter) ? 2 : 3; }   // letter:0=C … 4=G 5=A 6=B
 
 /* 產生一首:{ rh, lh, fifths, sub: 4, bar: 24 } */
-export function buildHanon(no, key = "C"){
+/* 節奏變化(哈農練習常用的附點練法):兩個音一組
+   dotted = 附點八分 + 十六分(長短)、reverse = 十六分 + 附點八分(短長);每組 = 一拍,原本 2/4 的一小節變成 4/4 的一小節 */
+export const HANON_RHYTHMS = ["even", "dotted", "reverse"];
+function applyRhythm(notes, rhythm){
+  const L = { dur: 9, ntype: "eighth", ndots: 1 }, S = { dur: 3, ntype: "16th", ndots: 0 };
+  notes.forEach((n, i) => {
+    if (i === notes.length - 1) return;
+    const first = i % 2 === 0, long = rhythm === "dotted" ? first : !first;
+    Object.assign(n, long ? L : S, long ? {} : { hook: first ? "forward hook" : "backward hook" });
+  });
+}
+export function buildHanon(no, key = "C", rhythm = "even"){
   const H = HANON[no], t = parseNote(key), scale = spellScale(t, INTERVALS.major), oct = tonicOctave(t);
   const mk = (deg, finger, shift) => { const n = noteAt(scale, oct + shift, deg); return { ...n, midi: midiOf(n), finger }; };
   const out = { rh: [], lh: [] };
@@ -60,5 +71,9 @@ export function buildHanon(no, key = "C"){
     else e = mk(0, null, shift);
     out[hand].push(e);
   }
-  return { rh: out.rh, lh: out.lh, fifths: keyFifths(key, "major"), sub: 4, bar: 24, time: [2, 4] };
+  if (rhythm === "dotted" || rhythm === "reverse") {
+    applyRhythm(out.rh, rhythm); applyRhythm(out.lh, rhythm);
+    return { rh: out.rh, lh: out.lh, fifths: keyFifths(key, "major"), sub: 4, bar: 48, time: [4, 4], rhythm, clefPerBar: true };
+  }
+  return { rh: out.rh, lh: out.lh, fifths: keyFifths(key, "major"), sub: 4, bar: 24, time: [2, 4], rhythm: "even", clefPerBar: true };
 }
