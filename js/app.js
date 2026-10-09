@@ -464,15 +464,22 @@ function xAtBeat(beat){
   }
   return noteXs[noteXs.length - 1].x;
 }
-/* follow = true:播放中,讓目前位置停在 25%(能捲才捲) */
+/* follow = true:播放中,讓目前位置停在 25%(能捲才捲)。
+   播放中用 transform 移動樂譜(小數像素、GPU),不改 scrollLeft:scrollLeft 只能整數,
+   播放軸跟樂譜各自四捨五入會差 1px 來回跳 → 看起來在抖 */
 function movePlayline(beat, follow){
   const scroll = $("scroll"), o = $("osmd"), pl = $("playline");
   const x = o.offsetLeft + xAtBeat(beat);
   if (follow) {
-    const max = scroll.scrollWidth - scroll.clientWidth;
-    scroll.scrollLeft = Math.max(0, Math.min(max, x - scroll.clientWidth * PLAYLINE_RATIO));
+    if (scroll.scrollLeft) scroll.scrollLeft = 0;
+    const max = Math.max(0, o.offsetLeft + o.offsetWidth - scroll.clientWidth);
+    const shift = Math.max(0, Math.min(max, x - scroll.clientWidth * PLAYLINE_RATIO));
+    o.style.transform = shift ? `translate3d(${-shift}px,0,0)` : "";
+    pl.style.transform = `translate3d(${x - shift - 1}px,0,0)`;
+    return;
   }
-  pl.style.transform = `translateX(${x - scroll.scrollLeft - 1}px)`;
+  if (o.style.transform) o.style.transform = "";
+  pl.style.transform = `translate3d(${x - scroll.scrollLeft - 1}px,0,0)`;
 }
 $("scroll").addEventListener("scroll", () => { if (!play) movePlayline(0, false); }, { passive: true });
 /* 旋轉螢幕 / 改視窗大小:縮放改了就重畫;播放軸位置重算 */
@@ -567,8 +574,9 @@ $("bpmReset").onclick = () => { if (cur && !cur.free) { S.tempoPct = 100; store.
 const VEL = { f: 92, p: 42, mf: 68, "cresc-dim": 60 };
 function demoVel(){ return cur && cur.dynamic ? VEL[cur.dynamic] : 64; }
 let samplesReady = false;
+/* 回傳這一題的取樣有沒有載好(以前用全域的 samplesReady:上一題載好、這一題載失敗時會靜音播放) */
 async function preloadSamples(){
-  if (!cur) return;
+  if (!cur) return false;
   try {
     audio.ensureAudio();
     const notes = ["rh", "lh"].flatMap(h => ex[h].flatMap(n => n.with ? [n, n.with] : [n])).map(n => ({ midi: n.midi, vel: demoVel() }));
@@ -577,8 +585,10 @@ async function preloadSamples(){
     await audio.loadClick().catch(() => {});
     samplesReady = true;
     $("loadingMsg").textContent = "";
+    return true;
   } catch (e) {
     $("loadingMsg").textContent = tr("鋼琴取樣載入失敗(需要網路,之後會存在裝置上)", "Could not load piano samples (needs internet once; then cached on this device)");
+    return false;
   }
 }
 
@@ -590,13 +600,13 @@ async function startPlayback(){
   const q0 = cur, show0 = show;
   const ctx = audio.ensureAudio();
   if (ctx.state === "suspended") await ctx.resume();
-  $("playLabel").textContent = tr("準備中…", "Preparing…");
-  await preloadSamples();
+  $("playLabel").textContent = tr("準備中…", "Preparing…"); $("playBtn").classList.add("busy");
+  const loaded = await preloadSamples();
   await audio.masterReady;
   // 準備期間換了題目、換了手、按了停止 → 不播
-  if (starting !== token || cur !== q0 || show !== show0) { if (starting === token) { starting = 0; $("playLabel").textContent = T("play"); } return; }
-  starting = 0;
-  if (!samplesReady) { $("playLabel").textContent = T("play"); return; }
+  if (starting !== token || cur !== q0 || show !== show0) { if (starting === token) { starting = 0; $("playLabel").textContent = T("play"); } $("playBtn").classList.remove("busy"); return; }
+  starting = 0; $("playBtn").classList.remove("busy");
+  if (!loaded) { $("playLabel").textContent = T("play"); return; }
   const events = playbackEvents(ex, cur, show);
   const u = unitOf(), clickSec = 60 / bpm, noteSec = clickSec / NOTES_PER_UNIT[u];
   const beatSec = noteSec * ex.sub;                      // 樂譜上一個四分音符的秒數
@@ -635,14 +645,23 @@ async function startPlayback(){
   play.raf = requestAnimationFrame(tick);
 }
 function stopPlayback(natural){
-  starting = 0;
+  starting = 0; $("playBtn").classList.remove("busy");
   if (play) { cancelAnimationFrame(play.raf); play = null; if (!natural) audio.stopAll(); }
   if (osmd && noteXs.length) { $("scroll").scrollLeft = 0; movePlayline(0, false); }
   $("playLabel").textContent = T("play");
   $("playIcon").innerHTML = '<path d="M7 4v16l13-8z"/>';
   showBeat(null);
 }
-$("playBtn").onclick = () => { if (play || starting) stopPlayback(); else startPlayback(); };
+/* 準備中再按一次不取消(以前會取消 → 看起來像「按了沒反應」);播放中按 = 停止 */
+$("playBtn").onclick = () => { if (play) stopPlayback(); else if (!starting) startPlayback(); };
+/* 禁止連點放大(iOS 有時不理 touch-action / user-scalable):300ms 內的第二下取消預設動作,自己補一次 click */
+let lastTouchEnd = 0;
+document.addEventListener("touchend", e => {
+  const now = Date.now();
+  if (now - lastTouchEnd < 300) { e.preventDefault(); const t = e.target.closest("button, .opt, .chip, [role=tab]"); if (t && !t.disabled) t.click(); }
+  lastTouchEnd = now;
+}, { passive: false });
+document.addEventListener("gesturestart", e => e.preventDefault());
 
 /* ── 拍點燈號(示範播放時亮)── */
 function showBeat(click){
