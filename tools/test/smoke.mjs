@@ -8,7 +8,7 @@ let bad = 0; const check = (c, m) => { if (!c) { bad++; console.log("✗ " + m);
 const scoreInfo = page => page.evaluate(() => {
   const ex = window.__app.ex, show = document.querySelector('#handSeg [aria-pressed="true"]').dataset.v;
   const hands = show === "both" ? ["rh", "lh"] : [show];
-  const want = hands.reduce((s, h) => s + ex[h].filter(n => n.finger).length, 0);
+  const want = hands.reduce((s, h) => s + ex[h].reduce((c, x) => c + !!x.finger + !!(x.with && x.with.finger), 0), 0);
   const got = [...document.querySelectorAll("#osmd svg text")].filter(t => /^[1-5]$/.test(t.textContent.trim())).length;
   return { svg: !!document.querySelector("#osmd svg"), want, got, msg: document.getElementById("paperMsg").textContent, title: document.getElementById("qTitle").textContent };
 });

@@ -83,7 +83,7 @@ async function run(vpName, vp){
       if (A.cur) {
         for (let t = 0; t < 60 && !document.querySelector("#osmd svg"); t++) await new Promise(r => setTimeout(r, 50));
         const ex = A.ex, hands = s.show === "both" ? ["rh", "lh"] : [s.show];
-        const want = hands.reduce((n, h) => n + ex[h].filter(x => x.finger).length, 0);
+        const want = hands.reduce((n, h) => n + ex[h].reduce((c, x) => c + !!x.finger + !!(x.with && x.with.finger), 0), 0);
         const got = [...document.querySelectorAll("#osmd svg text")].filter(t => /^[1-5]$/.test(t.textContent.trim())).length;
         if (want !== got) out.push(`指法數字 ${got} / ${want}(${document.getElementById("qTitle").textContent})`);
         if (document.getElementById("paperMsg").textContent) out.push("樂譜訊息:" + document.getElementById("paperMsg").textContent);

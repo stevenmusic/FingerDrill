@@ -169,3 +169,39 @@ export function cyclicFingers(pcsCycle, hand, n){
 
 /* ── 分解和弦(三個音一組:原位 1-3-5、第一轉位 1-2-5、第二轉位 1-3-5;左手 5-3-1、5-3-1、5-2-1)── */
 export const BROKEN_FINGERS = { rh: [[1, 3, 5], [1, 2, 5], [1, 3, 5]], lh: [[5, 3, 1], [5, 3, 1], [5, 2, 1]] };
+
+/* ── 雙音音階指法 ──
+   三度:照哈農《The Virtuoso Pianist》第 52 首「Scales in Thirds, in the Keys Most Used」(IMSLP #00876)。
+   每個調都是同一個 7 格循環,只是起點 p(級數)不同;右手、左手用同一個起點:
+     右手(下方音, 上方音):(1,2)(1,3)(2,4)(3,5)(1,3)(2,4)(3,5)
+     左手(下方音, 上方音):(5,3)(4,2)(3,1)(2,1)(5,3)(4,2)(3,1)
+   原譜印的調:C G D A E F B♭ E♭ A♭ 大調、A D G 小調(和聲)。其他調照同一個循環,起點選「右手拇指(下方音)都落在白鍵」的,
+   同分時依序偏好主音、第 4 級、第 2 級……
+   右手起音(最低那組)如果剛好是 (3,5),改用 (2,4) 起(原譜 B♭ E♭ A♭ 都這樣寫)。
+   六度:哈農第 48 首(斷奏六度)的寫法——右手下方 1、上方 5(上方是黑鍵用 4);左手下方 5(黑鍵用 4)、上方 1 */
+const THIRDS_R = [[1, 2], [1, 3], [2, 4], [3, 5], [1, 3], [2, 4], [3, 5]];
+const THIRDS_L = [[5, 3], [4, 2], [3, 1], [2, 1], [5, 3], [4, 2], [3, 1]];
+// 原譜的起點(級數 0 = 主音)
+const THIRDS_P = { "major:C": 0, "major:G": 0, "major:D": 0, "major:A": 3, "major:E": 3, "major:F": 0, "major:Bb": 1, "major:Eb": 1, "major:Ab": 1,
+  "minor:A": 0, "minor:D": 3, "minor:G": 3 };
+export function thirdsStart(scale, quality, tonicName){
+  const k = `${quality === "minor" ? "minor" : "major"}:${tonicName}`;
+  if (k in THIRDS_P) return { p: THIRDS_P[k], source: "hanon" };
+  const black = n => isBlack(pcOf(n));
+  let best = null;
+  for (const p of [0, 3, 1, 4, 5, 2, 6]) {
+    const nb = [0, 1, 4].filter(o => black(scale[(p + o) % 7])).length;
+    if (!best || nb < best.nb) best = { p, nb };
+  }
+  return { p: best.p, source: "rule" };
+}
+/* 一串三度(下方音的級數 degs)→ 每組 [下方指, 上方指] */
+export function thirdsFingers(degs, p, hand){
+  const T = hand === "rh" ? THIRDS_R : THIRDS_L;
+  const f = degs.map(d => T[((d - p) % 7 + 7) % 7].slice());
+  if (hand === "rh" && f[0][0] === 3 && f[0][1] === 5) f[0] = [2, 4];
+  return f;
+}
+export function sixthsFingers(pairs, hand){
+  return pairs.map(([lo, hi]) => hand === "rh" ? [1, isBlack(pcOf(hi)) ? 4 : 5] : [isBlack(pcOf(lo)) ? 4 : 5, 1]);
+}

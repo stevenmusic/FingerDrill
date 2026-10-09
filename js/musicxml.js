@@ -131,7 +131,9 @@ function noteXml(e, opts){
     x += e.short ? `<type>${sub === 4 ? "16th" : "eighth"}</type>` + (sub === 3 ? "<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>" : "") : `<type>${e.type}</type>` + "<dot/>".repeat(e.dots);
     if (opts.accidentalWith) x += `<accidental>${opts.accidentalWith}</accidental>`;
     if (e.type !== "whole") x += `<stem>${stem}</stem>`;
-    x += `<staff>${staff}</staff></note>`;
+    x += `<staff>${staff}</staff>`;
+    if (w.finger) x += `<notations><technical><fingering placement="${place}">${w.finger}</fingering></technical></notations>`;
+    x += "</note>";
   }
   return x;
 }

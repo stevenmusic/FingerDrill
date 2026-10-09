@@ -334,7 +334,9 @@ function setQuestion(q, tab){
   } else { $("verifyBadge").hidden = true; $("poolCount").textContent = ""; }
   // 樂譜下方說明
   const notes = [], noteFns = notes;   // 每一則是函式:中英文各跑一次
-  if (q.type === "thirds" || q.type === "sixths") notes.push(() => tr("雙音音階的指法有好幾種系統(各版本不同),這裡只標音、不標指法;請依老師或考試用書的指法練習。", "Double-note fingerings differ between editions, so only the notes are shown; use your teacher's or exam book's fingering."));
+  if (q.type === "thirds") notes.push(() => tr("三度指法照哈農第 52 首(Scales in Thirds)" + (["C", "G", "D", "A", "E", "F", "Bb", "Eb", "Ab"].includes(q.tonic) && q.quality !== "minor" || ["A", "D", "G"].includes(q.tonic) && q.quality === "minor" ? "。" : ";這個調原譜沒有印,照同一套循環推算。") + "雙音指法各版本不同,老師另有指定就照老師的。",
+    "Thirds fingering follows Hanon No. 52 (Scales in Thirds)" + (["C", "G", "D", "A", "E", "F", "Bb", "Eb", "Ab"].includes(q.tonic) && q.quality !== "minor" || ["A", "D", "G"].includes(q.tonic) && q.quality === "minor" ? ". " : "; this key isn't printed there, so the same cycle is applied. ") + "Editions differ; follow your teacher if they say otherwise."));
+  if (q.type === "sixths") notes.push(() => tr("六度指法照哈農第 48 首(斷奏六度):右手 1–5、左手 5–1,黑鍵用 4。雙音指法各版本不同,老師另有指定就照老師的。", "Sixths fingering follows Hanon No. 48 (detached sixths): RH 1–5, LH 5–1, 4 on black keys. Editions differ; follow your teacher if they say otherwise."));
   if (q.type === "broken") notes.push(() => tr("分解和弦的型態依一般教材的寫法(原位 → 第一轉位 → 第二轉位再下行),請以 Trinity《Piano Scales & Arpeggios》核對。", "Broken-chord pattern follows common teaching books (root → 1st → 2nd inversion and back); check it against Trinity's Piano Scales & Arpeggios."));
   if (q.type === "dom7") notes.push(() => tr("屬七和弦琶音最後解決到主音(照 ABRSM 大綱的譜例)。", "The dominant 7th resolves on the tonic (as in the ABRSM syllabus example)."));
   if (q.apart === 3) notes.push(() => tr("相隔三度:右手比左手高十度(三度 + 八度),左手從主音、右手從第三級開始。", "A third apart: RH plays a tenth above LH — LH starts on the tonic, RH on the 3rd."));

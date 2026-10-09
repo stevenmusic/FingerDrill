@@ -255,7 +255,9 @@ function checkQuestion(q, label){
       for (let i = 0; i + 1 < notes.length; i++) ok(Math.abs(notes[i + 1].midi - notes[i].midi) === 1, `${label} ${hand}: 半音階不是半音`);
     }
     if (q.type === "thirds" || q.type === "sixths") notes.forEach((n, i) => { const iv = n.with.midi - n.midi; ok(q.type === "thirds" ? iv === 3 || iv === 4 : iv === 8 || iv === 9, `${label} ${hand} 第 ${i + 1} 個雙音音程 ${iv}`); });
-    checkPlayable(notes, hand, label, q);
+    // 雙音:單音的指法規則不適用;改查每組兩個手指(右手下方指 < 上方指、左手相反)
+    if (q.type === "thirds" || q.type === "sixths") notes.forEach((n, i) => ok(n.finger >= 1 && n.with.finger <= 5 && (hand === "rh" ? n.finger < n.with.finger : n.finger > n.with.finger), `${label} ${hand} 第 ${i + 1} 組雙音指法 ${n.finger}/${n.with.finger}`));
+    else checkPlayable(notes, hand, label, q);
   }
   // 兩手的距離
   const d0 = ex.rh[0].midi - ex.lh[0].midi;
@@ -274,7 +276,7 @@ function checkQuestion(q, label){
     checkNotation(xml, `${label} ${show}`, ex.sub);
     const hands = show === "both" ? ["rh", "lh"] : [show];
     const expN = hands.reduce((s, h) => s + ex[h].reduce((a, n) => a + (n.with ? 2 : 1), 0), 0);
-    const expF = hands.reduce((s, h) => s + ex[h].filter(n => n.finger).length, 0);
+    const expF = hands.reduce((s, h) => s + ex[h].reduce((c, x) => c + !!x.finger + !!(x.with && x.with.finger), 0), 0);
     const nNotes = (xml.match(/<pitch>/g) || []).length, nF = (xml.match(/<fingering /g) || []).length;
     ok(nNotes === expN && nF === expF, `${label} ${show}: 音數 ${nNotes}/${expN}、指法 ${nF}/${expF}`);
     const beg = (xml.match(/<beam number="1">begin/g) || []).length, end = (xml.match(/<beam number="1">end/g) || []).length;

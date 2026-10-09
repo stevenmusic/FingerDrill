@@ -7,7 +7,7 @@ import {
 } from "./theory.js";
 import { tr, getLang } from "./i18n.js";
 import {
-  scaleFingersFrom, triadFingers, fourNoteFingers, chromaticFingers, arpGroupFingers, cyclicFingers, BROKEN_FINGERS
+  scaleFingersFrom, triadFingers, fourNoteFingers, chromaticFingers, arpGroupFingers, cyclicFingers, BROKEN_FINGERS, thirdsStart, thirdsFingers, sixthsFingers
 } from "./fingering.js";
 import { buildHanon } from "./hanon.js";
 
@@ -185,11 +185,13 @@ function buildDouble(FG, q){
     const desc = walkCycle(dn, lowDeg, base, 7 * n, 1).slice(0, -1).reverse();
     const lower = asc.concat(desc);
     const degOf = i => i <= 7 * n ? (lowDeg + i) % 7 : (lowDeg + (14 * n - i)) % 7;
-    out[h] = lower.map((ln, i) => {
+    const pairs = lower.map((ln, i) => {
       const cyc = i <= 7 * n ? up : dn;
-      const upper = placeAtLeast(cyc[(degOf(i) + step) % 7], midiOf(ln) + 1);
-      return { ...ln, midi: midiOf(ln), finger: null, with: { ...upper, midi: midiOf(upper) } };
+      return [ln, placeAtLeast(cyc[(degOf(i) + step) % 7], midiOf(ln) + 1)];
     });
+    // 指法:三度照哈農第 52 首的循環(fingering.js),六度照哈農第 48 首
+    const fs = q.type === "thirds" ? thirdsFingers(lower.map((_, i) => degOf(i)), thirdsStart(up, q.quality, q.tonic).p, h) : sixthsFingers(pairs, h);
+    out[h] = pairs.map(([ln, upper], i) => ({ ...ln, midi: midiOf(ln), finger: fs[i][0], with: { ...upper, midi: midiOf(upper), finger: fs[i][1] } }));
   }
   return out;
 }

@@ -23,7 +23,7 @@ const res = await page.evaluate(async () => {
         if (!gve.notes[0].sourceNote.Pitch) continue;
         gotAcc += gve.vfStaveNote.modifiers.filter(m => /accidental/i.test(m.getCategory())).length;
       }
-      const ex = A.ex, wantF = ex.rh.filter(x => x.finger).length + ex.lh.filter(x => x.finger).length;
+      const ex = A.ex, wantF = [...ex.rh, ...ex.lh].reduce((c, x) => c + !!x.finger + !!(x.with && x.with.finger), 0);
       const fingers = [...document.querySelectorAll("#osmd svg text")].filter(t => /^[1-5]$/.test(t.textContent.trim())).length;
       if (wantAcc !== gotAcc) bad.push(`${sys} ${q.key}: 臨時記號 OSMD ${gotAcc} / XML ${wantAcc}`);
       if (fingers !== wantF) bad.push(`${sys} ${q.key}: 指法 ${fingers} / ${wantF}`);
