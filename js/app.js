@@ -61,9 +61,11 @@ const OCTS = n => [1, 2, 3, 4].slice(0, n).map(o => [o, tr(o + "八度", o + " o
 /* 級數名稱:初級 / 1 級(Initial / Grade 1) */
 const gradeLabel = g => g.grade === 0 ? tr("初級", "Initial") : tr(g.grade + " 級", "Grade " + g.grade);
 
+// 拍點:♪ = 每 2 個音打一下(預設)、♩ = 每 4 個音(一拍)打一下;樂譜不變,只換節拍器的拍點與速度數字
+const PULSE = () => ["pulse", tr("拍點", "Pulse"), [["e", tr("♪ 每 2 音", "♪ per 2")], ["q", tr("♩ 每 4 音", "♩ per 4")]]];
 const PICKERS = {
   scale: {
-    defaults: { kind: "major", form: "harmonic", motion: "similar", key: "C", octaves: 2, hands: "HT", art: "legato" },
+    defaults: { kind: "major", form: "harmonic", motion: "similar", key: "C", octaves: 2, hands: "HT", art: "legato", pulse: "e" },
     rows: p => {
       const tonal = p.kind === "major" || p.kind === "minor";
       const SIM = ["similar", tr("同向", "Similar")], CON = ["contrary", tr("反向", "Contrary")];
@@ -79,7 +81,8 @@ const PICKERS = {
         ["key", tonal ? tr("調", "Key") : tr("起音", "Start"), keyOpts(p.kind === "major" ? MAJ_KEYS : p.kind === "minor" ? MIN_KEYS : STARTS)],
         ["octaves", tr("範圍", "Range"), OCTS(maxOct)],
         ["hands", tr("手", "Hands"), hands],
-        ["art", tr("奏法", "Touch"), ARTS()]
+        ["art", tr("奏法", "Touch"), ARTS()],
+        PULSE()
       ].filter(Boolean);
     },
     toQ: p => {
@@ -96,14 +99,15 @@ const PICKERS = {
     }
   },
   arp: {
-    defaults: { kind: "major", inv: 0, key: "C", octaves: 2, hands: "HT", art: "legato" },
+    defaults: { kind: "major", inv: 0, key: "C", octaves: 2, hands: "HT", art: "legato", pulse: "e" },
     rows: p => [
       ["kind", tr("種類", "Type"), [["major", tr("大三和弦", "Major")], ["minor", tr("小三和弦", "Minor")], ["dom7", tr("屬七", "Dom. 7th")], ["dim7", tr("減七", "Dim. 7th")], ["broken", tr("分解和弦", "Broken")]]],
       (p.kind === "major" || p.kind === "minor") && ["inv", tr("轉位", "Position"), [[0, tr("原位", "Root")], [1, tr("第一轉位", "1st inv.")], [2, tr("第二轉位", "2nd inv.")]]],
       ["key", p.kind === "dim7" ? tr("起音", "Start") : tr("調", "Key"), keyOpts(p.kind === "minor" ? MIN_KEYS : p.kind === "dim7" ? STARTS : MAJ_KEYS)],
       p.kind !== "broken" && ["octaves", tr("範圍", "Range"), OCTS(4)],
       ["hands", tr("手", "Hands"), HANDS()],
-      ["art", tr("奏法", "Touch"), ARTS()]
+      ["art", tr("奏法", "Touch"), ARTS()],
+      p.kind !== "broken" && PULSE()   // 分解和弦是八分音符,一拍本來就打一下
     ].filter(Boolean),
     toQ: p => {
       const q = { hands: p.hands, octaves: p.kind === "broken" ? 1 : p.octaves, articulation: p.art, motion: "similar", tonic: p.key };
@@ -162,7 +166,11 @@ function freeQuestion(tab){
   const q = PICKERS[tab].toQ(S.pick[tab]);
   // 哈農:S.freeBpm.hanon 一律記 ♩ 的速度;拍點選 ♪ 時顯示 ×2
   const eighth = tab === "hanon" && S.pick.hanon.pulse === "e";
-  q.tempo = { unit: tab === "hanon" ? (eighth ? "e16" : "q16") : "q", bpm: S.freeBpm[tab] * (eighth ? 2 : 1) }; q.free = true; q.sub = tab === "hanon" ? 4 : 2;
+  // 音階、琶音:S.freeBpm 一律記 ♪(每 2 音)的速度;拍點選 ♩ 時顯示 ÷2
+  const beat4 = tab !== "hanon" && S.pick[tab].pulse === "q" && q.type !== "broken";
+  q.tempo = tab === "hanon" ? { unit: eighth ? "e16" : "q16", bpm: S.freeBpm[tab] * (eighth ? 2 : 1) }
+    : { unit: beat4 ? "q16" : "q", bpm: beat4 ? Math.max(30, Math.round(S.freeBpm[tab] / 2)) : S.freeBpm[tab] };
+  q.free = true; q.sub = tab === "hanon" ? 4 : 2;
   q.key = tab === "hanon" ? `hanon|${q.no}|${q.tonic}|${q.hands}|${q.rhythm}` : masteryKey(q);
   return q;
 }
@@ -550,9 +558,16 @@ function measureNotes(){
   const c = osmd.cursor;
   c.show(); c.reset();
   let guard = 0;
+  // 播放軸對準符頭正中央(以前用游標的左緣:游標沒有 style.width,播放軸一直比音符偏左一個符頭,最後一個長音時看起來卡在兩個音之間)
+  const ox = $("osmd").getBoundingClientRect().x;
   while (!c.Iterator.EndReached && guard++ < 3000) {
     const el = c.cursorElement;
-    noteXs.push({ beat: c.Iterator.currentTimeStamp.RealValue * 4, x: parseFloat(el.style.left) + parseFloat(el.style.width || 0) / 2 });
+    let xs = [];
+    try {
+      xs = c.GNotesUnderCursor().map(n => { const g = n.getSVGGElement && n.getSVGGElement(); const h = g && (g.querySelector(".vf-notehead") || g); const r = h && h.getBoundingClientRect(); return r && r.width ? r.x - ox + r.width / 2 : null; }).filter(v => v != null);
+    } catch (e) {}
+    const x = xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : parseFloat(el.style.left) + (el.offsetWidth || el.width || 0) / 2;
+    noteXs.push({ beat: c.Iterator.currentTimeStamp.RealValue * 4, x });
     c.next();
   }
   c.reset(); c.hide();
@@ -619,6 +634,12 @@ function fitTitle(){
 }
 const onStageResize = () => {
   fitTitle();
+  // 播放中轉向:直式 → 橫式 收起分頁列、樂譜貼到工具列下;橫式 → 直式 放回分頁列
+  if (play) {
+    const land = document.body.classList.contains("land-play");
+    if (isPhoneLand() && !land) { revealScore(); setTimeout(() => { if (play) revealScore(); }, 400); }   // 樂譜放大重畫後再對齊一次
+    else if (!isPhoneLand() && land) { document.body.classList.remove("land-play"); landScroll = null; revealScore(); }
+  }
   if (!osmd || !cur) return;
   if (fitLandZoom()) return;
   const z = scoreZoom();
@@ -658,6 +679,7 @@ function syncTempoUI(){
       : tr(`考試速度 ${UNIT_SYM[u]} = ${examT.bpm}(八分音符,每拍 ${NOTES_PER_UNIT[u]} 個${u === "q." ? ",三連音" : ""})`,
       `Exam tempo ${UNIT_SYM[u]} = ${examT.bpm} (${NOTES_PER_UNIT[u]} ${u === "q." ? "triplet " : ""}quavers per beat)`);
   } else if (u === "e16") { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("拍點打在 ♪(每 2 個音)· 原譜 ♩ 60–108 = ♪ 120–216", "Clicks on ♪ (every 2 notes) · Hanon ♩ 60–108 = ♪ 120–216"); }
+  else if (u === "q16" && cur && cur.type !== "hanon") { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("拍點 ♩ = 每 4 個音", "Click ♩ = every 4 notes"); }
   else if (u === "q16") { $("bpmPct").textContent = ""; $("examTempo").textContent = ex && ex.rhythm !== "even" ? tr("每拍 4 個音(附點節奏)· 原譜 60–108", "4 notes per beat (dotted) · Hanon: 60–108") : tr("每拍 4 個十六分音符 · 原譜 60–108", "4 semiquavers per beat · Hanon: 60–108"); }
   else { $("bpmPct").textContent = ""; $("examTempo").textContent = ex && ex.timeHidden ? tr("拍點 ♪ = 每 2 個音", "Click ♪ = every 2 notes") : tr("每拍 2 個八分音符", "2 quavers per beat"); }
   $("beats").innerHTML = "<i class=\"first\"></i>" + "<i></i>".repeat(beatsPerBar() - 1);
@@ -667,7 +689,7 @@ function maxBpm(){ return 240; }   // 速度上限一律 240(使用者要求)
 function setBpm(v, fromUser){
   bpm = Math.max(30, Math.min(maxBpm(), Math.round(v)));
   if (fromUser && cur) {
-    if (cur.free) { S.freeBpm[S.tab] = unitOf() === "e16" ? bpm / 2 : bpm; cur.tempo.bpm = bpm; }
+    if (cur.free) { S.freeBpm[S.tab] = unitOf() === "e16" ? bpm / 2 : S.tab !== "hanon" && unitOf() === "q16" ? Math.min(240, bpm * 2) : bpm; cur.tempo.bpm = bpm; }
     else S.tempoPct = Math.round(100 * bpm / cur.tempo.bpm);
     store.save();
   }

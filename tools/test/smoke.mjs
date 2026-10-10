@@ -84,6 +84,7 @@ for (const vp of [{ name: "phone", viewport: { width: 390, height: 844 }, mobile
   await page.click("#playBtn");
   // 速度 −/+
   const bv = () => page.evaluate(() => Number(document.getElementById("bpmVal").textContent));
+  await page.evaluate(() => { const r = document.getElementById("bpmRange"); r.value = 100; r.dispatchEvent(new Event("input")); });   // 選項掃過後可能停在最慢
   const b0 = await bv(); await page.click("#bpmUp"); const b1 = await bv();
   check(b1 === Math.min(200, b0 + 1), `${vp.name}: 點一下 + 應該 +1(${b0} → ${b1})`);
   await page.click("#bpmDown");
