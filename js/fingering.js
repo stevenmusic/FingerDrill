@@ -91,7 +91,7 @@ export function chromaticFingers(notes, hand){
 export function scaleCycle(FG, tonic, quality, form, hand, desc){
   const e = scaleEntry(FG, quality, form, pcOf(tonic));
   const s = digits(desc && e[hand + "Desc"] ? e[hand + "Desc"] : (form === "natural" ? (e[hand + "Desc"] || e[hand]) : e[hand]));
-  return { start: s[0], cycle: s.slice(7, 14), top: s[14] };
+  return { start: s[0], head: s.slice(0, 7), cycle: s.slice(7, 14), top: s[14] };   // head:第一個八度(哈農 39 有的調開頭兩個音跟循環不同,例:A♭ 大調右手 2-3-1)
 }
 export function scaleFingersFrom(FG, tonic, quality, form, hand, startDeg, n){
   const up = scaleCycle(FG, tonic, quality, form, hand, false);
@@ -100,7 +100,7 @@ export function scaleFingersFrom(FG, tonic, quality, form, hand, startDeg, n){
   const make = c => {
     const f = [];
     for (let i = 0; i < len; i++) f.push(c.cycle[(startDeg + i) % 7]);
-    if (startDeg === 0) { f[0] = c.start; f[len - 1] = c.top; }
+    if (startDeg === 0) { for (let i = 0; i < 7 && i < len - 1; i++) f[i] = c.head[i]; f[len - 1] = c.top; }
     else if (hand === "rh") { if (f[len - 1] === 1) f[len - 1] = Math.min(5, f[len - 2] + 1); }
     else if (f[0] === 1) f[0] = Math.min(5, f[1] + 1);
     return f;

@@ -67,7 +67,7 @@ for (const [form, table] of Object.entries(FG.scale)) for (const k of PCS) {
   if (!ok(e, `指法表缺 scale/${form}/${k}`)) continue;
   for (const [h, s] of Object.entries(e)) {
     ok(/^[1-5]{15}$/.test(s), `scale/${form}/${k}/${h}: 要 15 個 1~5`);
-    ok(s.slice(1, 7) === s.slice(8, 14), `scale/${form}/${k}/${h}: 第一個八度與循環不一致`);
+    ok(s.slice(2, 7) === s.slice(9, 14), `scale/${form}/${k}/${h}: 第一個八度與循環不一致`);   // 開頭兩個音可以跟循環不同(哈農 39:A♭ 大調右手 2-3-1)
   }
 }
 for (const [q, table] of Object.entries(FG.arpeggio)) for (const k of PCS) {
