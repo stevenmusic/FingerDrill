@@ -129,7 +129,7 @@ const PICKERS = {
       ["hands", tr("手", "Hands"), HANDS()],
       ["rhythm", tr("節奏", "Rhythm"), [["even", tr("原譜", "Even")], ["dotted", tr("附點", "Dotted")], ["reverse", tr("反附點", "Rev. dotted")]]],
       // 拍點:♩ = 每 4 個音一拍(原譜的速度記法)、♪ = 每 2 個音一拍(比較好數;樂譜不變,速度數字 ×2)
-      ["pulse", tr("拍點", "Pulse"), [["q", tr("♩ 每 4 音", "♩ per 4")], ["e", tr("♪ 每 2 音", "♪ per 2")]]]
+      PULSE()   // 跟音階、琶音同一個順序(♪ 每 2 音 → ♩ 每 4 音);哈農預設仍是 ♩
     ],
     toQ: p => ({ type: "hanon", no: Number(p.no), tonic: p.key, hands: p.hands, rhythm: p.rhythm, quality: "major", articulation: "legato", motion: "similar", cat: "hanon" })
   }
