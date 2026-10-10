@@ -385,8 +385,8 @@ export function playPianoNote(m, when, keyUp, damperAt, vel, pedal){
   src.connect(g);
   pianoConnect(g, PIANO_VERB_SEND * (pedal ? 1.7 : 1));
   src.start(when); src.stop(end + 0.05);
-  scheduled.push(src);
-  pianoLastByKey[m] = { src, g, end };
+  src._at = when; scheduled.push(src);
+  pianoLastByKey[m] = { src, g, end, at: when };
   return true;
 }
 
@@ -417,7 +417,7 @@ export function playClick(when, strong){
   src.connect(g); g.connect(clickBus);
   src.start(Math.max(when, audioCtx.currentTime));
   src.stop(Math.max(when, audioCtx.currentTime) + 0.4);
-  scheduled.push(src);
+  src._at = when; scheduled.push(src);
   return true;
 }
 
@@ -429,6 +429,12 @@ export function stopAll(){
   scheduled = [];
   for (const k of Object.keys(pianoLastByKey)) { const v = pianoLastByKey[k]; try { v.g.gain.cancelScheduledValues(now); v.g.gain.setTargetAtTime(0, now, 0.03); } catch (e) {} }
   pianoLastByKey = {};
+}
+/* 播放中改速度:把還沒開始的音與拍點取消(正在響的不動),再照新速度重排 */
+export function cancelFrom(t){
+  for (const s of scheduled) if (s._at >= t) { try { s.stop(); } catch (e) {} }
+  scheduled = scheduled.filter(s => s._at < t);
+  for (const k of Object.keys(pianoLastByKey)) if (pianoLastByKey[k].at >= t) delete pianoLastByKey[k];
 }
 /* 排程過的節點會一直累積:超過一定數量時把已經結束的清掉 */
 export function pruneScheduled(){ if (scheduled.length > 400) scheduled = scheduled.slice(-200); }

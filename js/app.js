@@ -655,6 +655,7 @@ function setBpm(v, fromUser){
     store.save();
   }
   syncTempoUI();
+  retempo();
 }
 /* − / +:點一下 ±1;按住 0.4 秒後開始連續增減,越按越快(每次 ±1 → 0.6 秒後 ±2 → 1.6 秒後 ±5) */
 function holdRepeat(btn, dir){
@@ -735,6 +736,39 @@ const within = (p, ms) => Promise.race([p, new Promise(r => setTimeout(r, ms))])
 /* ── 示範播放:預備拍兩小節 + 節拍器 ── */
 const COUNT_IN_BARS = 2;   // 預備拍兩小節:第一小節聽速度、第二小節準備下手(2/4 只有一小節太短)
 let play = null, starting = 0;   // starting:正在準備播放(載入取樣中)的序號;連點、換題時舊的準備作廢
+/* 排程:從時間 from(秒)之後開始的音與拍點(開始播放時是全部;播放中改速度時只排還沒到的) */
+function schedulePlay(p, from){
+  const { t0, beatSec, clickSec, count, pre } = p;
+  for (const h of ["rh", "lh"]) {
+    const arr = p.byHand[h];
+    arr.forEach(e => {
+      const on = t0 + e.beat * beatSec;
+      if (on < from) return;
+      const next = arr.find(x => x.beat > e.beat + 1e-6);   // 同一隻手下一個「不同時」的音(雙音的兩個音同時按)
+      const legatoEnd = next ? t0 + next.beat * beatSec + 0.015 : on + e.len * beatSec;
+      const off = p.stacc && next ? on + Math.min(0.12, (next.beat - e.beat) * beatSec * 0.45) : legatoEnd;
+      if (!S.clickOnly) audio.playPianoNote(e.midi, on, off, off, p.velAt(e.beat) + (e.idx === 0 ? 6 : 0) + (Math.random() * 6 - 3), false);
+    });
+  }
+  const totalClicks = Math.ceil(p.endBeat * beatSec / clickSec);
+  for (let b = -pre; b < totalClicks; b++) { const at = t0 + b * clickSec; if (at >= from) audio.playClick(at, ((b % count) + count) % count === 0); }
+}
+/* 播放中改速度:停在目前的位置(拍數),照新速度把後面的音重排(以前要停下來重按才會變) */
+let retempoTimer = 0;
+function retempo(){
+  if (!play) return;
+  clearTimeout(retempoTimer);
+  retempoTimer = setTimeout(() => {
+    if (!play) return;
+    const clickSec = 60 / bpm, beatSec = clickSec / NOTES_PER_UNIT[unitOf()] * ex.sub;
+    if (Math.abs(beatSec - play.beatSec) < 1e-6) return;
+    const now = audio.audioNow(), from = now + 0.06;
+    const beat = (from - play.t0) / play.beatSec;           // 新速度從這一拍接下去
+    audio.cancelFrom(from);
+    play.t0 = from - beat * beatSec; play.beatSec = beatSec; play.clickSec = clickSec;
+    schedulePlay(play, from);
+  }, 60);
+}
 /* 按播放時樂譜要整份看得到(手機橫放時常常被底部分頁列蓋住一半):沒露出來就捲過去 */
 function revealScore(){
   const r = $("scoreCard").getBoundingClientRect(), bar = document.querySelector(".tabbar");
@@ -777,19 +811,8 @@ async function startPlaybackInner(){
   const velAt = beat => cur.dynamic === "cresc-dim" ? Math.round(42 + 50 * (1 - Math.abs(2 * beat / endBeat - 1))) : demoVel();
   const byHand = { rh: [], lh: [] };
   events.forEach(e => byHand[e.hand].push(e));
-  for (const h of ["rh", "lh"]) {
-    const arr = byHand[h];
-    arr.forEach(e => {
-      const on = t0 + e.beat * beatSec;
-      const next = arr.find(x => x.beat > e.beat + 1e-6);   // 同一隻手下一個「不同時」的音(雙音的兩個音同時按)
-      const legatoEnd = next ? t0 + next.beat * beatSec + 0.015 : on + e.len * beatSec;
-      const off = stacc && next ? on + Math.min(0.12, (next.beat - e.beat) * beatSec * 0.45) : legatoEnd;
-      if (!S.clickOnly) audio.playPianoNote(e.midi, on, off, off, velAt(e.beat) + (e.idx === 0 ? 6 : 0) + (Math.random() * 6 - 3), false);
-    });
-  }
-  const totalClicks = Math.ceil(endBeat * beatSec / clickSec);
-  for (let b = -pre; b < totalClicks; b++) audio.playClick(t0 + b * clickSec, ((b % count) + count) % count === 0);
-  play = { t0, beatSec, clickSec, endBeat, raf: 0 };
+  play = { t0, beatSec, clickSec, endBeat, raf: 0, byHand, stacc, velAt, count, pre };
+  schedulePlay(play, -Infinity);
   revealScore();
   $("playLabel").textContent = T("stop");
   $("playIcon").innerHTML = '<rect x="6" y="6" width="12" height="12" rx="1.5"/>';
