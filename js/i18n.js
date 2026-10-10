@@ -35,7 +35,7 @@ const STR = {
     "Piano: Accurate-Salamander Grand Piano V6.2 (Salamander Grand Piano V3, Alexander Holm, CC-BY 3.0) · Click: Naked Drums (Wilkinson Audio, CC-BY 4.0) · via ScrollScore · Notation: OpenSheetMusicDisplay (BSD-3-Clause). Requirements from ABRSM Piano Practical Grades 2025 & 2026 and Trinity Piano Syllabus from 2023; for practice only — check the official syllabus."],
   obTitle: ["你在準備鋼琴檢定嗎?", "Taking an exam?"],
   obSub: ["選好考試和級數,會打開「檢定」分頁,音階、琶音分頁也會列出這一級的要求;之後隨時可以改。",
-    "Pick a board and grade: Exams opens and Scales/Arpeggios list its requirements. Change any time."],
+    "Pick a board and grade: Exams opens and Scales/Arpeggios list its items. Change any time."],
   obYes: ["開始準備考試", "Start exam prep"], obNo: ["不考試,自由練習", "No exam — free practice"]
 };
 export const T = key => (STR[key] ? STR[key][LANG === "en" ? 1 : 0] : key);

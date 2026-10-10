@@ -453,8 +453,11 @@ body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
   border:7px solid transparent;border-top:10px solid #B8860B;
 }
 
-/* 英文選項比較長:手機直式(390、430)內距小一點,才跟中文一樣排在同一行 */
-@media (max-width:440px){ .prow .opt{padding:0 9px} }
+/* 英文選項比較長:手機直式(390、430;更窄的中英文本來就都換行)內距小一點,才跟中文一樣排在同一行 */
+@media (min-width:381px) and (max-width:440px){ .prow .opt{padding:0 9px} }
+
+/* 標籤放不下時整排縮小字級(fitTitle):行高固定,中英文高度才一樣 */
+.q-tag{line-height:calc(clamp(14px, 4.2vw, 18px) * 1.4)}
 
 /* ══ 手機橫放(高度 ≤ 420):第一個畫面就要看得到樂譜(放在譜架上最需要的是譜)══
    題目卡收成一行:題目 | 標籤 | ✓ ⚠ | 播放;卡片間距、內距縮小 */
