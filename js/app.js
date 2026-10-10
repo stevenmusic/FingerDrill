@@ -62,6 +62,7 @@ const OCTS = n => [1, 2, 3, 4].slice(0, n).map(o => [o, tr(o + "八度", o + " o
 const gradeLabel = g => g.grade === 0 ? tr("初級", "Initial") : tr(g.grade + " 級", "Grade " + g.grade);
 
 // 拍點:♪ = 每 2 個音打一下(預設)、♩ = 每 4 個音(一拍)打一下;樂譜不變,只換節拍器的拍點與速度數字
+const HANON_NOS = () => Array.from({ length: 20 }, (_, i) => [i + 1, String(i + 1)]).concat([[41, "41"]]);   // 第 41 首:三和弦琶音(24 個調)
 const PULSE = () => ["pulse", tr("拍點", "Pulse"), [["e", tr("♪ 每 2 音", "♪ per 2")], ["q", tr("♩ 每 4 音", "♩ per 4")]]];
 const PICKERS = {
   scale: {
@@ -119,9 +120,16 @@ const PICKERS = {
   },
   /* 哈農:曲目 1–20、調(12 個大調,同一個樣式移調)、手 */
   hanon: {
-    defaults: { no: 1, key: "C", hands: "HT", rhythm: "even", pulse: "q", moreKeys: false },
-    rows: p => [
-      ["no", tr("曲目", "No."), Array.from({ length: 20 }, (_, i) => [i + 1, String(i + 1)])],
+    defaults: { no: 1, key: "C", hands: "HT", rhythm: "even", pulse: "q", moreKeys: false, mode: "major" },
+    rows: p => p.no === 41 ? [
+      // 第 41 首:三和弦琶音,原譜就是 24 個調
+      ["no", tr("曲目", "No."), HANON_NOS()],
+      ["mode", tr("調性", "Mode"), [["major", tr("大調", "Major")], ["minor", tr("小調", "Minor")]]],
+      ["key", tr("調", "Key"), keyOpts(p.mode === "minor" ? MIN_KEYS : MAJ_KEYS)],
+      ["hands", tr("手", "Hands"), HANDS()],
+      ["pulse", tr("拍點", "Pulse"), [["q", tr("♩ 每 4 音", "♩ per 4")], ["e", tr("♪ 每 2 音", "♪ per 2")]]]
+    ] : [
+      ["no", tr("曲目", "No."), HANON_NOS()],
       // 調:預設只有原譜的 C 大調;「其他調」展開 12 個調(進階,指法照 C 大調原譜)
       ["key", tr("調", "Key"), p.moreKeys || p.key !== "C" ? keyOpts(MAJ_KEYS).concat([["__less", tr("收起", "Less")]])
         : [["C", tr("C(原譜)", "C (orig.)")], ["__more", tr("其他調…", "Other keys…")]]],
@@ -130,7 +138,7 @@ const PICKERS = {
       // 拍點:♩ = 每 4 個音一拍(原譜的速度記法)、♪ = 每 2 個音一拍(比較好數;樂譜不變,速度數字 ×2)
       ["pulse", tr("拍點", "Pulse"), [["q", tr("♩ 每 4 音", "♩ per 4")], ["e", tr("♪ 每 2 音", "♪ per 2")]]]
     ],
-    toQ: p => ({ type: "hanon", no: Number(p.no), tonic: p.key, hands: p.hands, rhythm: p.rhythm, articulation: "legato", motion: "similar", cat: "hanon" })
+    toQ: p => ({ type: "hanon", no: Number(p.no), tonic: p.key, hands: p.hands, rhythm: Number(p.no) === 41 ? "even" : p.rhythm, quality: Number(p.no) === 41 ? p.mode : "major", articulation: "legato", motion: "similar", cat: "hanon" })
   }
 };
 S.pick = S.pick || {};
@@ -172,7 +180,7 @@ function freeQuestion(tab){
     : { unit: beat4 ? "q16" : "q", bpm: beat4 ? Math.max(30, Math.round(S.freeBpm[tab] / 2)) : S.freeBpm[tab] };
   q.free = true;
 q.sub = tab === "hanon" ? 4 : 2;
-  q.key = tab === "hanon" ? `hanon|${q.no}|${q.tonic}|${q.hands}|${q.rhythm}` : masteryKey(q);
+  q.key = tab === "hanon" ? `hanon|${q.no}|${q.tonic}${q.quality === "minor" ? "m" : ""}|${q.hands}|${q.rhythm}` : masteryKey(q);
   return q;
 }
 function loadFree(tab){ setQuestion(freeQuestion(tab), tab); }

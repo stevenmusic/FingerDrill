@@ -180,6 +180,7 @@ export function exerciseToMusicXML(ex, q, show = "both"){
   const lay = hands.map(h => layoutHand(ex[h], ex.sub));
   const cp = hands.map((h, i) => clefPlan(lay[i], h, ex.sub, ex.clefPerBar));   // 哈農:一小節一個譜號(不在小節中間來回換)
   const plans = cp.map(c => c.plan);
+  const ottNow = hands.map(() => 0);   // 每隻手目前的 8va 狀態(跨小節延續)
   const clefNow = hands.map(() => null);
   const tupletShown = hands.map(() => false);
   const nMeasures = Math.max(...lay.map(l => l.length));
@@ -189,7 +190,7 @@ export function exerciseToMusicXML(ex, q, show = "both"){
     body += `<measure number="${m + 1}">`;
     let attrs = "";
     if (m === 0) attrs += `<divisions>${DIV}</divisions><key><fifths>${ex.fifths}</fifths></key>${ex.time ? `<time><beats>${ex.time[0]}</beats><beat-type>${ex.time[1]}</beat-type></time>` : `<time print-object="no"><beats>${ex.timeHidden ? ex.timeHidden[0] : 4}</beats><beat-type>${ex.timeHidden ? ex.timeHidden[1] : 4}</beat-type></time>`}` + (staves > 1 ? `<staves>${staves}</staves>` : "");
-    hands.forEach((h, i) => { if (m === 0) { clefNow[i] = plans[i].get(lay[i][0][0]); attrs += clefXml(clefNow[i], i + 1); } });
+    hands.forEach((h, i) => { if (m === 0) { clefNow[i] = ex.crossStaff ? (i === 0 ? "G" : "F") : plans[i].get(lay[i][0][0]); attrs += clefXml(clefNow[i], i + 1); } });
     if (attrs) body += `<attributes>${attrs}</attributes>`;
     if (m === 0 && q.dynamic) body += `<direction placement="below"><direction-type><dynamics><${q.dynamic}/></dynamics></direction-type><staff>1</staff></direction>`;
     hands.forEach((h, i) => {
@@ -206,11 +207,14 @@ export function exerciseToMusicXML(ex, q, show = "both"){
       // 臨時記號:同一小節、同一譜表、同一個音高(字母 + 實際八度)到小節線為止都有效;
       // 換譜號、8va 都不影響(Gould《Behind Bars》的規則,OSMD 也是這樣算)
       const keyA = keyAlters(ex.fifths), accState = new Map();
-      let inOttava = 0;
+      // 8va / 8vb 跨小節:下一小節開頭也要同樣的移位就不停(一條線畫到底,不在小節線斷開;使用者要求,所有樂譜)
+      let inOttava = ottNow[i];
       const ottava = (type, up) => `<direction placement="${up ? "above" : "below"}"><direction-type><octave-shift type="${type}" size="8"/></direction-type><staff>${i + 1}</staff></direction>`;
       for (const e of evs) {
         const c = plans[i].get(e);
-        if (c !== clefNow[i]) { body += `<attributes>${clefXml(c, i + 1)}</attributes>`; clefNow[i] = c; }
+        // 跨譜表(哈農第 41 首,照原譜):不換譜號,右手的低音整組寫到下面那行、左手的高音寫到上面那行
+        const home = i === 0 ? "G" : "F", cross = ex.crossStaff && c !== home;
+        if (!ex.crossStaff && c !== clefNow[i]) { body += `<attributes>${clefXml(c, i + 1)}</attributes>`; clefNow[i] = c; }
         const sh = e.rest ? inOttava : (shiftOf.get(e) || 0);
         if (sh !== inOttava) {
           if (inOttava) body += ottava("stop", inOttava > 0);
@@ -227,12 +231,16 @@ export function exerciseToMusicXML(ex, q, show = "both"){
           accidental = accFor(e.n);
           if (e.n.with) accidentalWith = accFor(e.n.with);
           stem = stems.get(e) || stemFor(shownAll(e), c);
+          if (ex.crossStaff) stem = i === 0 ? "up" : "down";   // 原譜:右手符桿一律朝上、左手一律朝下(跨到另一行也一樣)
         }
         const tp = tup.get(e), firstTuplet = tp === "start" && !tupletShown[i];
         if (firstTuplet) tupletShown[i] = true;
-        body += noteXml(e, { staff: i + 1, voice: h === "rh" ? 1 : 5, sub: ex.sub, place, staccato: q.articulation === "staccato", beam: marks.get(e), tuplet: tp, firstTuplet, stem, accidental, accidentalWith });
+        body += noteXml(e, { staff: cross ? 2 - i : i + 1, voice: h === "rh" ? 1 : 5, sub: ex.sub, place, staccato: q.articulation === "staccato", beam: marks.get(e), tuplet: tp, firstTuplet, stem, accidental, accidentalWith });
       }
-      if (inOttava) body += ottava("stop", inOttava > 0);
+      const nextEv = (lay[i][m + 1] || []).find(x => !x.rest);
+      const nextSh = nextEv ? (shiftOf.get(nextEv) || 0) : 0;
+      if (inOttava && nextSh !== inOttava) { body += ottava("stop", inOttava > 0); inOttava = 0; }
+      ottNow[i] = inOttava;
     });
     if (m === nMeasures - 1) body += `<barline location="right"><bar-style>light-heavy</bar-style></barline>`;
     body += "</measure>";

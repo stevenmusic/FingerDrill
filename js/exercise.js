@@ -167,7 +167,9 @@ function buildBroken(q){
       }
       const notes = [], fs = [];
       groups.forEach((g, i) => { notes.push(...g); fs.push(...fing[i]); });
-      for (let i = 2; i >= 0; i--) { notes.push(...groups[i].slice().reverse()); fs.push(...fing[i].slice().reverse()); }
+      // 下行:四組全部反過來(頂端那組也是:右手 C-G-E-C 5-3-2-1)。以前從頂端直接接第二轉位反過來,
+      // 頂端 C 用 5、下一個 G 又用 5,同一指往下跳(使用者指正)
+      for (let i = 3; i >= 0; i--) { notes.push(...groups[i].slice().reverse()); fs.push(...fing[i % 3].slice().reverse()); }
       out[h] = withF(notes, fs);
     }
     return out;
@@ -220,6 +222,11 @@ function buildDouble(FG, q){
 
 export const SIXTEENTH_TYPES = ["scale", "chromatic", "wholetone", "thirds", "sixths", "arpeggio", "dom7", "dim7", "broken"];   // 分解和弦:兩個八度(四音一組)才是十六分;大綱的三連音(sub 3)不變
 export function buildExercise(FG, q){
+  // 哈農第 41 首(三和弦琶音,24 個調):照原譜 3/4 拍、十六分音符、上行四個八度再下行,結尾附點二分音符;指法 = 琶音指法表(已照第 41 首核對)
+  if (q.type === "hanon" && q.no === 41) {
+    const quality = q.quality || "major", { rh, lh } = buildArp(FG, { type: "arpeggio", tonic: q.tonic, quality, octaves: 4, inversion: 0 });
+    return { rh, lh, fifths: keyFifths(q.tonic, quality), sub: 4, bar: 36, time: [3, 4], rhythm: "even", crossStaff: true };   // 一小節跨四個八度:照原譜不換譜號,低音寫在下面那行、高音寫在上面那行(跨譜表)
+  }
   if (q.type === "hanon") return buildHanon(q.no, q.tonic, q.rhythm);
   const b = {
     scale: buildScale, arpeggio: buildArp, dom7: buildArp, dim7: buildArp,
@@ -265,7 +272,7 @@ export function keyName(q){
 }
 export const keyNameZh = keyName;
 export function questionText(q){
-  if (q.type === "hanon") return [tr(`哈農 第 ${q.no} 首`, `Hanon No. ${q.no}`), pick(HAND[q.hands] || HAND.HT), nm(q.tonic) + tr(" 大調", " major")]
+  if (q.type === "hanon") return [tr(`哈農 第 ${q.no} 首`, `Hanon No. ${q.no}`), pick(HAND[q.hands] || HAND.HT), nm(q.tonic) + (q.quality === "minor" ? tr(" 小調", " minor") : tr(" 大調", " major"))]
     .concat(q.rhythm === "dotted" ? [tr("附點", "Dotted")] : q.rhythm === "reverse" ? [tr("反附點", "Rev. dotted")] : []);
   // 相隔三度/六度放在標籤(取代「雙手」),題目才不會比另一種語言多一行
   const parts = [keyName(q.apart ? { ...q, apart: 0 } : q)];
