@@ -120,7 +120,7 @@ function expectedPitches(q, hand, notes){
     const k = cyc.length, up = [];
     for (let i = 0; i <= k * q.octaves; i++) up.push(first + 12 * Math.floor(i / k) + cyc[i % k]);
     const seq = up.concat(up.slice(0, -1).reverse());
-    if (q.type === "dom7") seq.push(first + 5);   // 解決:屬音往上四度到主音
+    if (q.type === "dom7" && q.sys !== "trinity") { seq.pop(); seq.push(first + 5); }   // ABRSM 譜例:下行停在導音、往上半音解決到主音(最低的屬音不彈);Trinity 沒寫要解決
     return seq;
   }
   if (q.type === "broken") {
@@ -248,7 +248,7 @@ function checkQuestion(q, label){
     const lowDeg = (q.type === "scale" && ((hand === "rh" && q.apart === 3) || (hand === "lh" && q.apart === 6))) || q.type === "sixths";
     if (!["dom7"].includes(q.type) && !lowDeg && !(q.type === "arpeggio" && q.inversion)) ok(pcOf(parseNote(startName)) === pc(notes[0].midi), `${label} ${hand}: 起音不是 ${startName}`);
     // 分解和弦(1 級)照 Trinity 大綱譜例停在五音(音高另外由 expected 逐音比對)
-    const endOk = q.type === "dom7" ? pc(notes[notes.length - 1].midi) === pcOf(parseNote(q.tonic)) : q.type === "broken" && q.range !== "5th" ? true : notes[notes.length - 1].midi === notes[0].midi;
+    const endOk = q.type === "dom7" && q.sys !== "trinity" ? pc(notes[notes.length - 1].midi) === pcOf(parseNote(q.tonic)) : q.type === "broken" && q.range !== "5th" ? true : notes[notes.length - 1].midi === notes[0].midi;
     ok(endOk, `${label} ${hand}: 結束音不對`);
     const exp = expectedPitches(q, hand, notes);
     if (exp) ok(notes.length === exp.length && notes.every((n, i) => n.midi === exp[i]), `${label} ${hand}: 音高錯誤`);

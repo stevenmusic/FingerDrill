@@ -36,7 +36,7 @@ function expandAbrsm(g, item, prefs){
   const hands = item.hands === "HS" ? ["RH", "LH"] : ["HT"];
   for (const key of item.keys) for (const articulation of item.articulation) for (const form of forms) for (const h of hands) {
     const q = base(item);
-    Object.assign(q, { tonic: key, articulation, form, hands: h, tempo: g.tempo[item.tempo], examinerForms: !!item.examinerForms });
+    Object.assign(q, { sys: "abrsm", tonic: key, articulation, form, hands: h, tempo: g.tempo[item.tempo], examinerForms: !!item.examinerForms });
     out.push(finish(q));
   }
   return out;
@@ -44,7 +44,7 @@ function expandAbrsm(g, item, prefs){
 /* Trinity:每一項就是一題(手、力度、奏法都固定) */
 function expandTrinity(item, set, prefs){
   const q = base(item);
-  Object.assign(q, { tonic: item.key, articulation: item.articulation, hands: item.hands, dynamic: item.dynamic,
+  Object.assign(q, { sys: "trinity", tonic: item.key, articulation: item.articulation, hands: item.hands, dynamic: item.dynamic,
     form: pickForm(item.forms, prefs.minorForm), tempo: item.tempo, set });
   return finish(q);
 }

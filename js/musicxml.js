@@ -11,10 +11,12 @@ function fitType(d){ for (const [len, type, dots] of NOTE_TYPES) if (len <= d) r
 /* 最後一個音與後面的休止符(照 4/4 記譜慣例):
    在第 1 拍 → 全音符;第 3 拍 → 二分音符;第 2、4 拍 → 四分音符;不在拍點上 → 延到下一拍。
    休止符從拍點起、不跨小節中間:二分休止符只放在第 1、3 拍,其他用四分(不用附點休止符) */
+let FINAL_Q = false;   // 照大綱譜例:最後一個音一律四分音符(ABRSM 譜例的寫法)
 function finalAndRests(pos){
   const inBar = pos % BAR, out = [];
   let len;
-  if (inBar % DIV) len = DIV - (inBar % DIV);
+  if (FINAL_Q && !(inBar % DIV)) len = DIV;
+  else if (inBar % DIV) len = DIV - (inBar % DIV);
   else len = inBar === 0 ? BAR : inBar === 2 * DIV ? 2 * DIV : DIV;
   len = Math.min(len, BAR - inBar);   // 3/4 的第 3 拍只剩一拍(四分音符),不能寫二分
   out.push(len);
@@ -176,7 +178,7 @@ function beamMarks(evs, sub){
 
 /* show: "both" | "rh" | "lh" */
 export function exerciseToMusicXML(ex, q, show = "both"){
-  DIV = ex.div || 12; BAR = ex.bar || 4 * DIV;
+  DIV = ex.div || 12; BAR = ex.bar || 4 * DIV; FINAL_Q = !!ex.finalQuarter;
   const hands = show === "both" ? ["rh", "lh"] : [show];
   const lay = hands.map(h => layoutHand(ex[h], ex.sub));
   const cp = hands.map((h, i) => clefPlan(lay[i], h, ex.sub, ex.clefPerBar));   // 哈農:一小節一個譜號(不在小節中間來回換)

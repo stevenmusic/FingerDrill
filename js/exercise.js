@@ -102,12 +102,14 @@ function buildArp(FG, q){
   for (const h of ["rh", "lh"]) {
     const asc = walkCycle(tones, 0, st[h], tones.length * n, 1);
     let notes = withF(asc, f[h].up).concat(withF(asc.slice(0, -1).reverse(), f[h].down));
-    if (q.type === "dom7") {
-      // 解決到主音:最後的屬音往上四度(ABRSM 譜例的寫法)
+    if (q.type === "dom7" && q.sys !== "trinity") {
+      // 解決到主音(照 ABRSM 6–8 級大綱的譜例):下行停在導音(屬音上方的三音),最低的屬音不彈,往上半音到主音
+      // Trinity 大綱沒有寫要解決,就照一般琶音回到起音
+      notes = notes.slice(0, -1);
       const last = notes[notes.length - 1];
       const tonic = placeAtLeast(parseNote(q.tonic), last.midi + 1);
       const lf = last.finger;
-      const rf = h === "rh" ? (lf === 1 ? 4 : Math.min(5, lf + 2)) : (lf >= 3 ? Math.max(1, lf - 3) : 1);
+      const rf = h === "rh" ? Math.min(5, lf + 1) : Math.max(1, lf - 1);
       notes = notes.concat(withF([tonic], [rf]));
     }
     out[h] = notes;
@@ -223,6 +225,9 @@ export function buildExercise(FG, q){
   const noKey = ["chromatic", "dim7", "wholetone"].includes(q.type);
   const fifths = noKey ? 0 : keyFifths(q.tonic, q.quality || "major");
   // 音階、琶音(使用者要求,跟哈農一樣;分解和弦三個音一組,寫三連音、一組一拍):寫成十六分音符、2/4 一小節 8 個音(拍號不顯示);速度與拍點不變
+  // ABRSM 大綱印了譜例的項目照譜例的節奏寫(八分音符,最後一個音四分音符):初級反向五度、初級琶音五度、6–8 級屬七
+  if (q.sys === "abrsm" && q.range === "5th") return { rh, lh, fifths, sub: 2, bar: rh.length === 9 ? 60 : 36, timeHidden: [rh.length === 9 ? 5 : 3, 4], finalQuarter: true };
+  if (q.sys === "abrsm" && q.type === "dom7") return { rh, lh, fifths, sub: 2, finalQuarter: true };
   if (SIXTEENTH_TYPES.includes(q.type) && (q.sub || 2) === 2) return { rh, lh, fifths, sub: 4, bar: 24, timeHidden: [2, 4] };
   if (q.type === "broken" && q.range === "5th") return { rh, lh, fifths, sub: 2, bar: 36, time: [3, 4] };   // 初級:大綱譜例是 3/4(八分音符一拍一組,結尾四分音符)
   return { rh, lh, fifths, sub: q.sub || 2 };
