@@ -151,44 +151,34 @@ function buildWholeTone(q){
    型態依一般教材寫法,請以 Trinity《Piano Scales & Arpeggios from 2015》核對 */
 function buildBroken(q){
   const out = {};
-  // 兩個八度(自由練習):照哈農第 41 首的寫法,十六分音符、四個音一組。每組 = 這個轉位的三個音 + 第一個音高八度,
-  // 上行 原位 → 第一轉位 → 第二轉位 → 原位(高八度),下行把前三組反過來,回到主音
-  // 指法(四音和弦):右手 原位 1235、第一/第二轉位 1245;左手 原位/第一轉位 5421、第二轉位 5321
-  if (q.octaves === 2) {
-    const F4 = { rh: [[1, 2, 3, 5], [1, 2, 4, 5], [1, 2, 4, 5]], lh: [[5, 4, 2, 1], [5, 4, 2, 1], [5, 3, 2, 1]] };
+  // 照 Trinity 大綱(分解和弦只出現在 Trinity;使用者要求「考試系統怎麼寫就怎麼做」):
+  // 初級(五度範圍,大綱 p.97 譜例):3/4,八分音符 1-3-5-3 + 四分音符 1(C E G E | C)
+  if (q.range === "5th") {
+    const sp = inversionTones(q.tonic, q.quality, 0);
     for (const h of ["rh", "lh"]) {
-      const groups = [], fing = [];
-      let prev = null;
-      for (let g = 0; g < 4; g++) {
-        const inv = g % 3, ts = inversionTones(q.tonic, q.quality, inv);
-        const first = prev === null ? placeAtLeast(ts[0], h === "rh" ? 60 : 48) : placeAtLeast(ts[0], midiOf(prev) + 1);
-        groups.push(walkCycle(ts, 0, first, 3, 1)); fing.push(F4[h][inv]);
-        prev = first;
-      }
-      const notes = [], fs = [];
-      groups.forEach((g, i) => { notes.push(...g); fs.push(...fing[i]); });
-      // 下行:四組全部反過來(頂端那組也是:右手 C-G-E-C 5-3-2-1)。以前從頂端直接接第二轉位反過來,
-      // 頂端 C 用 5、下一個 G 又用 5,同一指往下跳(使用者指正)
-      for (let i = 3; i >= 0; i--) { notes.push(...groups[i].slice().reverse()); fs.push(...fing[i % 3].slice().reverse()); }
-      out[h] = withF(notes, fs);
+      const g = walkCycle(sp, 0, placeAtLeast(sp[0], h === "rh" ? 60 : 48), 2, 1);
+      out[h] = withF([g[0], g[1], g[2], g[1], g[0]], h === "rh" ? [1, 3, 5, 3, 1] : [5, 3, 1, 3, 5]);
     }
     return out;
   }
-  // 一個八度(Trinity 大綱的三連音分解和弦):三個音一組,上行 原位 → 第一轉位 → 第二轉位,下行反過來回到原位
+  // 1 級(一個八度,大綱 p.101 D 小調譜例):三連音,上行 原位 → 第一轉位 → 第二轉位,停在高八度的主音(一整拍);
+  // 下行 第二轉位 → 第一轉位 → 原位(每組反過來),最後一個長音照譜例停在五音(一整拍)
   for (const h of ["rh", "lh"]) {
     const groups = [], fing = [];
     let prevFirst = null;
     for (let inv = 0; inv < 3; inv++) {
       const ts = inversionTones(q.tonic, q.quality, inv);
       const first = prevFirst === null ? placeAtLeast(ts[0], h === "rh" ? 60 : 48) : placeAtLeast(ts[0], midiOf(prevFirst) + 1);
-      const g = walkCycle(ts, 0, first, 2, 1);
-      groups.push(g); fing.push(BROKEN_FINGERS[h][inv]);
+      groups.push(walkCycle(ts, 0, first, 2, 1)); fing.push(BROKEN_FINGERS[h][inv]);
       prevFirst = first;
     }
     const notes = [], fs = [];
     groups.forEach((g, i) => { notes.push(...g); fs.push(...fing[i]); });
-    // 下行:第二轉位 → 第一轉位 → 原位,每組反過來彈(以前少了原位那一組,結尾 E 直接接 C 都用 1 指,錯)
+    // 頂端:高八度的主音(第二轉位那組的中間音),右手 3、左手 2
+    notes.push({ ...groups[2][1], dur: 12, ntype: "quarter" }); fs.push(h === "rh" ? 3 : 2);
     for (let i = 2; i >= 0; i--) { notes.push(...groups[i].slice().reverse()); fs.push(...fing[i].slice().reverse()); }
+    // 結尾:原位那組的五音(譜例的寫法),右手 5、左手 1
+    notes.push({ ...groups[0][2] }); fs.push(h === "rh" ? 5 : 1);
     out[h] = withF(notes, fs);
   }
   return out;
@@ -220,7 +210,7 @@ function buildDouble(FG, q){
   return out;
 }
 
-export const SIXTEENTH_TYPES = ["scale", "chromatic", "wholetone", "thirds", "sixths", "arpeggio", "dom7", "dim7", "broken"];   // 分解和弦:兩個八度(四音一組)才是十六分;大綱的三連音(sub 3)不變
+export const SIXTEENTH_TYPES = ["scale", "chromatic", "wholetone", "thirds", "sixths", "arpeggio", "dom7", "dim7"];   // 分解和弦照 Trinity 大綱(三連音 / 初級八分音符)
 export function buildExercise(FG, q){
   if (q.type === "hanon") return buildHanon(q.no, q.tonic, q.rhythm);
   const b = {
@@ -233,7 +223,8 @@ export function buildExercise(FG, q){
   const noKey = ["chromatic", "dim7", "wholetone"].includes(q.type);
   const fifths = noKey ? 0 : keyFifths(q.tonic, q.quality || "major");
   // 音階、琶音(使用者要求,跟哈農一樣;分解和弦三個音一組,寫三連音、一組一拍):寫成十六分音符、2/4 一小節 8 個音(拍號不顯示);速度與拍點不變
-  if (SIXTEENTH_TYPES.includes(q.type) && (q.sub || 2) === 2 && (q.type !== "broken" || q.octaves === 2)) return { rh, lh, fifths, sub: 4, bar: 24, timeHidden: [2, 4] };
+  if (SIXTEENTH_TYPES.includes(q.type) && (q.sub || 2) === 2) return { rh, lh, fifths, sub: 4, bar: 24, timeHidden: [2, 4] };
+  if (q.type === "broken" && q.range === "5th") return { rh, lh, fifths, sub: 2, bar: 36, time: [3, 4] };   // 初級:大綱譜例是 3/4(八分音符一拍一組,結尾四分音符)
   return { rh, lh, fifths, sub: q.sub || 2 };
 }
 

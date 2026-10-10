@@ -107,12 +107,12 @@ const PICKERS = {
       ["key", p.kind === "dim7" ? tr("起音", "Start") : tr("調", "Key"), keyOpts(p.kind === "minor" ? MIN_KEYS : p.kind === "dim7" ? STARTS : MAJ_KEYS)],
       ["hands", tr("手", "Hands"), HANDS()],
       ["art", tr("奏法", "Touch"), ARTS()],
-      PULSE()
+      p.kind !== "broken" && PULSE()   // 分解和弦是三連音,一拍(三個音)打一下
     ].filter(Boolean),
     toQ: p => {
       const q = { hands: p.hands, octaves: 4, articulation: p.art, motion: "similar", tonic: p.key };   // 琶音一律四個八度(使用者要求,不給 1–3 八度);分解和弦另外設兩個八度
       if (p.kind === "major" || p.kind === "minor") Object.assign(q, { type: "arpeggio", quality: p.kind, inversion: Number(p.inv), cat: "arpeggio" });
-      else if (p.kind === "broken") Object.assign(q, { type: "broken", quality: "major", cat: "broken", octaves: 2 });
+      else if (p.kind === "broken") Object.assign(q, { type: "broken", quality: "major", cat: "broken", octaves: 1 });   // 照 Trinity 1 級:一個八度、三連音
       else Object.assign(q, { type: p.kind, quality: "major", cat: "seventh" });
       return q;
     }
@@ -171,7 +171,8 @@ function freeQuestion(tab){
   q.tempo = tab === "hanon" ? { unit: eighth ? "e16" : "q16", bpm: S.freeBpm[tab] * (eighth ? 2 : 1) }
     : { unit: beat4 ? "q16" : "q", bpm: beat4 ? Math.max(30, Math.round(S.freeBpm[tab] / 2)) : S.freeBpm[tab] };
   q.free = true;
-q.sub = tab === "hanon" ? 4 : 2;
+  if (q.type === "broken") { q.tempo = { unit: "q.", bpm: S.freeBpm.broken || 50 }; q.sub = 3; q.key = masteryKey(q); return q; }   // 分解和弦照 Trinity:♩. = 50、三連音
+  q.sub = tab === "hanon" ? 4 : 2;
   q.key = tab === "hanon" ? `hanon|${q.no}|${q.tonic}${q.quality === "minor" ? "m" : ""}|${q.hands}|${q.rhythm}` : masteryKey(q);
   return q;
 }
@@ -399,7 +400,7 @@ function setQuestion(q, tab){
   if (q.type === "thirds") notes.push(() => tr("三度指法照哈農第 52 首(Scales in Thirds)" + (["C", "G", "D", "A", "E", "F", "Bb", "Eb", "Ab"].includes(q.tonic) && q.quality !== "minor" || ["A", "D", "G"].includes(q.tonic) && q.quality === "minor" ? "。" : ";這個調原譜沒有印,照同一套循環推算。") + "雙音指法各版本不同,老師另有指定就照老師的。",
     "Thirds fingering follows Hanon No. 52 (Scales in Thirds)" + (["C", "G", "D", "A", "E", "F", "Bb", "Eb", "Ab"].includes(q.tonic) && q.quality !== "minor" || ["A", "D", "G"].includes(q.tonic) && q.quality === "minor" ? ". " : "; this key isn't printed there, so the same cycle is applied. ") + "Editions differ; follow your teacher if they say otherwise."));
   if (q.type === "sixths") notes.push(() => tr("六度指法照哈農第 48 首(斷奏六度):右手 1–5、左手 5–1,黑鍵用 4。雙音指法各版本不同,老師另有指定就照老師的。", "Sixths fingering follows Hanon No. 48 (detached sixths): RH 1–5, LH 5–1, 4 on black keys. Editions differ; follow your teacher if they say otherwise."));
-  if (q.type === "broken") notes.push(() => tr("分解和弦的型態依一般教材的寫法(原位 → 第一轉位 → 第二轉位再下行),請以 Trinity《Piano Scales & Arpeggios》核對。", "Broken-chord pattern follows common teaching books (root → 1st → 2nd inversion and back); check it against Trinity's Piano Scales & Arpeggios."));
+  if (q.type === "broken") notes.push(() => (q.range === "5th" ? tr("分解三和弦照 Trinity 大綱的譜例(1-3-5-3-1,3/4 拍)。", "Broken triad as in the Trinity syllabus example (1-3-5-3-1 in 3/4).") : tr("分解和弦照 Trinity 大綱 1 級的譜例:三連音,原位 → 第一轉位 → 第二轉位到高八度主音,再反過來,停在五音。", "Broken chord as in the Trinity Grade 1 syllabus example: triplets, root → 1st → 2nd inversion to the upper tonic, then back, ending on the 5th.")));
   if (q.type === "dom7") notes.push(() => tr("屬七和弦琶音最後解決到主音(照 ABRSM 大綱的譜例)。", "The dominant 7th resolves on the tonic (as in the ABRSM syllabus example)."));
   if (q.apart === 3) notes.push(() => tr("相隔三度:右手比左手高十度(三度 + 八度),左手從主音、右手從第三級開始。", "A third apart: RH plays a tenth above LH — LH starts on the tonic, RH on the 3rd."));
   if (q.apart === 6) notes.push(() => tr("相隔六度:主音在上方 — 右手從主音、左手從低六度的第三級開始。", "A sixth apart: tonic on top — RH starts on the tonic, LH on the 3rd a sixth below."));
@@ -558,6 +559,18 @@ function drawFingerings(){
     }
   }
   svg.appendChild(frag);
+  // 力度記號(mf 等文字)跟指法數字疊在一起時,往外移到指法外側(左手指法在下方,mf 常常壓在第一個指法上)
+  const fings = [...svg.querySelectorAll("text.fd-finger")].map(t => t.getBBox());
+  svg.querySelectorAll("text").forEach(t => {
+    if (t.classList.contains("fd-finger") || t.closest(".vf-tuplet")) return;
+    for (let k = 0; k < 4; k++) {
+      const b = t.getBBox(), hit = fings.find(f => f.x < b.x + b.width + 1 && f.x + f.width > b.x - 1 && f.y < b.y + b.height && f.y + f.height > b.y);
+      if (!hit) break;
+      const below = b.y + b.height / 2 > hit.y + hit.height / 2;
+      const dy = below ? hit.y + hit.height + 2 - b.y : hit.y - 2 - (b.y + b.height);
+      t.setAttribute("y", parseFloat(t.getAttribute("y")) + dy);
+    }
+  });
   // 指法放到 OSMD 預留的範圍外時,把畫布撐大(不然會被切掉)
   const vb = svg.viewBox.baseVal, bb = svg.getBBox();
   if (vb && vb.height) {
@@ -708,7 +721,8 @@ function maxBpm(){ return 300; }   // 速度上限一律 300(使用者要求)
 function setBpm(v, fromUser){
   bpm = Math.max(30, Math.min(maxBpm(), Math.round(v)));
   if (fromUser && cur) {
-    if (cur.free) { S.freeBpm[S.tab] = unitOf() === "e16" ? bpm / 2 : S.tab !== "hanon" && unitOf() === "q16" ? Math.min(300, bpm * 2) : bpm; cur.tempo.bpm = bpm; }
+    if (cur.free && cur.type === "broken") { S.freeBpm.broken = bpm; cur.tempo.bpm = bpm; }
+    else if (cur.free) { S.freeBpm[S.tab] = unitOf() === "e16" ? bpm / 2 : S.tab !== "hanon" && unitOf() === "q16" ? Math.min(300, bpm * 2) : bpm; cur.tempo.bpm = bpm; }
     else S.tempoPct = Math.round(100 * bpm / cur.tempo.bpm);
     store.save();
   }

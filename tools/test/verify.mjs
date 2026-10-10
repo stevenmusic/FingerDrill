@@ -125,12 +125,10 @@ function expectedPitches(q, hand, notes){
   }
   if (q.type === "broken") {
     const s = q.quality === "major" ? [0, 4, 7] : [0, 3, 7];
-    if (q.octaves === 2) {   // 四音一組(哈農第 41 首的寫法):原位、第一轉位、第二轉位、原位高八度,下行前三組反過來
-      const g = [[0, s[1], s[2], 12], [s[1], s[2], 12, 12 + s[1]], [s[2], 12, 12 + s[1], 12 + s[2]], [12, 12 + s[1], 12 + s[2], 24]];
-      return g[0].concat(g[1], g[2], g[3], g[2].slice().reverse(), g[1].slice().reverse(), g[0].slice().reverse()).map(x => first + x);
-    }
+    // 照 Trinity 大綱譜例:初級五度範圍 1-3-5-3-1;1 級三連音 原位/第一/第二轉位 → 高八度主音 → 反過來 → 五音
+    if (q.range === "5th") return [0, s[1], s[2], s[1], 0].map(x => first + x);
     const g0 = s, g1 = [s[1], s[2], 12], g2 = [s[2], 12, 12 + s[1]];
-    return g0.concat(g1, g2, g2.slice().reverse(), g1.slice().reverse(), g0.slice().reverse()).map(x => first + x);
+    return g0.concat(g1, g2, [12], g2.slice().reverse(), g1.slice().reverse(), g0.slice().reverse(), [s[2]]).map(x => first + x);
   }
   return null;
 }
@@ -249,7 +247,8 @@ function checkQuestion(q, label){
     const startName = q.type === "chromatic" ? (hand === "rh" ? q.rhStart || q.tonic : q.lhStart || q.tonic) : q.tonic;
     const lowDeg = (q.type === "scale" && ((hand === "rh" && q.apart === 3) || (hand === "lh" && q.apart === 6))) || q.type === "sixths";
     if (!["dom7"].includes(q.type) && !lowDeg && !(q.type === "arpeggio" && q.inversion)) ok(pcOf(parseNote(startName)) === pc(notes[0].midi), `${label} ${hand}: 起音不是 ${startName}`);
-    const endOk = q.type === "dom7" ? pc(notes[notes.length - 1].midi) === pcOf(parseNote(q.tonic)) : notes[notes.length - 1].midi === notes[0].midi;
+    // 分解和弦(1 級)照 Trinity 大綱譜例停在五音(音高另外由 expected 逐音比對)
+    const endOk = q.type === "dom7" ? pc(notes[notes.length - 1].midi) === pcOf(parseNote(q.tonic)) : q.type === "broken" && q.range !== "5th" ? true : notes[notes.length - 1].midi === notes[0].midi;
     ok(endOk, `${label} ${hand}: 結束音不對`);
     const exp = expectedPitches(q, hand, notes);
     if (exp) ok(notes.length === exp.length && notes.every((n, i) => n.midi === exp[i]), `${label} ${hand}: 音高錯誤`);
