@@ -100,18 +100,17 @@ const PICKERS = {
     }
   },
   arp: {
-    defaults: { kind: "major", inv: 0, key: "C", octaves: 2, hands: "HT", art: "legato", pulse: "e" },
+    defaults: { kind: "major", inv: 0, key: "C", octaves: 4, hands: "HT", art: "legato", pulse: "e" },
     rows: p => [
       ["kind", tr("種類", "Type"), [["major", tr("大三和弦", "Major")], ["minor", tr("小三和弦", "Minor")], ["dom7", tr("屬七", "Dom. 7th")], ["dim7", tr("減七", "Dim. 7th")], ["broken", tr("分解和弦", "Broken")]]],
       (p.kind === "major" || p.kind === "minor") && ["inv", tr("轉位", "Position"), [[0, tr("原位", "Root")], [1, tr("第一轉位", "1st inv.")], [2, tr("第二轉位", "2nd inv.")]]],
       ["key", p.kind === "dim7" ? tr("起音", "Start") : tr("調", "Key"), keyOpts(p.kind === "minor" ? MIN_KEYS : p.kind === "dim7" ? STARTS : MAJ_KEYS)],
-      p.kind !== "broken" && ["octaves", tr("範圍", "Range"), OCTS(4)],
       ["hands", tr("手", "Hands"), HANDS()],
       ["art", tr("奏法", "Touch"), ARTS()],
       PULSE()
     ].filter(Boolean),
     toQ: p => {
-      const q = { hands: p.hands, octaves: p.kind === "broken" ? 1 : p.octaves, articulation: p.art, motion: "similar", tonic: p.key };
+      const q = { hands: p.hands, octaves: 4, articulation: p.art, motion: "similar", tonic: p.key };   // 琶音一律四個八度(使用者要求,不給 1–3 八度);分解和弦另外設兩個八度
       if (p.kind === "major" || p.kind === "minor") Object.assign(q, { type: "arpeggio", quality: p.kind, inversion: Number(p.inv), cat: "arpeggio" });
       else if (p.kind === "broken") Object.assign(q, { type: "broken", quality: "major", cat: "broken", octaves: 2 });
       else Object.assign(q, { type: p.kind, quality: "major", cat: "seventh" });
