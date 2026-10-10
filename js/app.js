@@ -689,23 +689,49 @@ $("bpmReset").onclick = () => { if (cur && !cur.free) { S.tempoPct = 100; store.
 const VEL = { f: 92, p: 42, mf: 68, "cresc-dim": 60 };
 function demoVel(){ return cur && cur.dynamic ? VEL[cur.dynamic] : 64; }
 let samplesReady = false;
-/* 回傳這一題的取樣有沒有載好(以前用全域的 samplesReady:上一題載好、這一題載失敗時會靜音播放) */
-async function preloadSamples(){
-  if (!cur) return false;
-  try {
-    audio.ensureAudio();
-    const notes = ["rh", "lh"].flatMap(h => ex[h].flatMap(n => n.with ? [n, n.with] : [n])).map(n => ({ midi: n.midi, vel: demoVel() }));
-    $("loadingMsg").textContent = tr("載入鋼琴取樣…", "Loading piano samples…");
-    await audio.loadPianoFor(notes, 6, p => { $("loadingMsg").textContent = tr("載入鋼琴取樣… ", "Loading piano samples… ") + Math.round(p * 100) + "%"; });
-    await audio.loadClick().catch(() => {});
-    samplesReady = true;
-    $("loadingMsg").textContent = "";
-    return true;
-  } catch (e) {
-    $("loadingMsg").textContent = tr("鋼琴取樣載入失敗(需要網路,之後會存在裝置上)", "Could not load piano samples (needs internet once; then cached on this device)");
-    return false;
-  }
+/* 播放鈕外圈的載入進度(跟著百分比跑);p = null 表示還不知道進度(讀清單中),外圈轉一小段 */
+let loadProg = null;
+function setRing(p){
+  loadProg = p;
+  const r = $("playRing"); if (!r) return;
+  r.classList.toggle("indet", p == null);
+  r.querySelector(".ring-fg").style.strokeDashoffset = String(p == null ? 0.82 : 1 - Math.max(0.03, p));
 }
+/* 同一題只載一次:打開網頁時已經在背景載,按播放就接著等同一個工作(以前會再開一份,手機網路慢時要等兩倍) */
+let preloadJob = null;
+/* 回傳這一題的取樣有沒有載好(以前用全域的 samplesReady:上一題載好、這一題載失敗時會靜音播放) */
+function preloadSamples(){
+  if (!cur) return Promise.resolve(false);
+  if (preloadJob && preloadJob.ex === ex) return preloadJob.p;
+  const job = { ex, p: null };
+  job.p = (async () => {
+    try {
+      audio.ensureAudio();
+      setRing(null);
+      const notes = ["rh", "lh"].flatMap(h => ex[h].flatMap(n => n.with ? [n, n.with] : [n])).map(n => ({ midi: n.midi, vel: demoVel() }));
+      $("loadingMsg").textContent = tr("載入鋼琴取樣…", "Loading piano samples…");
+      await audio.loadPianoFor(notes, 6, p => {
+        if (preloadJob !== job) return;
+        setRing(p * 0.95);
+        $("loadingMsg").textContent = tr("載入鋼琴取樣… ", "Loading piano samples… ") + Math.round(p * 100) + "%";
+      });
+      await audio.loadClick().catch(() => {});
+      samplesReady = true;
+      if (preloadJob === job) { setRing(1); $("loadingMsg").textContent = ""; }
+      return true;
+    } catch (e) {
+      if (preloadJob === job) {
+        preloadJob = null;   // 失敗的不留著:下次按播放重新載
+        $("loadingMsg").textContent = tr("鋼琴取樣載入失敗,再按一次播放重試(需要網路,之後會存在裝置上)", "Could not load piano samples — tap play to retry (needs internet once; then cached)");
+      }
+      return false;
+    }
+  })();
+  preloadJob = job;
+  return job.p;
+}
+/* 最多等 ms 毫秒(iOS 的 AudioContext 被來電、鎖屏打斷後 resume() 可能永遠不回來,以前就會卡在「準備中」、之後怎麼按都沒反應) */
+const within = (p, ms) => Promise.race([p, new Promise(r => setTimeout(r, ms))]);
 
 /* ── 示範播放:預備拍兩小節 + 節拍器 ── */
 const COUNT_IN_BARS = 2;   // 預備拍兩小節:第一小節聽速度、第二小節準備下手(2/4 只有一小節太短)
@@ -715,10 +741,10 @@ async function startPlayback(){
   const token = starting = Date.now() + Math.random();
   const q0 = cur, show0 = show;
   const ctx = audio.ensureAudio();
-  if (ctx.state === "suspended") await ctx.resume();
   $("playLabel").textContent = tr("準備中…", "Preparing…"); $("playBtn").classList.add("busy");
+  if (ctx.state !== "running") await within(ctx.resume().catch(() => {}), 1500);
   const loaded = await preloadSamples();
-  await audio.masterReady;
+  await within(audio.masterReady, 1500);
   // 準備期間換了題目、換了手、按了停止 → 不播
   if (starting !== token || cur !== q0 || show !== show0) { if (starting === token) { starting = 0; $("playLabel").textContent = T("play"); } $("playBtn").classList.remove("busy"); return; }
   starting = 0; $("playBtn").classList.remove("busy");
@@ -783,6 +809,8 @@ document.addEventListener("touchend", e => {
   lastTouchEnd = now;
 }, { passive: false });
 document.addEventListener("gesturestart", e => e.preventDefault());
+/* 每一次真的點擊都喚醒音訊(上面補的 click 不算使用者手勢,iOS 不准它打開聲音;被來電、鎖屏打斷的也在這裡叫回來) */
+for (const ev of ["touchend", "pointerdown", "keydown"]) document.addEventListener(ev, () => audio.unlockAudio(), { capture: true, passive: true });
 
 /* ── 拍點燈號(示範播放時亮)── */
 function showBeat(click){

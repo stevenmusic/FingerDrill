@@ -213,11 +213,19 @@ body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
 .play-round{flex:none;width:52px;height:52px;border-radius:50%;border:0;background:var(--gold-fill);color:var(--on-fill);
   display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 .play-round:disabled{opacity:.35}
-/* 準備中(載入鋼琴取樣):外圈轉動,看得出有按到 */
+/* 準備中(載入鋼琴取樣):外圈照載入百分比畫一圈(從 12 點順時針);還不知道進度時轉一小段 */
 .play-round{position:relative}
-.play-round.busy::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:3px solid transparent;border-top-color:var(--gold);animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
 .play-round svg{fill:currentColor}
+.play-round .play-ring{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);fill:none;transform:rotate(-90deg);
+  opacity:0;transition:opacity .2s;pointer-events:none}
+.play-round.busy .play-ring{opacity:1}
+.play-ring circle{fill:none;stroke-width:3.5;stroke-linecap:round}
+.play-ring .ring-bg{stroke:var(--line)}
+.play-ring .ring-fg{stroke:var(--gold);stroke-dasharray:1 1;stroke-dashoffset:.82;transition:stroke-dashoffset .25s ease-out}
+.play-ring.indet{animation:spin .9s linear infinite}
+.play-ring.indet .ring-fg{transition:none}
+@keyframes spin{from{transform:rotate(-90deg)}to{transform:rotate(270deg)}}
+@media (prefers-reduced-motion:reduce){.play-ring.indet{animation-duration:2.5s}}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .q-actions{display:flex;gap:6px;align-items:center;flex:none;margin-left:auto}
 .q-actions .btn{height:36px;padding:0 14px;font-size:var(--fs-md)}

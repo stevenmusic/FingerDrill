@@ -34,6 +34,7 @@ export async function open(opts = {}){
   await page.route(/raw\.githubusercontent\.com/, async r => {
     const u = r.request().url(), f = path.join(CACHE, u.replace(/^https:\/\/raw\.githubusercontent\.com\//, "").replace(/\//g, "__"));
     if (!fs.existsSync(f)) { try { execFileSync("curl", ["-sSfL", "-o", f, u]); } catch (e) { return r.fulfill({ status: 404, body: "" }); } }
+    if (opts.sampleDelay && u.endsWith(".flac")) await new Promise(res => setTimeout(res, opts.sampleDelay * (0.5 + Math.random())));   // 模擬慢網路
     r.fulfill({ path: f, headers: { "access-control-allow-origin": "*", "content-type": u.endsWith(".json") ? "application/json" : "audio/flac" } });
   });
   await page.goto(url + (opts.path || ""));

@@ -150,6 +150,17 @@ function buildMaster(){
     } catch (e) { console.warn("母帶限幅器載入失敗,使用備援:", e); return false; }
   })();
 }
+/* iPhone 側邊靜音開關打開時,網頁的 Web Audio 預設會被靜音(看起來像按播放沒反應);設成 playback 就照樣有聲音(Safari 17+) */
+try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+/* 在使用者手勢裡呼叫:讓 AudioContext 開始跑(iOS 要在手勢裡 resume + 播一個無聲的音才算解鎖) */
+export function unlockAudio(){
+  if (!audioCtx || audioCtx instanceof OfflineAudioContext || audioCtx.state === "running") return;
+  try {
+    audioCtx.resume().catch(() => {});
+    const src = audioCtx.createBufferSource(); src.buffer = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+    src.connect(audioCtx.destination); src.start(0);
+  } catch (e) {}
+}
 export function ensureAudio(){
   if (audioCtx && !(audioCtx instanceof OfflineAudioContext)) return audioCtx;
   const AC = window.AudioContext || window.webkitAudioContext;
@@ -174,7 +185,12 @@ function sampleCache(){
 async function fetchSample(url){
   const cache = await sampleCache();
   if (cache) { try { const hit = await cache.match(url); if (hit) return hit; } catch (e) {} }
-  const res = await fetch(url);
+  // 網路卡住時不要永遠等(以前會一直停在「準備中」):25 秒沒下載完就算失敗,再按一次重試
+  const ac = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timer = ac && setTimeout(() => ac.abort(), 25000);
+  let res;
+  try { res = await fetch(url, ac ? { signal: ac.signal } : undefined); if (res.ok) await res.clone().arrayBuffer(); }
+  finally { if (timer) clearTimeout(timer); }
   if (res.ok && cache) { try { await cache.put(url, res.clone()); } catch (e) {} }
   return res;
 }
@@ -220,7 +236,7 @@ async function fetchPianoBuffer(file, lenSec){
 }
 function loadPianoManifest(){
   if (!pianoManPromise) pianoManPromise = (async () => {
-    const r = await fetch(PIANO_BASE + "manifest.json");
+    const r = await fetch(PIANO_BASE + "manifest.json", typeof AbortSignal !== "undefined" && AbortSignal.timeout ? { signal: AbortSignal.timeout(15000) } : undefined);
     if (!r.ok) throw new Error("manifest " + r.status);
     pianoMan = await r.json();
     return pianoMan;
