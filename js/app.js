@@ -107,7 +107,7 @@ const PICKERS = {
       p.kind !== "broken" && ["octaves", tr("範圍", "Range"), OCTS(4)],
       ["hands", tr("手", "Hands"), HANDS()],
       ["art", tr("奏法", "Touch"), ARTS()],
-      p.kind !== "broken" && PULSE()   // 分解和弦是八分音符,一拍本來就打一下
+      p.kind !== "broken" && PULSE()   // 分解和弦三個音一組 = 三連音一拍,拍點本來就一拍一下
     ].filter(Boolean),
     toQ: p => {
       const q = { hands: p.hands, octaves: p.kind === "broken" ? 1 : p.octaves, articulation: p.art, motion: "similar", tonic: p.key };
@@ -135,7 +135,7 @@ const PICKERS = {
 };
 S.pick = S.pick || {};
 for (const t of ["scale", "arp", "hanon"]) S.pick[t] = { ...PICKERS[t].defaults, ...(S.pick[t] || {}) };
-S.freeBpm = { scale: 60, arp: 60, hanon: 60, ...(S.freeBpm || {}) };
+S.freeBpm = { scale: 60, arp: 60, hanon: 60, broken: 50, ...(S.freeBpm || {}) };
 S.hanonBest = S.hanonBest || {};   // 哈農每首(不分調)練過的最高速度
 const paneOf = tab => $(tab === "scale" ? "paneScale" : tab === "arp" ? "paneArp" : "paneHanon");
 
@@ -167,10 +167,12 @@ function freeQuestion(tab){
   // 哈農:S.freeBpm.hanon 一律記 ♩ 的速度;拍點選 ♪ 時顯示 ×2
   const eighth = tab === "hanon" && S.pick.hanon.pulse === "e";
   // 音階、琶音:S.freeBpm 一律記 ♪(每 2 音)的速度;拍點選 ♩ 時顯示 ÷2
-  const beat4 = tab !== "hanon" && S.pick[tab].pulse === "q" && q.type !== "broken";
+  const beat4 = tab !== "hanon" && S.pick[tab].pulse === "q";
   q.tempo = tab === "hanon" ? { unit: eighth ? "e16" : "q16", bpm: S.freeBpm[tab] * (eighth ? 2 : 1) }
+    : q.type === "broken" ? { unit: "q.", bpm: S.freeBpm.broken }   // 分解和弦:三連音,一組(3 個音)一拍
     : { unit: beat4 ? "q16" : "q", bpm: beat4 ? Math.max(30, Math.round(S.freeBpm[tab] / 2)) : S.freeBpm[tab] };
-  q.free = true; q.sub = tab === "hanon" ? 4 : 2;
+  q.free = true;
+  if (q.type === "broken") { q.sub = 3; q.key = masteryKey(q); return q; } q.sub = tab === "hanon" ? 4 : 2;
   q.key = tab === "hanon" ? `hanon|${q.no}|${q.tonic}|${q.hands}|${q.rhythm}` : masteryKey(q);
   return q;
 }
@@ -511,6 +513,9 @@ function drawFingerings(){
     }
     return out;
   };
+  // 三連音的「3」(含括弧):指法數字要放在它外側,不然會疊在一起
+  // (VexFlow 把「3」畫成沒有 class 的 path,直接放在 .vf-measure 底下;譜線也是 path 但高度 0)
+  const tuplets = [...svg.querySelectorAll(".vf-tuplet, .vf-measure > path:not([class])")].map(t => t.getBBox()).filter(b => b.width > 2 && b.height > 4);
   for (const mlist of osmd.GraphicSheet.MeasureList) for (const gm of mlist || []) {
     if (!gm || !gm.getVFStave) continue;
     const stave = gm.getVFStave(), sp = stave.getSpacingBetweenLines(), top = stave.getYForLine(0), bot = stave.getYForLine(4);
@@ -523,6 +528,7 @@ function drawFingerings(){
       const b0 = el.getBBox(), cx = heads[0].x + heads[0].width / 2;
       let bt = b0.y, bb = b0.y + b0.height;
       for (const [y0, y1] of beamAt(Math.min(heads[0].x - 1, cx - fs * 0.4), Math.max(heads[0].x + heads[0].width + 1, cx + fs * 0.4))) if (y1 >= top - sp * 8 && y0 <= bot + sp * 8 && y1 >= bt - sp * 9 && y0 <= bb + sp * 9) { bt = Math.min(bt, y0); bb = Math.max(bb, y1); }
+      for (const t of tuplets) if (t.x <= cx + fs * 0.45 && t.x + t.width >= cx - fs * 0.45 && t.y + t.height >= top - sp * 8 && t.y <= bot + sp * 8 && t.y + t.height >= bt - sp * 6 && t.y <= bb + sp * 6) { bt = Math.min(bt, t.y); bb = Math.max(bb, t.y + t.height); }
       const box = { y: bt, height: bb - bt };
       const sorted = gve.notes.slice().sort((a, b) => a.sourceNote.Pitch.getHalfTone() - b.sourceNote.Pitch.getHalfTone());
       const list = sorted.map((n, k) => ({ n, h: heads[Math.min(k, heads.length - 1)] })).filter(x => x.n.sourceNote.Fingering);
@@ -679,6 +685,7 @@ function syncTempoUI(){
       : tr(`考試速度 ${UNIT_SYM[u]} = ${examT.bpm}(八分音符,每拍 ${NOTES_PER_UNIT[u]} 個${u === "q." ? ",三連音" : ""})`,
       `Exam tempo ${UNIT_SYM[u]} = ${examT.bpm} (${NOTES_PER_UNIT[u]} ${u === "q." ? "triplet " : ""}quavers per beat)`);
   } else if (u === "e16") { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("拍點打在 ♪(每 2 個音)· 原譜 ♩ 60–108 = ♪ 120–216", "Clicks on ♪ (every 2 notes) · Hanon ♩ 60–108 = ♪ 120–216"); }
+  else if (u === "q.") { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("三連音:每拍 3 個音", "Triplets: 3 notes per beat"); }
   else if (u === "q16" && cur && cur.type !== "hanon") { $("bpmPct").textContent = ""; $("examTempo").textContent = tr("拍點 ♩ = 每 4 個音", "Click ♩ = every 4 notes"); }
   else if (u === "q16") { $("bpmPct").textContent = ""; $("examTempo").textContent = ex && ex.rhythm !== "even" ? tr("每拍 4 個音(附點節奏)· 原譜 60–108", "4 notes per beat (dotted) · Hanon: 60–108") : tr("每拍 4 個十六分音符 · 原譜 60–108", "4 semiquavers per beat · Hanon: 60–108"); }
   else { $("bpmPct").textContent = ""; $("examTempo").textContent = ex && ex.timeHidden ? tr("拍點 ♪ = 每 2 個音", "Click ♪ = every 2 notes") : tr("每拍 2 個八分音符", "2 quavers per beat"); }
@@ -689,7 +696,8 @@ function maxBpm(){ return 240; }   // 速度上限一律 240(使用者要求)
 function setBpm(v, fromUser){
   bpm = Math.max(30, Math.min(maxBpm(), Math.round(v)));
   if (fromUser && cur) {
-    if (cur.free) { S.freeBpm[S.tab] = unitOf() === "e16" ? bpm / 2 : S.tab !== "hanon" && unitOf() === "q16" ? Math.min(240, bpm * 2) : bpm; cur.tempo.bpm = bpm; }
+    if (cur.free && cur.type === "broken") { S.freeBpm.broken = bpm; cur.tempo.bpm = bpm; }
+    else if (cur.free) { S.freeBpm[S.tab] = unitOf() === "e16" ? bpm / 2 : S.tab !== "hanon" && unitOf() === "q16" ? Math.min(240, bpm * 2) : bpm; cur.tempo.bpm = bpm; }
     else S.tempoPct = Math.round(100 * bpm / cur.tempo.bpm);
     store.save();
   }

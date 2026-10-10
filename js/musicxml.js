@@ -119,7 +119,7 @@ function noteXml(e, opts){
   }
   x += "<notations>";
   // 三連音的「3」只標在每隻手的第一組,之後照慣例省略(simile),不跟指法數字擠在一起
-  if (tuplet === "start" || tuplet === "stop") x += `<tuplet type="${tuplet}" bracket="no" show-number="${tuplet === "start" && opts.firstTuplet ? "actual" : "none"}" placement="${stem === "up" ? "above" : "below"}"/>`;
+  if (tuplet === "start" || tuplet === "stop") x += `<tuplet type="${tuplet}" bracket="no" show-number="${tuplet === "start" && opts.firstTuplet ? "actual" : "none"}" placement="${opts.staff === 1 ? "below" : "above"}"/>`;   // 「3」放在指法的另一側(右手指法在上、左手在下),不會跟指法數字疊在一起
   if (n.finger) x += `<technical><fingering placement="${place}">${n.finger}</fingering></technical>`;
   if (staccato) x += `<articulations><staccato placement="${stem === "up" ? "below" : "above"}"/></articulations>`;   // 跳音點在符頭那側
   x += "</notations></note>";
