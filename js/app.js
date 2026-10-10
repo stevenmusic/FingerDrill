@@ -397,7 +397,7 @@ function setQuestion(q, tab){
   if (!q.free && S.exam) notes.push(() => SY.systems[S.exam.system].mode === "sets" ? tr("速度是大綱的「最低速度」。", "Tempo is the syllabus minimum.") : tr("速度是大綱的「參考速度」。", "Tempo is the syllabus guide speed."));
   $("scoreNote").hidden = !notes.length;
   pairText($("scoreNote"), () => noteFns.map(f => f()).join(" "));
-  bpm = q.free ? q.tempo.bpm : Math.max(30, Math.min(240, Math.round(q.tempo.bpm * S.tempoPct / 100)));
+  bpm = q.free ? q.tempo.bpm : Math.max(30, Math.min(300, Math.round(q.tempo.bpm * S.tempoPct / 100)));
   syncTempoUI();
   renderScore();
   if (tab === "exam" && S.exam) renderList();
@@ -691,12 +691,12 @@ function syncTempoUI(){
   else { $("bpmPct").textContent = ""; $("examTempo").textContent = ex && ex.timeHidden ? tr("拍點 ♪ = 每 2 個音", "Click ♪ = every 2 notes") : tr("每拍 2 個八分音符", "2 quavers per beat"); }
   $("beats").innerHTML = "<i class=\"first\"></i>" + "<i></i>".repeat(beatsPerBar() - 1);
 }
-/* ♪ 拍點時速度數字是 ♩ 的兩倍:上限放寬到 240(♩ = 120) */
-function maxBpm(){ return 240; }   // 速度上限一律 240(使用者要求)
+/* ♪ 拍點時速度數字是 ♩ 的兩倍:上限 300(♪ = 300 等於 ♩ = 150) */
+function maxBpm(){ return 300; }   // 速度上限一律 300(使用者要求)
 function setBpm(v, fromUser){
   bpm = Math.max(30, Math.min(maxBpm(), Math.round(v)));
   if (fromUser && cur) {
-    if (cur.free) { S.freeBpm[S.tab] = unitOf() === "e16" ? bpm / 2 : S.tab !== "hanon" && unitOf() === "q16" ? Math.min(240, bpm * 2) : bpm; cur.tempo.bpm = bpm; }
+    if (cur.free) { S.freeBpm[S.tab] = unitOf() === "e16" ? bpm / 2 : S.tab !== "hanon" && unitOf() === "q16" ? Math.min(300, bpm * 2) : bpm; cur.tempo.bpm = bpm; }
     else S.tempoPct = Math.round(100 * bpm / cur.tempo.bpm);
     store.save();
   }
