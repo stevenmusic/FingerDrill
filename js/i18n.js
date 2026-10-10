@@ -33,7 +33,7 @@ const STR = {
   legendGood: ["通過", "Pass"], legendWeak: ["待加強", "Weak"], legendNone: ["未標記", "New"],
   footer: ["鋼琴音色:Accurate-Salamander Grand Piano V6.2(Salamander Grand Piano V3 by Alexander Holm,CC-BY 3.0)· 節拍器:Naked Drums(Wilkinson Audio,CC-BY 4.0)· 取樣經 ScrollScore 整理後直接讀取 · 樂譜:OpenSheetMusicDisplay(BSD-3-Clause)。檢定要求依 ABRSM《Piano Practical Grades 2025 & 2026》與 Trinity《Piano Syllabus from 2023》整理,僅供練習參考;實際要求以官方大綱為準。",
     "Piano: Accurate-Salamander Grand Piano V6.2 (Salamander Grand Piano V3, Alexander Holm, CC-BY 3.0) · Click: Naked Drums (Wilkinson Audio, CC-BY 4.0) · via ScrollScore · Notation: OpenSheetMusicDisplay (BSD-3-Clause). Requirements from ABRSM Piano Practical Grades 2025 & 2026 and Trinity Piano Syllabus from 2023; for practice only — check the official syllabus."],
-  obTitle: ["你在準備鋼琴檢定嗎?", "Taking a piano exam?"],
+  obTitle: ["你在準備鋼琴檢定嗎?", "Taking an exam?"],
   obSub: ["選好考試和級數,會打開「檢定」分頁,音階、琶音分頁也會列出這一級的要求;之後隨時可以改。",
     "Pick a board and grade: Exams opens and Scales/Arpeggios list its requirements. Change any time."],
   obYes: ["開始準備考試", "Start exam prep"], obNo: ["不考試,自由練習", "No exam — free practice"]

@@ -635,7 +635,7 @@ function syncTempoUI(){
   $("bpmReset").hidden = !examT;
   if (examT) {
     const pct = Math.round(100 * bpm / examT.bpm);
-    $("bpmPct").textContent = pct === 100 ? tr("考試速度", "exam") : tr(`考試速度的 ${pct}%`, `${pct}% of exam tempo`);
+    $("bpmPct").textContent = pct === 100 ? tr("考試", "exam") : tr(`考試速度的 ${pct}%`, `${pct}% of exam tempo`);
     $("examTempo").textContent = unitSym(u) !== UNIT_SYM[u]
       ? tr(`大綱 ${UNIT_SYM[u]} = ${examT.bpm}(每拍 ${NOTES_PER_UNIT[u]} 個八分音符)= 這裡的 ${unitSym(u)} = ${examT.bpm}`, `Syllabus ${UNIT_SYM[u]} = ${examT.bpm} (${NOTES_PER_UNIT[u]} quavers) = ${unitSym(u)} = ${examT.bpm} here`)
       : tr(`考試速度 ${UNIT_SYM[u]} = ${examT.bpm}(八分音符,每拍 ${NOTES_PER_UNIT[u]} 個${u === "q." ? ",三連音" : ""})`,
