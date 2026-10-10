@@ -429,7 +429,22 @@ const PLAYLINE_RATIO = 0.25;
 let noteXs = [];
 const syncHandSeg = segBind("handSeg", () => show, v => { show = v; stopPlayback(); renderScore(); });
 let renderSeq = 0;
-const scoreZoom = () => window.innerWidth < 600 ? 0.85 : window.innerWidth < 1000 ? 0.95 : 1.05;
+const scoreZoom = () => landZoom || (window.innerWidth < 600 ? 0.85 : window.innerWidth < 1000 ? 0.95 : 1.05);
+/* 手機橫放(平板不算):樂譜照畫面高度放大,讓「工具列 + 樂譜標題 + 樂譜」剛好一個畫面(播放時下方分頁列收起來) */
+const PHONE_LAND = "(orientation: landscape) and (max-height: 500px)";
+const isPhoneLand = () => matchMedia(PHONE_LAND).matches;
+let landZoom = null;
+function fitLandZoom(){
+  if (!isPhoneLand()) { if (landZoom) { landZoom = null; return refit(); } return false; }
+  const svg = document.querySelector("#osmd svg"); if (!svg || !osmd) return false;
+  const H = svg.getBoundingClientRect().height; if (!H) return false;
+  const head = document.querySelector("header").offsetHeight, title = document.querySelector("#scoreCard .card-title").offsetHeight;
+  const avail = innerHeight - head - title - 44;           // 卡片與紙的上下內距、間隔
+  const z = Math.max(0.85, Math.min(1.8, osmd.zoom * avail / H));
+  if (Math.abs(z - osmd.zoom) < 0.03) { landZoom = osmd.zoom; return false; }
+  landZoom = z; return refit();
+}
+function refit(){ osmd.zoom = scoreZoom(); lastZoom = osmd.zoom; renderOsmd(); measureNotes(); return true; }
 async function renderScore(){
   if (!cur) return;
   const seq = ++renderSeq;
@@ -448,6 +463,7 @@ async function renderScore(){
     osmd.zoom = scoreZoom();
     renderOsmd();
     measureNotes();
+    fitLandZoom();
   } catch (e) {
     console.error(e);
     $("paperMsg").textContent = tr("樂譜繪製失敗:", "Could not draw the score: ") + e.message;
@@ -604,6 +620,7 @@ function fitTitle(){
 const onStageResize = () => {
   fitTitle();
   if (!osmd || !cur) return;
+  if (fitLandZoom()) return;
   const z = scoreZoom();
   if (z !== lastZoom && lastZoom !== null) { lastZoom = z; osmd.zoom = z; renderOsmd(); measureNotes(); return; }
   lastZoom = z;
@@ -770,7 +787,16 @@ function retempo(){
   }, 60);
 }
 /* 按播放時樂譜要整份看得到(手機橫放時常常被底部分頁列蓋住一半):沒露出來就捲過去 */
+let landScroll = null;   // 手機橫放:播放前的捲動位置(播完捲回去,播放鈕才看得到)
 function revealScore(){
+  if (isPhoneLand()) {
+    // 樂譜卡貼在工具列下面、下方分頁列收起來,樂譜延伸到底
+    if (landScroll == null) landScroll = scrollY;
+    document.body.classList.add("land-play");
+    const top = $("scoreCard").getBoundingClientRect().top - document.querySelector("header").getBoundingClientRect().bottom - 6;
+    if (Math.abs(top) > 2) window.scrollBy({ top, behavior: "smooth" });
+    return;
+  }
   const r = $("scoreCard").getBoundingClientRect(), bar = document.querySelector(".tabbar");
   const bottom = bar ? bar.getBoundingClientRect().top : innerHeight;
   if (r.bottom > bottom - 4) window.scrollBy({ top: Math.min(r.bottom - bottom + 8, r.top - 4), behavior: "smooth" });
@@ -823,7 +849,7 @@ async function startPlaybackInner(){
     showBeat((now - play.t0) / play.clickSec);
     movePlayline(Math.max(0, beat), true);
     if (beat > play.endBeat + 0.5) {
-      const sec = play.endBeat * play.beatSec; stopPlayback(true); logPractice(sec);
+      const sec = play.endBeat * play.beatSec; stopPlayback(true, !!(S.loop && cur)); logPractice(sec);
       // 循環:再來一輪(有預備拍);勾了「每輪 +4」就每輪快 4(拍點 ♪ 時快 8,等於 ♩ +4)
       if (S.loop && cur) { if (S.ramp) setBpm(bpm + (unitOf() === "e16" ? 8 : 4), true); startPlayback(); }
       return;
@@ -832,14 +858,21 @@ async function startPlaybackInner(){
   };
   play.raf = requestAnimationFrame(tick);
 }
-function stopPlayback(natural){
+function stopPlayback(natural, keepView){
   starting = 0; $("playBtn").classList.remove("busy");
+  // 手機橫放:播完(或停止)捲回播放前的位置、分頁列放回來;循環的下一輪不捲
+  if (!keepView && landScroll != null) {
+    document.body.classList.remove("land-play");
+    window.scrollTo({ top: landScroll, behavior: "smooth" }); landScroll = null;
+  }
   if (play) { cancelAnimationFrame(play.raf); play = null; if (!natural) audio.stopAll(); }
   if (osmd && noteXs.length) { $("scroll").scrollLeft = 0; movePlayline(0, false); }
   $("playLabel").textContent = T("play");
   $("playIcon").innerHTML = '<path d="M7 4v16l13-8z"/>';
   showBeat(null);
 }
+/* 手機橫放播放中看不到播放鈕:點樂譜就停止(並捲回播放鈕) */
+$("stage").addEventListener("click", () => { if (play && document.body.classList.contains("land-play")) stopPlayback(); });
 /* 準備中再按一次不取消(以前會取消 → 看起來像「按了沒反應」);播放中按 = 停止 */
 $("playBtn").onclick = () => { if (play) stopPlayback(); else if (!starting) startPlayback(); };
 /* 禁止連點放大(iOS 有時不理 touch-action / user-scalable):300ms 內的第二下取消預設動作,自己補一次 click */

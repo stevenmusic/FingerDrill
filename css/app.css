@@ -116,7 +116,7 @@ header h1 span{color:var(--ivory);font-weight:600}
 }
 @media (max-width:380px){ .btn{padding:0 8px;height:32px} }
 @media (max-width:340px){ .btn{padding:0 5px} }
-@media (max-height:420px){
+@media (max-height:420px), (orientation:landscape) and (max-height:500px){
   header{padding:5px 10px;gap:4px 8px}
   header h1{font-size:var(--fs-sm)}
   .btn{padding:0 10px;height:28px;font-size:var(--fs-xs)}
@@ -176,7 +176,7 @@ body.light .chip[aria-pressed="true"]{background:rgba(133,100,24,.08)}
 body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
 .verify-note{font-size:var(--fs-xs);color:var(--muted);line-height:1.6;margin-top:8px}
 @media (max-width:900px){ .fields{grid-template-columns:repeat(2,minmax(0,1fr))} }
-@media (max-width:600px), (max-height:420px){
+@media (max-width:600px), (max-height:420px), (orientation:landscape) and (max-height:500px){
   .setup{padding:8px 12px}
   .setup-summary{display:flex}
   .setup:not(.open) .setup-body{display:none}
@@ -316,7 +316,7 @@ body.light{background:
   #drawBtn .btn-label,#mockBtn .btn-label{display:inline}
 }
 /* 手機橫向 */
-@media (max-height:420px){
+@media (max-height:420px), (orientation:landscape) and (max-height:500px){
   .q-title{font-size:24px}
 }
 /* iPhone 瀏海/底部安全區 */
@@ -360,7 +360,7 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 .quick .opt .dot{flex:none}
 .quick .opt span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25;overflow-wrap:anywhere}
 .picker .setup-summary{display:none}
-@media (max-width:600px), (max-height:420px){
+@media (max-width:600px), (max-height:420px), (orientation:landscape) and (max-height:500px){
   .picker .setup-summary{display:flex}
   .picker:not(.open) .setup-body{display:none}
   .picker.open .setup-body{margin-top:8px}
@@ -388,7 +388,7 @@ header{z-index:60}
 @media (max-width:480px){ #examChip{display:none !important} }
 /* 主題/語言按鈕一律正方形,窄螢幕也不被擠扁 */
 #themeToggle,#langToggle{aspect-ratio:1;padding:0;min-width:34px;justify-content:center}
-@media (max-height:420px){ #themeToggle,#langToggle{min-width:30px} }
+@media (max-height:420px), (orientation:landscape) and (max-height:500px){ #themeToggle,#langToggle{min-width:30px} }
 /* 速度滑桿:加高點擊區域(滑軌樣式不變) */
 .metro input[type=range]{height:36px;margin:0}
 /* 收起/展開:手指點得到 */
@@ -413,7 +413,7 @@ header{z-index:60}
 .tabbar button[aria-selected="true"]{background:rgba(242,185,75,.12)}
 body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
 /* 手機橫放:分頁列改成矮的(圖示和文字並排) */
-@media (max-height:420px){
+@media (max-height:420px), (orientation:landscape) and (max-height:500px){
   .tabbar{padding-top:3px;padding-bottom:calc(3px + env(safe-area-inset-bottom))}
   .tabbar button{flex-direction:row;gap:6px;min-height:38px;padding:0}
   .tabbar svg{width:18px;height:18px}
@@ -426,13 +426,13 @@ body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
 .tabbar button[aria-selected="true"]{background:rgba(242,185,75,.12)}
 body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
 /* 手機橫放:分頁列改成矮的(圖示和文字並排) */
-@media (max-height:420px){
+@media (max-height:420px), (orientation:landscape) and (max-height:500px){
   .tabbar{padding-top:3px;padding-bottom:calc(3px + env(safe-area-inset-bottom))}
   .tabbar button{flex-direction:row;gap:6px;min-height:38px;padding:0}
   .tabbar svg{width:18px;height:18px}
   main{padding-bottom:calc(56px + env(safe-area-inset-bottom))}
 }
-@media (max-height:420px){ .tabbar button{justify-content:center} }
+@media (max-height:420px), (orientation:landscape) and (max-height:500px){ .tabbar button{justify-content:center} }
 
 /* ══ 樂譜:一整行 + 播放軸(照 ScrollScore)══
    比畫面短 → 水平置中,播放時播放軸沿著音符走;比畫面長 → 可以左右滑,播放時播放軸停在 25%、樂譜往左捲 */
@@ -461,7 +461,7 @@ body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
 
 /* ══ 手機橫放(高度 ≤ 420):第一個畫面就要看得到樂譜(放在譜架上最需要的是譜)══
    題目卡收成一行:題目 | 標籤 | ✓ ⚠ | 播放;卡片間距、內距縮小 */
-@media (max-height:420px){
+@media (max-height:420px), (orientation:landscape) and (max-height:500px){
   main{gap:8px;padding-top:8px}
   .card{padding:8px 12px}
   .setup-summary{min-height:32px;padding-top:0;padding-bottom:0}
@@ -480,3 +480,9 @@ body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
   #scoreCard .card-title{margin-bottom:4px}
   #scoreCard .seg button{height:28px}
 }
+
+/* 手機橫放播放中:下方分頁列收起來,樂譜延伸到畫面底部(JS 依畫面高度放大樂譜,見 fitLandZoom) */
+.tabbar{transition:transform .25s ease}
+body.land-play .tabbar{transform:translateY(calc(100% + 40px));box-shadow:none}
+body.land-play #scoreCard{display:flex;flex-direction:column;min-height:calc(100vh - 70px);min-height:calc(100dvh - 70px)}
+body.land-play #stage{flex:1;display:flex;flex-direction:column;justify-content:center}
