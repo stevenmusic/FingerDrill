@@ -107,12 +107,12 @@ const PICKERS = {
       p.kind !== "broken" && ["octaves", tr("範圍", "Range"), OCTS(4)],
       ["hands", tr("手", "Hands"), HANDS()],
       ["art", tr("奏法", "Touch"), ARTS()],
-      p.kind !== "broken" && PULSE()   // 分解和弦三個音一組 = 三連音一拍,拍點本來就一拍一下
+      PULSE()
     ].filter(Boolean),
     toQ: p => {
       const q = { hands: p.hands, octaves: p.kind === "broken" ? 1 : p.octaves, articulation: p.art, motion: "similar", tonic: p.key };
       if (p.kind === "major" || p.kind === "minor") Object.assign(q, { type: "arpeggio", quality: p.kind, inversion: Number(p.inv), cat: "arpeggio" });
-      else if (p.kind === "broken") Object.assign(q, { type: "broken", quality: "major", cat: "broken" });
+      else if (p.kind === "broken") Object.assign(q, { type: "broken", quality: "major", cat: "broken", octaves: 2 });
       else Object.assign(q, { type: p.kind, quality: "major", cat: "seventh" });
       return q;
     }
@@ -169,10 +169,9 @@ function freeQuestion(tab){
   // 音階、琶音:S.freeBpm 一律記 ♪(每 2 音)的速度;拍點選 ♩ 時顯示 ÷2
   const beat4 = tab !== "hanon" && S.pick[tab].pulse === "q";
   q.tempo = tab === "hanon" ? { unit: eighth ? "e16" : "q16", bpm: S.freeBpm[tab] * (eighth ? 2 : 1) }
-    : q.type === "broken" ? { unit: "q.", bpm: S.freeBpm.broken }   // 分解和弦:三連音,一組(3 個音)一拍
     : { unit: beat4 ? "q16" : "q", bpm: beat4 ? Math.max(30, Math.round(S.freeBpm[tab] / 2)) : S.freeBpm[tab] };
   q.free = true;
-  if (q.type === "broken") { q.sub = 3; q.key = masteryKey(q); return q; } q.sub = tab === "hanon" ? 4 : 2;
+q.sub = tab === "hanon" ? 4 : 2;
   q.key = tab === "hanon" ? `hanon|${q.no}|${q.tonic}|${q.hands}|${q.rhythm}` : masteryKey(q);
   return q;
 }
@@ -696,8 +695,7 @@ function maxBpm(){ return 240; }   // 速度上限一律 240(使用者要求)
 function setBpm(v, fromUser){
   bpm = Math.max(30, Math.min(maxBpm(), Math.round(v)));
   if (fromUser && cur) {
-    if (cur.free && cur.type === "broken") { S.freeBpm.broken = bpm; cur.tempo.bpm = bpm; }
-    else if (cur.free) { S.freeBpm[S.tab] = unitOf() === "e16" ? bpm / 2 : S.tab !== "hanon" && unitOf() === "q16" ? Math.min(240, bpm * 2) : bpm; cur.tempo.bpm = bpm; }
+    if (cur.free) { S.freeBpm[S.tab] = unitOf() === "e16" ? bpm / 2 : S.tab !== "hanon" && unitOf() === "q16" ? Math.min(240, bpm * 2) : bpm; cur.tempo.bpm = bpm; }
     else S.tempoPct = Math.round(100 * bpm / cur.tempo.bpm);
     store.save();
   }

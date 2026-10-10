@@ -38,8 +38,8 @@ function layoutHand(notes, sub){
   notes.forEach((n, i) => {
     const last = i === notes.length - 1;
     // 音可以自己帶時值(哈農的附點節奏:n.dur 幾個 division、n.ntype / n.ndots 音符種類、n.hook 十六分音符的半截連桿)
-    // 三連音的最後一個音剛好是一組的第三個音:留在三連音裡(跟前兩個音連桿),後面從拍點起補休止符
-    const closesTriplet = last && sub === 3 && (pos + step) % DIV === 0 && pos % DIV !== 0;
+    // 最後一個音剛好是一拍(三連音或十六分音符一組)的最後一個:留在三連音裡(跟前兩個音連桿),後面從拍點起補休止符
+    const closesTriplet = last && (sub === 3 || sub === 4) && (pos + step) % DIV === 0 && pos % DIV !== 0;
     if (!last || closesTriplet) { const d = n.dur || step; events.push({ n, pos, dur: d, short: true, ntype: n.ntype, ndots: n.ndots || 0, hook: n.hook }); pos += d;
       if (closesTriplet) fillRests(events, pos);
       return; }

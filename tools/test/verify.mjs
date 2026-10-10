@@ -125,8 +125,12 @@ function expectedPitches(q, hand, notes){
   }
   if (q.type === "broken") {
     const s = q.quality === "major" ? [0, 4, 7] : [0, 3, 7];
+    if (q.octaves === 2) {   // 四音一組(哈農第 41 首的寫法):原位、第一轉位、第二轉位、原位高八度,下行前三組反過來
+      const g = [[0, s[1], s[2], 12], [s[1], s[2], 12, 12 + s[1]], [s[2], 12, 12 + s[1], 12 + s[2]], [12, 12 + s[1], 12 + s[2], 24]];
+      return g[0].concat(g[1], g[2], g[3], g[2].slice().reverse(), g[1].slice().reverse(), g[0].slice().reverse()).map(x => first + x);
+    }
     const g0 = s, g1 = [s[1], s[2], 12], g2 = [s[2], 12, 12 + s[1]];
-    return g0.concat(g1, g2, g2.slice().reverse(), g1.slice().reverse(), [0]).map(x => first + x);
+    return g0.concat(g1, g2, g2.slice().reverse(), g1.slice().reverse(), g0.slice().reverse()).map(x => first + x);
   }
   return null;
 }
