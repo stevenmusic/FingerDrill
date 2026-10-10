@@ -222,11 +222,6 @@ function buildDouble(FG, q){
 
 export const SIXTEENTH_TYPES = ["scale", "chromatic", "wholetone", "thirds", "sixths", "arpeggio", "dom7", "dim7", "broken"];   // 分解和弦:兩個八度(四音一組)才是十六分;大綱的三連音(sub 3)不變
 export function buildExercise(FG, q){
-  // 哈農第 41 首(三和弦琶音,24 個調):照原譜 3/4 拍、十六分音符、上行四個八度再下行,結尾附點二分音符;指法 = 琶音指法表(已照第 41 首核對)
-  if (q.type === "hanon" && q.no === 41) {
-    const quality = q.quality || "major", { rh, lh } = buildArp(FG, { type: "arpeggio", tonic: q.tonic, quality, octaves: 4, inversion: 0 });
-    return { rh, lh, fifths: keyFifths(q.tonic, quality), sub: 4, bar: 36, time: [3, 4], rhythm: "even", crossStaff: true };   // 一小節跨四個八度:照原譜不換譜號,低音寫在下面那行、高音寫在上面那行(跨譜表)
-  }
   if (q.type === "hanon") return buildHanon(q.no, q.tonic, q.rhythm);
   const b = {
     scale: buildScale, arpeggio: buildArp, dom7: buildArp, dim7: buildArp,
