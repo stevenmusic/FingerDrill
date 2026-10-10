@@ -1,11 +1,11 @@
 /* 雙語(繁體中文 / English):跟 HarmonyHands、HarmonyMap 同一套做法——
-   頂欄最右邊的語言按鈕(中文時顯示 EN、英文時顯示 中),選擇存在 localStorage,第一次照瀏覽器語言。
+   頂欄最右邊的語言按鈕(中文時顯示 EN、英文時顯示 中),選擇存在 localStorage,第一次一律英文(使用者要求)。
    靜態文字:HTML 上的 data-i18n="key"(文字)/ data-i18n-attr="aria-label:key,title:key";
    程式產生的文字:tr("中文", "English")。 */
 const LANG_KEY = "fingerdrill-lang";
 let LANG = (() => {
   try { const v = localStorage.getItem(LANG_KEY); if (v === "en" || v === "zh") return v; } catch (e) {}
-  return /^zh/i.test(navigator.language || "zh") ? "zh" : "en";
+  return "en";   // 預設英文(使用者要求);切過語言就記住
 })();
 export const getLang = () => LANG;
 export const tr = (zh, en) => LANG === "en" ? en : zh;
