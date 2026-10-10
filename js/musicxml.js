@@ -25,6 +25,12 @@ function finalAndRests(pos){
 const TYPE_OF = { 48: ["whole", 0], 36: ["half", 1], 24: ["half", 0], 12: ["quarter", 0], 8: ["quarter", 0], 6: ["eighth", 0], 4: ["eighth", 0], 3: ["16th", 0], 9: ["eighth", 1] };
 function typeOf(len){ return TYPE_OF[len * 12 / DIV] || ["quarter", 0]; }   // 表是以一拍 = 12 寫的
 
+/* 從 pos(拍點)補休止符到小節結束(二分休止符只放第 1、3 拍) */
+function fillRests(events, pos){
+  let p = pos % BAR;
+  if (p === 0) return;
+  while (p < BAR) { const r = (p === 0 || p === 2 * DIV) && p + 2 * DIV <= BAR ? 2 * DIV : DIV; const [rt, rd] = typeOf(r); events.push({ rest: true, pos: pos, dur: r, type: rt, dots: rd }); pos += r; p += r; }
+}
 /* 一隻手的音 → 依小節切開的事件 */
 function layoutHand(notes, sub){
   const step = DIV / sub, events = [];
@@ -32,7 +38,11 @@ function layoutHand(notes, sub){
   notes.forEach((n, i) => {
     const last = i === notes.length - 1;
     // 音可以自己帶時值(哈農的附點節奏:n.dur 幾個 division、n.ntype / n.ndots 音符種類、n.hook 十六分音符的半截連桿)
-    if (!last) { const d = n.dur || step; events.push({ n, pos, dur: d, short: true, ntype: n.ntype, ndots: n.ndots || 0, hook: n.hook }); pos += d; return; }
+    // 三連音的最後一個音剛好是一組的第三個音:留在三連音裡(跟前兩個音連桿),後面從拍點起補休止符
+    const closesTriplet = last && sub === 3 && (pos + step) % DIV === 0 && pos % DIV !== 0;
+    if (!last || closesTriplet) { const d = n.dur || step; events.push({ n, pos, dur: d, short: true, ntype: n.ntype, ndots: n.ndots || 0, hook: n.hook }); pos += d;
+      if (closesTriplet) fillRests(events, pos);
+      return; }
     const { len, rests } = finalAndRests(pos);
     const [type, dots] = typeOf(len);
     events.push({ n, pos, dur: len, type, dots, short: false, offbeat: (pos % DIV) !== 0 });

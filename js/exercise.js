@@ -163,8 +163,8 @@ function buildBroken(q){
     }
     const notes = [], fs = [];
     groups.forEach((g, i) => { notes.push(...g); fs.push(...fing[i]); });
-    for (let i = 2; i >= 1; i--) { notes.push(...groups[i].slice().reverse()); fs.push(...fing[i].slice().reverse()); }
-    notes.push(groups[0][0]); fs.push(fing[0][0]);
+    // 下行:第二轉位 → 第一轉位 → 原位,每組反過來彈(以前少了原位那一組,結尾 E 直接接 C 都用 1 指,錯)
+    for (let i = 2; i >= 0; i--) { notes.push(...groups[i].slice().reverse()); fs.push(...fing[i].slice().reverse()); }
     out[h] = withF(notes, fs);
   }
   return out;
