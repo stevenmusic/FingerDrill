@@ -143,7 +143,8 @@ function checkPlayable(notes, hand, label, q){
     const a = asc[i].finger, b = asc[i + 1].finger, at = `${label} ${hand} 第 ${i + 1}→${i + 2} 個音(${a}→${b})`;
     if (hand === "rh") ok(b > a || (b === 1 && [2, 3, 4].includes(a)), at + " 右手上行不能這樣接");
     else ok(b < a || (a === 1 && [2, 3, 4].includes(b)), at + " 左手上行不能這樣接");
-    if (q.type === "scale") ok(b === 1 ? true : (hand === "rh" ? b === a + 1 : b === a - 1 || a === 1), at + " 音階手指要連續");
+    const top = i + 2 === asc.length && hand === "rh";   // 右手頂端轉下行:可以跳指(例:F♯ 旋律小調 E♯ 1 → F♯ 3,下行 E 才能用 2)
+    if (q.type === "scale") ok(b === 1 ? true : top ? b > a : (hand === "rh" ? b === a + 1 : b === a - 1 || a === 1), at + " 音階手指要連續");
   }
   // 拇指不在黑鍵:三個音都是黑鍵的和弦(F♯ 大三、E♭ 小三,含轉位)、屬七最後解決的那一個長音除外
   notes.forEach((n, i) => { if (n.finger === 1 && isBlack(n.midi)) {

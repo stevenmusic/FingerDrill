@@ -106,6 +106,8 @@ export function scaleFingersFrom(FG, tonic, quality, form, hand, startDeg, n){
     return f;
   };
   const fu = make(up), fd = make(dn);
+  // 右手在頂端轉下行:下行第一個音的手指要比頂端小(例:F♯ 旋律小調上行用 2 到頂、下行 E 也是 2 → 頂端改 3)
+  if (hand === "rh" && n >= 1 && fd[len - 2] >= fu[len - 1] && fd[len - 2] < 5) fu[len - 1] = fd[len - 2] + 1;
   fd[len - 1] = fu[len - 1];
   return { up: fu, downAsc: fd, down: fd.slice(0, -1).reverse() };
 }
@@ -124,7 +126,8 @@ export function arpGroupFingers(tones, hand, n){
     const x = gap(t, t + 1) >= 5 ? 3 : 2, y = gap(t, t + 1) + gap(t + 1, t + 2) >= 8 ? 4 : 3;
     const cyc = []; cyc[t] = 1; cyc[(t + 1) % k] = x; cyc[(t + 2) % k] = y;
     for (let i = 0; i <= k * n; i++) up.push(cyc[i % k]);
-    for (let i = 0; i < t; i++) up[i] = 2 + i;
+    // 拇指前面的音:只有一個就用 2;有兩個就照循環的手指(例:A♭ 大調第二轉位 E♭-A♭-C = 2-4-1,以前寫 2-3 要撐四度)
+    for (let i = 0; i < t; i++) up[i] = t === 1 ? 2 : cyc[i];
     if (t === 0) up[up.length - 1] = 5;
   } else {
     let u = 0;

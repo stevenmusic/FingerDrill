@@ -109,7 +109,7 @@ function buildArp(FG, q){
       const last = notes[notes.length - 1];
       const tonic = placeAtLeast(parseNote(q.tonic), last.midi + 1);
       const lf = last.finger;
-      const rf = h === "rh" ? Math.min(5, lf + 1) : Math.max(1, lf - 1);
+      const rf = h === "rh" ? Math.min(5, lf + 1) : (lf === 1 ? 2 : lf - 1);   // 往上半音:右手下一指、左手上一指(左手拇指時用 2 跨過去)
       notes = notes.concat(withF([tonic], [rf]));
     }
     out[h] = notes;

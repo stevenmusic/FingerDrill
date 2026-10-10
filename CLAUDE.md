@@ -36,7 +36,7 @@
 
 ## 工作方式(使用者要求:省 token)
 - 改好就 push,不用每次跑整套測試、不用審查;只有改了 css/js/data 一定要跑 `node tools/build/stamp.mjs`(版本指紋,不然手機拿到新舊混雜的檔案)
-- 測試工具留著備用(大改動或使用者要求時才跑):`tools/test/` 的 verify / smoke / notation / layout / bilingual / human / shot
+- 測試工具留著備用(大改動或使用者要求時才跑):`tools/test/` 的 verify / fingeraudit(指法全面檢查:每一對相鄰音,上下行、穿指跨指、距離)/ smoke / notation / layout / bilingual / human / shot
 
 ## 記譜規則(js/musicxml.js,verify.mjs 另外獨立檢查)
 - 符桿:一組連桿看離中線最遠的音,中線以上(含)朝下;指法右手在上、左手在下(不跟符桿走)

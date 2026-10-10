@@ -71,6 +71,9 @@ export function buildHanon(no, key = "C", rhythm = "even"){
     // 結尾的指法:右手拇指、左手小指(第 20 首的和弦標低音那一個)
     if (H.end20) e = hand === "rh" ? { ...mk(2, 1, 0), with: mk(7, null, 0) } : { ...mk(0, 5, -1), with: mk(0, null, 0) };
     else e = mk(0, hand === "rh" ? 1 : 5, shift);
+    // 結尾的手指不能跟前一個音一樣(例:第 17 首下行最後是 B 用 1,結尾 C 再用 1 → 改 2;左手 5 → 4)
+    const prev = out[hand][out[hand].length - 1];
+    if (prev.finger === e.finger && prev.midi !== e.midi) e.finger = hand === "rh" ? (e.midi > prev.midi ? Math.min(5, e.finger + 1) : Math.max(1, e.finger - 1)) : (e.midi > prev.midi ? Math.max(1, e.finger - 1) : Math.min(5, e.finger + 1));
     out[hand].push(e);
   }
   if (rhythm === "dotted" || rhythm === "reverse") {
