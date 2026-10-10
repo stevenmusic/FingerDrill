@@ -154,12 +154,21 @@ function buildMaster(){
 try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
 /* 在使用者手勢裡呼叫:讓 AudioContext 開始跑(iOS 要在手勢裡 resume + 播一個無聲的音才算解鎖) */
 export function unlockAudio(){
-  if (!audioCtx || audioCtx instanceof OfflineAudioContext || audioCtx.state === "running") return;
+  if (!audioCtx) { try { ensureAudio(); } catch (e) { return; } }
+  if (audioCtx instanceof OfflineAudioContext || audioCtx.state === "running") return;
   try {
     audioCtx.resume().catch(() => {});
     const src = audioCtx.createBufferSource(); src.buffer = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
     src.connect(audioCtx.destination); src.start(0);
   } catch (e) {}
+}
+/* 取樣解碼用的離線 context:打開網頁就能先下載、解碼,真正的 AudioContext 等第一次點畫面才建立
+   (iPhone 加到主畫面後,沒有手勢就建立的 AudioContext 常常永遠叫不醒 → 按播放沒聲音也沒反應)。AudioBuffer 可以跨 context 用 */
+let decodeCtx = null;
+function dec(){
+  if (audioCtx) return audioCtx;
+  if (!decodeCtx) { const O = window.OfflineAudioContext || window.webkitOfflineAudioContext; decodeCtx = new O(2, 1, 48000); }
+  return decodeCtx;
 }
 export function ensureAudio(){
   if (audioCtx && !(audioCtx instanceof OfflineAudioContext)) return audioCtx;
@@ -222,10 +231,10 @@ function pianoHalfPedalTau(m){ return PIANO_HALF_PEDAL * Math.max(0.35, 1.3 - (m
 async function fetchPianoBuffer(file, lenSec){
   const res = await fetchSample(PIANO_BASE + file);
   if (!res.ok) throw new Error("HTTP " + res.status);
-  const buf = await audioCtx.decodeAudioData(await res.arrayBuffer());
+  const buf = await dec().decodeAudioData(await res.arrayBuffer());
   const n = Math.min(buf.length, Math.round((lenSec || 1e9) * buf.sampleRate));
   if (n === buf.length) return buf;
-  const nc = buf.numberOfChannels, out = audioCtx.createBuffer(nc, n, buf.sampleRate);
+  const nc = buf.numberOfChannels, out = dec().createBuffer(nc, n, buf.sampleRate);
   const fade = Math.min(n >> 2, Math.round(0.8 * buf.sampleRate));
   for (let c = 0; c < nc; c++) {
     const d = out.getChannelData(c);
@@ -388,7 +397,7 @@ export function loadClick(){
   if (!clickPromise) clickPromise = (async () => {
     const bufs = [];
     for (const f of CLICK_FILES) {
-      try { const r = await fetchSample(SAMPLE_ROOT + "drums/" + f); if (r.ok) bufs.push(await audioCtx.decodeAudioData(await r.arrayBuffer())); } catch (e) {}
+      try { const r = await fetchSample(SAMPLE_ROOT + "drums/" + f); if (r.ok) bufs.push(await dec().decodeAudioData(await r.arrayBuffer())); } catch (e) {}
     }
     if (!bufs.length) throw new Error("click samples failed");
     clickBufs = bufs;

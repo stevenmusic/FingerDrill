@@ -437,6 +437,8 @@ body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
 /* ══ 樂譜:一整行 + 播放軸(照 ScrollScore)══
    比畫面短 → 水平置中,播放時播放軸沿著音符走;比畫面長 → 可以左右滑,播放時播放軸停在 25%、樂譜往左捲 */
 .paper{padding:6px 0;min-height:0}
+/* 還沒選題目:留一塊紙放提示字(以前高度是 0,只剩一條白線、字被切掉) */
+.paper:has(#osmd:empty){min-height:96px}
 #scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;display:flex}
 #scroll::-webkit-scrollbar{display:none}
 #osmd{flex:none;width:auto;margin:0 auto;padding:0;position:relative;will-change:transform}
@@ -449,4 +451,26 @@ body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
 #playline::before{
   content:"";position:absolute;top:-2px;left:50%;transform:translateX(-50%);
   border:7px solid transparent;border-top:10px solid #B8860B;
+}
+
+/* ══ 手機橫放(高度 ≤ 420):第一個畫面就要看得到樂譜(放在譜架上最需要的是譜)══
+   題目卡收成一行:題目 | 標籤 | ✓ ⚠ | 播放;卡片間距、內距縮小 */
+@media (max-height:420px){
+  main{gap:8px;padding-top:8px}
+  .card{padding:8px 12px}
+  .setup-summary{min-height:0;padding-top:0;padding-bottom:0}
+  .picker,.setup{padding-top:6px;padding-bottom:6px}
+  .quiz{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:6px 10px}
+  .quiz > *{min-width:0}
+  .quiz-top{grid-column:1 / -1;min-height:30px}
+  .q-head,.q-row{display:contents}
+  .q-title{grid-column:1;grid-row:2;font-size:22px;max-width:46vw}
+  .q-tags{grid-column:2;grid-row:2;min-height:0}
+  .q-tag{font-size:calc(14px * var(--tag-scale, 1));padding:2px 7px}
+  .mastery{grid-column:3;grid-row:2}
+  .mbtn{width:34px;height:34px}
+  .play-round{grid-column:4;grid-row:2;width:44px;height:44px}
+  .quiz .loading{top:2px}
+  #scoreCard .card-title{margin-bottom:4px}
+  #scoreCard .seg button{height:28px}
 }

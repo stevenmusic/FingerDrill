@@ -343,7 +343,7 @@ function showEmpty(){
   cur = null; ex = null;
   $("qTitle").classList.add("empty"); $("qTitle").style.fontSize = "";
   const sets = S.exam && SY.systems[S.exam.system].mode === "sets";
-  pairText($("qTitle"), () => { const d = sets ? tr("隨機抽一項", "Random") : tr("隨機抽考", "Random"); return tr("按「" + d + "」開始,或從下面的清單選一項", "Tap “" + d + "” or pick from the list below"); }); $("qTags").innerHTML = "";
+  pairText($("qTitle"), () => { const d = sets ? tr("隨機抽一項", "Random") : tr("隨機抽考", "Random"); return tr("按「" + d + "」,或從下方清單選一項", "Tap " + d + ", or pick from the list below"); }); $("qTags").innerHTML = "";
   $("playBtn").disabled = true; document.querySelectorAll(".mbtn").forEach(b => { b.disabled = true; b.setAttribute("aria-pressed", "false"); });
   $("verifyBadge").hidden = true; $("poolCount").textContent = S.exam ? tr(`抽考範圍 ${examPool().length} 題`, `${examPool().length} items in range`) : "";
   if (osmd) { try { osmd.clear(); } catch (e) {} }
@@ -706,8 +706,7 @@ function preloadSamples(){
   const job = { ex, p: null };
   job.p = (async () => {
     try {
-      audio.ensureAudio();
-      setRing(null);
+      setRing(null);   // 不在這裡建立 AudioContext(要等使用者的手勢,見 audio.js 的 dec())
       const notes = ["rh", "lh"].flatMap(h => ex[h].flatMap(n => n.with ? [n, n.with] : [n])).map(n => ({ midi: n.midi, vel: demoVel() }));
       $("loadingMsg").textContent = tr("載入鋼琴取樣…", "Loading piano samples…");
       await audio.loadPianoFor(notes, 6, p => {
@@ -736,7 +735,25 @@ const within = (p, ms) => Promise.race([p, new Promise(r => setTimeout(r, ms))])
 /* ── 示範播放:預備拍兩小節 + 節拍器 ── */
 const COUNT_IN_BARS = 2;   // 預備拍兩小節:第一小節聽速度、第二小節準備下手(2/4 只有一小節太短)
 let play = null, starting = 0;   // starting:正在準備播放(載入取樣中)的序號;連點、換題時舊的準備作廢
+/* 按播放時樂譜要整份看得到(手機橫放時常常被底部分頁列蓋住一半):沒露出來就捲過去 */
+function revealScore(){
+  const r = $("scoreCard").getBoundingClientRect(), bar = document.querySelector(".tabbar");
+  const bottom = bar ? bar.getBoundingClientRect().top : innerHeight;
+  if (r.bottom > bottom - 4) window.scrollBy({ top: Math.min(r.bottom - bottom + 8, r.top - 4), behavior: "smooth" });
+  else if (r.top < 0) window.scrollBy({ top: r.top - 8, behavior: "smooth" });
+}
+/* 播放的準備或排程中途出錯時,不能讓 starting 卡著(之後怎麼按都不理);錯誤原因直接寫在卡片上,方便回報 */
 async function startPlayback(){
+  try { await startPlaybackInner(); }
+  catch (e) {
+    console.error(e);
+    starting = 0; $("playBtn").classList.remove("busy");
+    if (play) stopPlayback();
+    $("playLabel").textContent = T("play");
+    $("loadingMsg").textContent = tr("播放失敗:", "Playback failed: ") + (e && e.message || e);
+  }
+}
+async function startPlaybackInner(){
   if (!cur || starting) return;
   const token = starting = Date.now() + Math.random();
   const q0 = cur, show0 = show;
@@ -773,6 +790,7 @@ async function startPlayback(){
   const totalClicks = Math.ceil(endBeat * beatSec / clickSec);
   for (let b = -pre; b < totalClicks; b++) audio.playClick(t0 + b * clickSec, ((b % count) + count) % count === 0);
   play = { t0, beatSec, clickSec, endBeat, raf: 0 };
+  revealScore();
   $("playLabel").textContent = T("stop");
   $("playIcon").innerHTML = '<rect x="6" y="6" width="12" height="12" rx="1.5"/>';
   const tick = () => {
@@ -810,7 +828,7 @@ document.addEventListener("touchend", e => {
 }, { passive: false });
 document.addEventListener("gesturestart", e => e.preventDefault());
 /* 每一次真的點擊都喚醒音訊(上面補的 click 不算使用者手勢,iOS 不准它打開聲音;被來電、鎖屏打斷的也在這裡叫回來) */
-for (const ev of ["touchend", "pointerdown", "keydown"]) document.addEventListener(ev, () => audio.unlockAudio(), { capture: true, passive: true });
+for (const ev of ["touchend", "click", "keydown"]) document.addEventListener(ev, () => audio.unlockAudio(), { capture: true, passive: true });
 
 /* ── 拍點燈號(示範播放時亮)── */
 function showBeat(click){
