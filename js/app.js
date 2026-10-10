@@ -187,16 +187,16 @@ function examQuestions(){
 }
 function renderQuick(tab){
   const box = paneOf(tab).querySelector(".quick");
-  if (!S.exam || tab === "hanon") { box.hidden = true; return; }
+  if (!S.exam || S.exam.auto || tab === "hanon") { box.hidden = true; return; }
   const sys = SY.systems[S.exam.system], g = gradeOf(SY, S.exam.system, S.exam.grade);
   const qs = examQuestions().filter(q => TAB_CATS[tab].includes(q.cat));
   box.hidden = false;
-  const on = S.quickOn !== false;
+  const on = S.quickOpen === true;   // 預設收起:從檢定分頁回來時,題目不會被一整塊清單往下推(使用者反映)
   box.innerHTML = `<div class="qhead"><b>${sys.name} ${gradeLabel(g)}${sys.mode === "sets" ? " " + setName(S.exam.set) : ""}</b>${tr("的要求", "")}(${qs.length})` +
     `<button class="chip" aria-pressed="${on}">${on ? tr("收起", "Hide") : tr("展開", "Show")}</button></div>` +
     (on ? `<div class="opts">` + (qs.length ? qs.map((q, i) => `<button class="opt" data-i="${i}" aria-pressed="${!!(cur && !cur.free && cur.key === q.key)}"><i class="dot ${S.mastery[q.key] || ""}"></i><span>${shortLabel(q)}</span></button>`).join("") : `<span class="lbl">${tr("這一級沒有這類項目", "None at this grade")}</span>`) + `</div>` : "");
   box.onclick = e => {
-    if (e.target.closest(".chip")) { S.quickOn = !on; store.save(); renderQuick(tab); return; }
+    if (e.target.closest(".chip")) { S.quickOpen = !on; store.save(); renderQuick(tab); return; }
     const b = e.target.closest(".opt[data-i]"); if (!b) return;
     setQuestion(qs[Number(b.dataset.i)], tab);
   };
@@ -214,7 +214,8 @@ function sourceText(g){ return getLang() === "en" && g.sourceEn ? g.sourceEn : g
 
 /* ══ 檢定分頁 ══ */
 function examGrade(){ return gradeOf(SY, S.exam.system, S.exam.grade); }
-function ensureExam(){ if (!S.exam) S.exam = { system: "abrsm", grade: 1, set: "A" }; }
+// 只是點進檢定分頁看看(沒選考試、級數):auto = true,不算在準備考試,音階/琶音分頁不會多出「本級要求」(使用者反映題目被往下推)
+function ensureExam(){ if (!S.exam) S.exam = { system: "abrsm", grade: 1, set: "A", auto: true }; }
 function fillGrades(sel, system, grade){
   const sys = SY.systems[system];
   sel.innerHTML = sys.grades.map(g => `<option value="${g.grade}">${gradeLabel(g)}</option>`).join("");
@@ -245,14 +246,14 @@ function renderExam(){
     + (sets ? tr(" Trinity:整組都要彈,每一項的手、力度、奏法固定。", " Trinity: play all of Set A or B; hands, dynamics and touch are fixed.")
             : tr(" ABRSM:考官從清單點題,分手的項目會指定左手或右手。", " ABRSM: the examiner picks items and names the hand.")));
   $("examSummary").textContent = `${sys.name} · ${gradeLabel(g)}` + (sets ? ` · ${setName(S.exam.set)}` : "") + " · " + tr(`${examPool().length} 題`, `${examPool().length} items`);
-  $("examChip").hidden = false; $("examChip").textContent = `${sys.name} ${gradeLabel(g)}`;
+  $("examChip").hidden = !!S.exam.auto; $("examChip").textContent = `${sys.name} ${gradeLabel(g)}`;
   renderList();
   if (S.tab === "exam") syncExamButtons();
 }
-const syncSystemSeg = segBind("systemSeg", () => S.exam ? S.exam.system : "abrsm", v => { ensureExam(); S.exam.system = v; store.save(); onExamChange(); });
-const syncSetSeg = segBind("setSeg", () => S.exam ? S.exam.set : "A", v => { ensureExam(); S.exam.set = v; store.save(); onExamChange(); });
+const syncSystemSeg = segBind("systemSeg", () => S.exam ? S.exam.system : "abrsm", v => { ensureExam(); S.exam.system = v; delete S.exam.auto; store.save(); onExamChange(); });
+const syncSetSeg = segBind("setSeg", () => S.exam ? S.exam.set : "A", v => { ensureExam(); S.exam.set = v; delete S.exam.auto; store.save(); onExamChange(); });
 const syncQualitySeg = segBind("qualitySeg", () => S.filter.quality, v => { S.filter.quality = v; store.save(); renderExam(); });
-$("selGrade").onchange = () => { ensureExam(); S.exam.grade = Number($("selGrade").value); store.save(); onExamChange(); };
+$("selGrade").onchange = () => { ensureExam(); S.exam.grade = Number($("selGrade").value); delete S.exam.auto; store.save(); onExamChange(); };
 $("selMinor").onchange = () => { S.minorForm = $("selMinor").value; store.save(); onExamChange(true); };
 $("catChips").onclick = e => {
   const b = e.target.closest("[data-cat]"); if (!b) return;

@@ -8,7 +8,7 @@ const DEFAULTS = {
   minorForm: "harmonic",
   tempoPct: 100,          // 檢定題目:練習速度 = 考試速度的幾 %(新題目沿用)
   freeBpm: { scale: 60, arp: 60 },   // 自由練習的速度(♩)
-  quickOn: true,          // 音階/琶音分頁上方列出考試級數的要求
+  quickOpen: false,       // 音階/琶音分頁上方「本級要求」清單是否展開(預設收起;舊的 quickOn 不再用)
   mastery: {},            // masteryKey → "good" | "weak"
   theme: "dark",
   loop: false, ramp: false, clickOnly: false   // 播放選項
