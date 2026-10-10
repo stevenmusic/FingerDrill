@@ -279,6 +279,7 @@ function syncExamButtons(){
   $("mockBtn").hidden = false; $("mockBtn").disabled = !mock && examQuestions().length === 0;
   $("mockLabel").textContent = mock ? tr("停止", "Stop") : tr("模擬考", "Mock");
   $("mockBtn").title = $("mockBtn").ariaLabel = mock ? tr("停止模擬考", "Stop mock exam") : tr("模擬考", "Mock exam");
+  syncQuizTop();
 }
 /* ══ 模擬考 ══
    ABRSM:從抽考範圍隨機點 8 項(不重複,像考官點題);Trinity:整組依序。每一項自己按 ✓ / ⚠,最後給結果 */
@@ -345,9 +346,17 @@ function switchTab(tab){
   if (tab === "scale" || tab === "arp" || tab === "hanon") { renderPicker(tab); setQuestion(tabCur[tab] || freeQuestion(tab), tab); }
   else if (tab === "exam") { renderExam(); syncExamButtons(); if (tabCur.exam) setQuestion(tabCur.exam, "exam"); else showEmpty(); }
   window.scrollTo({ top: 0 });
+  syncQuizTop();
 }
 $("tabbar").onclick = e => { const b = e.target.closest("button[data-tab]"); if (b) switchTab(b.dataset.tab); };
 
+/* 題目上方那一列(官方大綱標記、抽考範圍、抽考按鈕)沒東西就整列收掉;樂譜還沒畫就留一塊放提示字。用 JS 判斷,不靠 CSS :has */
+function syncQuizTop(){
+  const top = document.querySelector(".quiz-top");
+  const empty = $("verifyBadge").hidden && !$("poolCount").textContent.trim() && [...top.querySelectorAll(".q-actions button")].every(b => b.hidden);
+  top.classList.toggle("blank", empty);
+  $("stage").classList.toggle("blank", !$("osmd").childElementCount);
+}
 /* ══ 練習面板 ══ */
 function showEmpty(){
   stopPlayback();
@@ -362,6 +371,7 @@ function showEmpty(){
   $("paperMsg").textContent = tr("選一題之後,這裡會顯示五線譜與指法", "Pick an item to see the score and fingering here");
   $("scoreNote").hidden = true;
   syncTempoUI();
+  syncQuizTop();
 }
 function setQuestion(q, tab){
   stopPlayback();
@@ -403,6 +413,7 @@ function setQuestion(q, tab){
   renderScore();
   if (tab === "exam" && S.exam) renderList();
   if (tab === "scale" || tab === "arp") renderQuick(tab);
+  syncQuizTop();
   preloadSamples();
 }
 function syncMastery(){
@@ -475,6 +486,7 @@ async function renderScore(){
     renderOsmd();
     measureNotes();
     fitLandZoom();
+    syncQuizTop();
   } catch (e) {
     console.error(e);
     $("paperMsg").textContent = tr("樂譜繪製失敗:", "Could not draw the score: ") + e.message;

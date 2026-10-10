@@ -241,6 +241,7 @@ body.light .verify-badge{color:#9A5512;border-color:rgba(154,85,18,.4)}
 .loading{position:absolute;top:6px;right:16px;font-size:var(--fs-2xs);color:var(--muted);pointer-events:none}
 /* 自由練習:上方這一列沒有東西就整列收掉(題目直接在最上面) */
 .quiz-top:not(:has(#verifyBadge:not([hidden]))):not(:has(.q-actions button:not([hidden]))):has(.count:empty){display:none}
+.quiz-top.blank{display:none}   /* JS 判斷(syncQuizTop):iPhone 上 :has 那條沒生效,題目上方會空一格(使用者反映) */
 
 /* ── 樂譜 ── */
 .score-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
@@ -362,6 +363,7 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 .picker .setup-summary{display:none}
 @media (max-width:600px), (max-height:420px), (orientation:landscape) and (max-height:500px){
   .picker .setup-summary{display:flex}
+  .picker,.setup{padding:8px 12px}   /* 檢定分頁與其他分頁上面那一列一樣高、圖示位置對齊(使用者反映不一致) */
   .picker:not(.open) .setup-body{display:none}
   .picker.open .setup-body{margin-top:8px}
   .prow{grid-template-columns:1fr;gap:4px}
@@ -438,7 +440,7 @@ body.light .tabbar button[aria-selected="true"]{background:rgba(133,100,24,.10)}
    比畫面短 → 水平置中,播放時播放軸沿著音符走;比畫面長 → 可以左右滑,播放時播放軸停在 25%、樂譜往左捲 */
 .paper{padding:6px 0;min-height:0}
 /* 還沒選題目:留一塊紙放提示字(以前高度是 0,只剩一條白線、字被切掉) */
-.paper:has(#osmd:empty){min-height:96px}
+.paper:has(#osmd:empty), .paper.blank{min-height:96px}
 #scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;display:flex}
 #scroll::-webkit-scrollbar{display:none}
 #osmd{flex:none;width:auto;margin:0 auto;padding:0;position:relative;will-change:transform}
