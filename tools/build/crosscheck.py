@@ -1,6 +1,6 @@
 # 用官方 PDF 的文字(pdftotext -layout)跟 data/syllabus.json 逐級比對:每一級每一類列出的調、八度數、手、奏法要一致。
 # 用法:python3 tools/build/crosscheck.py <ABRSM 2025&2026 PDF 轉的 txt> <Trinity PDF 轉的 txt>
-# (PDF 有版權,不放進 repo;取得方式見 README「考級資料」)
+# (PDF 有版權,不放進 repo;取得方式見 README「檢定資料」)
 import json, re, sys, os
 root = os.path.join(os.path.dirname(__file__), "..", "..")
 SY = json.load(open(os.path.join(root, "data", "syllabus.json")))

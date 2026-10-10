@@ -11,12 +11,12 @@
 <meta name="application-name" content="FingerDrill">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="description" content="FingerDrill 手指特訓:鋼琴音階、琶音、哈農練習與 ABRSM / Trinity 考級抽考,附五線譜指法、取樣鋼琴示範與節拍器。">
+<meta name="description" content="FingerDrill 手指特訓:鋼琴音階、琶音、哈農練習與 ABRSM / Trinity 檢定抽考,附五線譜指法、取樣鋼琴示範與節拍器。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='4' fill='%230C0A07'/%3E%3Cg fill='none' stroke='%23F2B94B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' transform='translate(0.6 0) scale(0.95)'%3E%3Cpath d='M18 11V6a2 2 0 0 0-4 0v5'/%3E%3Cpath d='M14 10V4a2 2 0 0 0-4 0v6'/%3E%3Cpath d='M10 10.5V6a2 2 0 0 0-4 0v8'/%3E%3Cpath d='M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15'/%3E%3C/g%3E%3C/svg%3E">
 <title>FingerDrill 手指特訓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=28b1310457">
+<link rel="stylesheet" href="css/app.css?v=9f67036089">
 </head>
 <body>
 <header>
@@ -51,7 +51,7 @@
     <div class="setup-body"><div class="quick" hidden></div><div class="rows"></div></div>
   </section>
 
-  <!-- 考級抽考 -->
+  <!-- 檢定抽考 -->
   <section class="card setup pane" data-pane="exam" id="paneExam" hidden>
     <button class="setup-summary" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="sum" id="examSummary"></span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
     <div class="setup-body">
@@ -90,7 +90,7 @@
     </div>
   </section>
 
-  <!-- 練習面板(音階、琶音、考級共用) -->
+  <!-- 練習面板(音階、琶音、檢定共用) -->
   <section class="card quiz" id="quizCard" aria-live="polite">
     <div class="quiz-top">
       <span class="verify-badge" id="verifyBadge" hidden></span>
@@ -173,7 +173,7 @@
     <div class="log-week" id="logWeek"></div>
   </section>
 
-  <!-- 考級:本級要求清單 -->
+  <!-- 檢定:本級要求清單 -->
   <details class="card pane" data-pane="exam" id="listCard" hidden>
     <summary class="card-title"><b id="listTitle">本級要求</b><span class="sub" id="listSub"></span>
       <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
@@ -194,14 +194,14 @@
   <button role="tab" data-tab="hanon" aria-selected="false">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg><span data-i18n="tabHanon">哈農</span></button>
   <button role="tab" data-tab="exam" aria-selected="false">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l1 2h3v15H5V6h3z"/><path d="m9 13 2 2 4-4"/></svg><span data-i18n="tabExam">考級</span></button>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l1 2h3v15H5V6h3z"/><path d="m9 13 2 2 4-4"/></svg><span data-i18n="tabExam">檢定</span></button>
 </nav>
 
 <!-- 第一次打開:在準備考試嗎? -->
 <div class="modal" id="onboard" hidden role="dialog" aria-modal="true" aria-labelledby="onboardTitle">
   <div class="modal-card">
-    <h2 id="onboardTitle" data-i18n="obTitle">你在準備鋼琴考級嗎?</h2>
-    <p class="modal-sub" data-i18n="obSub" data-i18n-pair>選了考試和級數,App 會直接打開「考級」分頁,音階、琶音分頁也會先列出這一級的要求。之後隨時可以在「考級」分頁更改。</p>
+    <h2 id="onboardTitle" data-i18n="obTitle">你在準備鋼琴檢定嗎?</h2>
+    <p class="modal-sub" data-i18n="obSub" data-i18n-pair>選了考試和級數,App 會直接打開「檢定」分頁,音階、琶音分頁也會先列出這一級的要求。之後隨時可以在「檢定」分頁更改。</p>
     <div class="field"><span class="lbl" data-i18n="lblSystem">考試系統</span>
       <div class="seg" id="obSystem" role="group">
         <button data-v="abrsm" aria-pressed="true">ABRSM</button>
@@ -215,9 +215,9 @@
   </div>
 </div>
 
-<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=0a4a9f9bb8","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=3f195af1f8","./js/fingering.js":"./js/fingering.js?v=d896334fc8","./js/hanon.js":"./js/hanon.js?v=be1f1026d1","./js/i18n.js":"./js/i18n.js?v=6fbf195d5b","./js/musicxml.js":"./js/musicxml.js?v=ad86937ad8","./js/store.js":"./js/store.js?v=7c6a224d60","./js/syllabus.js":"./js/syllabus.js?v=a93127bd50","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
+<script type="importmap">{"imports":{"./js/app.js":"./js/app.js?v=8d64970357","./js/audio.js":"./js/audio.js?v=9c592e19f6","./js/exercise.js":"./js/exercise.js?v=3f195af1f8","./js/fingering.js":"./js/fingering.js?v=d896334fc8","./js/hanon.js":"./js/hanon.js?v=be1f1026d1","./js/i18n.js":"./js/i18n.js?v=5117c79606","./js/musicxml.js":"./js/musicxml.js?v=ad86937ad8","./js/store.js":"./js/store.js?v=6d991e8799","./js/syllabus.js":"./js/syllabus.js?v=a93127bd50","./js/theory.js":"./js/theory.js?v=ed03457554"}}</script>
 <script type="application/json" id="fdVersions">{"data/fingerings.json":"c5b57cffa5","data/syllabus.json":"30b5443db2"}</script>
 <script src="vendor/opensheetmusicdisplay.min.js?v=fe43ac6f19"></script>
-<script type="module" src="js/app.js?v=0a4a9f9bb8"></script>
+<script type="module" src="js/app.js?v=8d64970357"></script>
 </body>
 </html>

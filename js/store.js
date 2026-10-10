@@ -6,7 +6,7 @@ const DEFAULTS = {
   onboarded: false,
   filter: { quality: "all", cats: ["scale", "contrary", "apart", "double", "chromatic", "wholetone", "arpeggio", "seventh", "broken"], excludeMastered: false },
   minorForm: "harmonic",
-  tempoPct: 100,          // 考級題目:練習速度 = 考試速度的幾 %(新題目沿用)
+  tempoPct: 100,          // 檢定題目:練習速度 = 考試速度的幾 %(新題目沿用)
   freeBpm: { scale: 60, arp: 60 },   // 自由練習的速度(♩)
   quickOn: true,          // 音階/琶音分頁上方列出考試級數的要求
   mastery: {},            // masteryKey → "good" | "weak"

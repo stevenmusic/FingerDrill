@@ -1,5 +1,5 @@
 // 瀏覽器整合測試(手機直式 + 桌機):
-// 第一次打開的問題、四個分頁、音階/琶音選擇器每個選項都畫得出樂譜、考級(ABRSM 抽考、Trinity A/B 組依序)、
+// 第一次打開的問題、四個分頁、音階/琶音選擇器每個選項都畫得出樂譜、檢定(ABRSM 抽考、Trinity A/B 組依序)、
 // 播放、速度 ±1 與按住連續、熟練標記存起來、沒有橫向捲動、沒有 console 錯誤。截圖放 tools/test/out/
 import { open } from "./harness.mjs";
 import fs from "node:fs";
@@ -25,7 +25,7 @@ for (const vp of [{ name: "phone", viewport: { width: 390, height: 844 }, mobile
   await page.click('#obSystem button[data-v="abrsm"]');
   await page.selectOption("#obGrade", "5");
   await page.click("#obYes");
-  check(await page.evaluate(() => window.__app.S.tab) === "exam", `${vp.name}: 選了考試應該打開考級分頁`);
+  check(await page.evaluate(() => window.__app.S.tab) === "exam", `${vp.name}: 選了考試應該打開檢定分頁`);
   // ABRSM 5 級隨機抽考 10 題
   for (let i = 0; i < 10; i++) {
     const b = await ready(page); await page.click("#drawBtn"); await waitScore(page, b);

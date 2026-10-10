@@ -317,7 +317,7 @@ main{padding-left:max(14px, env(safe-area-inset-left));padding-right:max(14px, e
 footer{padding-bottom:max(28px, env(safe-area-inset-bottom))}
 @media (max-width:600px){ main{padding-left:max(10px, env(safe-area-inset-left));padding-right:max(10px, env(safe-area-inset-right))} }
 
-/* ══ 分頁架構(音階 / 琶音 / 哈農 / 考級)══ */
+/* ══ 分頁架構(音階 / 琶音 / 哈農 / 檢定)══ */
 [hidden]{display:none !important}
 main{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);
@@ -374,7 +374,7 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 header{z-index:60}
 
 /* ══ 各種尺寸的修正(tools/test/layout.mjs 檢查)══ */
-/* 副標「指法特訓」:手機也顯示(360 以下才藏);頂欄的考試標籤在 480 以下不顯示(底部分頁就有「考級」) */
+/* 副標「指法特訓」:手機也顯示(360 以下才藏);頂欄的考試標籤在 480 以下不顯示(底部分頁就有「檢定」) */
 @media (max-width:600px){ .tagline{display:inline} }
 @media (max-width:359px){ .tagline{display:none} }
 @media (max-width:480px){ #examChip{display:none !important} }

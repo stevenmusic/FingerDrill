@@ -79,14 +79,14 @@ for (const [name, w, h, mobile] of VPS) {
   await audit(page, name, "對話框"); await shot("onboard");
   await page.selectOption("#obGrade", "8"); await page.click("#obYes");
   await page.waitForTimeout(300);
-  // 考級:ABRSM 8 級抽一題(四個八度,最寬的譜)
+  // 檢定:ABRSM 8 級抽一題(四個八度,最寬的譜)
   const b = await page.evaluate(() => window.__scoreReady || 0);
   await page.click("#drawBtn"); await page.waitForFunction(b => (window.__scoreReady || 0) > b, b);
-  await audit(page, name, "考級 ABRSM"); await shot("exam");
+  await audit(page, name, "檢定 ABRSM"); await shot("exam");
   // 展開設定(手機收合時)
   if (await page.isVisible("#paneExam .setup-summary")) await page.click("#paneExam .setup-summary");
   await page.click('#systemSeg button[data-v="trinity"]'); await page.waitForTimeout(200);
-  await audit(page, name, "考級 Trinity 設定展開");
+  await audit(page, name, "檢定 Trinity 設定展開");
   // 音階:選擇器展開
   await page.click('#tabbar button[data-tab="scale"]'); await page.waitForTimeout(400);
   if (await page.isVisible("#paneScale .setup-summary")) await page.click("#paneScale .setup-summary");
@@ -102,7 +102,7 @@ for (const [name, w, h, mobile] of VPS) {
   await page.click('#tabbar button[data-tab="scale"]'); await page.click("#langToggle"); await page.waitForTimeout(500);
   await audit(page, name, "英文 音階"); await shot("english");
   await page.click('#tabbar button[data-tab="exam"]'); await page.waitForTimeout(400);
-  await audit(page, name, "英文 考級");
+  await audit(page, name, "英文 檢定");
   for (const e of errors) report(name, "console", e);
   await close();
 }

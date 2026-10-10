@@ -1,4 +1,4 @@
-/* FingerDrill 主程式:音階 / 琶音 / 哈農 / 考級 四個分頁,練習面板(題目、樂譜、節拍器)共用 */
+/* FingerDrill 主程式:音階 / 琶音 / 哈農 / 檢定 四個分頁,練習面板(題目、樂譜、節拍器)共用 */
 import * as store from "./store.js";
 import { gradeOf, questionsFor, applyFilter, drawQuestion, CATEGORIES, masteryKey, UNIT_SYM, NOTES_PER_UNIT } from "./syllabus.js";
 import { buildExercise, questionText } from "./exercise.js";
@@ -202,7 +202,7 @@ const setName = k => tr(k + " 組", "Set " + k);
 function sourceText(g){ return getLang() === "en" && g.sourceEn ? g.sourceEn : g.source;
 }
 
-/* ══ 考級分頁 ══ */
+/* ══ 檢定分頁 ══ */
 function examGrade(){ return gradeOf(SY, S.exam.system, S.exam.grade); }
 function ensureExam(){ if (!S.exam) S.exam = { system: "abrsm", grade: 1, set: "A" }; }
 function fillGrades(sel, system, grade){
@@ -365,7 +365,7 @@ function setQuestion(q, tab){
   $("playBtn").disabled = false;
   document.querySelectorAll(".mbtn").forEach(b => b.disabled = false);
   syncMastery();
-  // 上方那一列(官方大綱標記、抽考範圍)只在考級分頁出現:音階/琶音分頁點「本級要求」的題目時不出現,題目才不會往下跳
+  // 上方那一列(官方大綱標記、抽考範圍)只在檢定分頁出現:音階/琶音分頁點「本級要求」的題目時不出現,題目才不會往下跳
   if (!q.free && S.exam && tab === "exam") {
     const g = examGrade();
     $("verifyBadge").hidden = false;
@@ -614,7 +614,7 @@ window.addEventListener("resize", onStageResize);
 if (typeof ResizeObserver !== "undefined") new ResizeObserver(() => requestAnimationFrame(onStageResize)).observe($("stage"));
 
 /* ── 速度 ──
-   考級題目:單位照大綱(♩ 或 𝅗𝅥),一拍幾個八分音符照 NOTES_PER_UNIT;自由練習:♩、一拍兩個八分音符 */
+   檢定題目:單位照大綱(♩ 或 𝅗𝅥),一拍幾個八分音符照 NOTES_PER_UNIT;自由練習:♩、一拍兩個八分音符 */
 function unitOf(){ return cur && cur.tempo ? cur.tempo.unit : "q"; }
 function beatsPerBar(){
   if (ex && ex.time) return ex.time[0] * (unitOf() === "e16" ? 2 : 1);
@@ -707,7 +707,8 @@ async function preloadSamples(){
   }
 }
 
-/* ── 示範播放:預備拍一小節 + 節拍器 ── */
+/* ── 示範播放:預備拍兩小節 + 節拍器 ── */
+const COUNT_IN_BARS = 2;   // 預備拍兩小節:第一小節聽速度、第二小節準備下手(2/4 只有一小節太短)
 let play = null, starting = 0;   // starting:正在準備播放(載入取樣中)的序號;連點、換題時舊的準備作廢
 async function startPlayback(){
   if (!cur || starting) return;
@@ -725,8 +726,8 @@ async function startPlayback(){
   const events = playbackEvents(ex, cur, show);
   const u = unitOf(), clickSec = 60 / bpm, noteSec = clickSec / NOTES_PER_UNIT[u];
   const beatSec = noteSec * ex.sub;                      // 樂譜上一個四分音符的秒數
-  const count = beatsPerBar();
-  const t0 = ctx.currentTime + 0.15 + count * clickSec;
+  const count = beatsPerBar(), pre = count * COUNT_IN_BARS;
+  const t0 = ctx.currentTime + 0.15 + pre * clickSec;
   const stacc = cur.articulation === "staccato";
   const endBeat = Math.max(...events.map(e => e.beat + e.len));
   // 漸強再漸弱(p–f–p):前半漸強、後半漸弱
@@ -744,7 +745,7 @@ async function startPlayback(){
     });
   }
   const totalClicks = Math.ceil(endBeat * beatSec / clickSec);
-  for (let b = -count; b < totalClicks; b++) audio.playClick(t0 + b * clickSec, ((b % count) + count) % count === 0);
+  for (let b = -pre; b < totalClicks; b++) audio.playClick(t0 + b * clickSec, ((b % count) + count) % count === 0);
   play = { t0, beatSec, clickSec, endBeat, raf: 0 };
   $("playLabel").textContent = T("stop");
   $("playIcon").innerHTML = '<rect x="6" y="6" width="12" height="12" rx="1.5"/>';
@@ -786,7 +787,7 @@ document.addEventListener("gesturestart", e => e.preventDefault());
 /* ── 拍點燈號(示範播放時亮)── */
 function showBeat(click){
   const dots = $("beats").children, n = dots.length;
-  const k = click == null || click < -n ? -1 : ((Math.floor(click + 1e-6) % n) + n) % n;
+  const k = click == null || click < -n * COUNT_IN_BARS ? -1 : ((Math.floor(click + 1e-6) % n) + n) % n;
   for (let i = 0; i < dots.length; i++) dots[i].classList.toggle("on", i === k);
 }
 
@@ -808,7 +809,7 @@ async function keepAwake(){
 document.addEventListener("visibilitychange", keepAwake);
 document.addEventListener("pointerdown", keepAwake, { once: true });
 
-/* 桌機快捷鍵:空白鍵 播放/停止、↑↓ 速度 ±1、N 下一題(考級) */
+/* 桌機快捷鍵:空白鍵 播放/停止、↑↓ 速度 ±1、N 下一題(檢定) */
 document.addEventListener("keydown", e => {
   if (e.target.closest("input, select, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.code === "Space") { e.preventDefault(); $("playBtn").click(); }

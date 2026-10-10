@@ -14,7 +14,7 @@ const STR = {
   pageTitle: ["FingerDrill 手指特訓", "FingerDrill 手指特訓"],
   themeToggleLabel: ["淺色模式", "Light mode"], themeToggleTitle: ["切換淺色/深色主題", "Switch light/dark theme"],
   langToggleText: ["EN", "中"], langToggleLabel: ["切換為英文", "Switch to Chinese"], langToggleTitle: ["切換語言", "Switch language"],
-  tabScale: ["音階", "Scales"], tabArp: ["琶音", "Arpeggios"], tabHanon: ["哈農", "Hanon"], tabExam: ["考級", "Exams"],
+  tabScale: ["音階", "Scales"], tabArp: ["琶音", "Arpeggios"], tabHanon: ["哈農", "Hanon"], tabExam: ["檢定", "Exams"],
   lblSystem: ["考試系統", "Exam board"], lblGrade: ["級數", "Grade"], lblSet: ["準備哪一組(Trinity)", "Set (Trinity)"],
   setA: ["A 組", "Set A"], setB: ["B 組", "Set B"],
   lblQuality: ["大調 / 小調", "Major / minor"], qAll: ["全部", "All"], qMajor: ["大調", "Major"], qMinor: ["小調", "Minor"],
@@ -31,10 +31,10 @@ const STR = {
   optLoop: ["循環播放", "Loop"], optRamp: ["每輪 +4", "+4 each loop"], optClick: ["只聽拍點", "Clicks only"],
   listTitle: ["本級要求", "Grade requirements"],
   legendGood: ["通過", "Pass"], legendWeak: ["待加強", "Weak"], legendNone: ["未標記", "New"],
-  footer: ["鋼琴音色:Accurate-Salamander Grand Piano V6.2(Salamander Grand Piano V3 by Alexander Holm,CC-BY 3.0)· 節拍器:Naked Drums(Wilkinson Audio,CC-BY 4.0)· 取樣經 ScrollScore 整理後直接讀取 · 樂譜:OpenSheetMusicDisplay(BSD-3-Clause)。考級要求依 ABRSM《Piano Practical Grades 2025 & 2026》與 Trinity《Piano Syllabus from 2023》整理,僅供練習參考;實際要求以官方大綱為準。",
+  footer: ["鋼琴音色:Accurate-Salamander Grand Piano V6.2(Salamander Grand Piano V3 by Alexander Holm,CC-BY 3.0)· 節拍器:Naked Drums(Wilkinson Audio,CC-BY 4.0)· 取樣經 ScrollScore 整理後直接讀取 · 樂譜:OpenSheetMusicDisplay(BSD-3-Clause)。檢定要求依 ABRSM《Piano Practical Grades 2025 & 2026》與 Trinity《Piano Syllabus from 2023》整理,僅供練習參考;實際要求以官方大綱為準。",
     "Piano: Accurate-Salamander Grand Piano V6.2 (Salamander Grand Piano V3, Alexander Holm, CC-BY 3.0) · Click: Naked Drums (Wilkinson Audio, CC-BY 4.0) · via ScrollScore · Notation: OpenSheetMusicDisplay (BSD-3-Clause). Requirements from ABRSM Piano Practical Grades 2025 & 2026 and Trinity Piano Syllabus from 2023; for practice only — check the official syllabus."],
-  obTitle: ["你在準備鋼琴考級嗎?", "Taking a piano exam?"],
-  obSub: ["選好考試和級數,會打開「考級」分頁,音階、琶音分頁也會列出這一級的要求;之後隨時可以改。",
+  obTitle: ["你在準備鋼琴檢定嗎?", "Taking a piano exam?"],
+  obSub: ["選好考試和級數,會打開「檢定」分頁,音階、琶音分頁也會列出這一級的要求;之後隨時可以改。",
     "Pick a board and grade: Exams opens and Scales/Arpeggios list its requirements. Change any time."],
   obYes: ["開始準備考試", "Start exam prep"], obNo: ["不考試,自由練習", "No exam — free practice"]
 };

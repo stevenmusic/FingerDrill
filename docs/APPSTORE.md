@@ -21,23 +21,23 @@ Xcode 裡:Signing & Capabilities 選自己的 Team → Bundle ID `io.github.stev
 
 ## App Store Connect 填寫
 - **名稱**:手指特訓 FingerDrill
-- **副標題**(30 字內):鋼琴音階、琶音、哈農與考級抽考
+- **副標題**(30 字內):鋼琴音階、琶音、哈農與檢定抽考
 - **類別**:教育(次要:音樂)
 - **年齡分級**:4+;**隱私**:不收集任何資料(Data Not Collected)
-- **關鍵字**:鋼琴,音階,琶音,哈農,指法,ABRSM,Trinity,考級,練習,節拍器
+- **關鍵字**:鋼琴,音階,琶音,哈農,指法,ABRSM,Trinity,檢定,練習,節拍器
 - **描述**:
   > 給鋼琴學生、老師和想練手指的人。音階、琶音、哈農第一部分 1–20 首,每個音都標指法,取樣鋼琴示範附預備拍。
-  > 準備 ABRSM / Trinity 考級的,選好級數就能依官方大綱隨機抽考(初級到 8 級)。
+  > 準備 ABRSM / Trinity 檢定的,選好級數就能依官方大綱隨機抽考(初級到 8 級)。
   > 速度可以慢慢加,哈農按 ✓ 記錄最高速度、下一輪自動加快;練習紀錄顯示連續天數。全部離線可用、不需要登入、沒有廣告。
 - **英文描述**:Scales, arpeggios and Hanon Part I with fingering on every note, a sampled-piano demo with count-in, and ABRSM / Trinity exam drills (Initial–Grade 8) taken straight from the official syllabuses. Works offline, no sign-in, no ads.
 
 ## 審核規則 4.2(不能只是網頁包裝)要強調的
 審核備註可以寫:
 - 全部離線可用(樂譜引擎、資料、取樣都在裝置上)
-- 依官方考級大綱產生 443 種考題,樂譜與指法即時產生,不是靜態網頁
+- 依官方檢定大綱產生 443 種考題,樂譜與指法即時產生,不是靜態網頁
 - 取樣鋼琴示範、拍點、播放軸、速度階梯與最高速度紀錄、練習紀錄
 - 若被以 4.2 退件,可再加原生功能:每日練習提醒(@capacitor/local-notifications)、觸覺回饋(@capacitor/haptics)
 
 ## 授權提醒
 - 鋼琴取樣 Salamander Grand(CC-BY 3.0)、節拍器 Naked Drums(CC-BY 4.0)、OSMD(BSD-3):App 內頁尾已署名
-- 考級大綱內容只整理「要求清單」(調、八度、奏法),不含官方譜例;ABRSM、Trinity 是各自的商標,描述中只當說明用途使用
+- 檢定大綱內容只整理「要求清單」(調、八度、奏法),不含官方譜例;ABRSM、Trinity 是各自的商標,描述中只當說明用途使用

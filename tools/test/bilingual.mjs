@@ -42,13 +42,13 @@ for (const [name, w, h, mobile] of VPS) {
   await page.reload(); await page.waitForFunction(() => window.__stageReady >= 1);
   await compare(page, name, "對話框");
   await page.selectOption("#obGrade", "5"); await page.click("#obYes"); await page.waitForTimeout(300);
-  await compare(page, name, "考級 收合");
+  await compare(page, name, "檢定 收合");
   const b = await page.evaluate(() => window.__scoreReady || 0);
   await page.click("#drawBtn"); await page.waitForFunction(b => (window.__scoreReady || 0) > b, b);
   if (await page.isVisible("#paneExam .setup-summary")) await page.click("#paneExam .setup-summary");
-  await compare(page, name, "考級 ABRSM");
+  await compare(page, name, "檢定 ABRSM");
   await page.click('#systemSeg button[data-v="trinity"]'); await page.waitForTimeout(300);
-  await compare(page, name, "考級 Trinity");
+  await compare(page, name, "檢定 Trinity");
   for (const tab of ["scale", "arp"]) {
     await page.click(`#tabbar button[data-tab="${tab}"]`); await page.waitForTimeout(400);
     if (await page.isVisible(`#pane${tab === "scale" ? "Scale" : "Arp"} .setup-summary`)) await page.click(`#pane${tab === "scale" ? "Scale" : "Arp"} .setup-summary`);
@@ -57,7 +57,7 @@ for (const [name, w, h, mobile] of VPS) {
   }
   await page.click('#tabbar button[data-tab="hanon"]'); await page.waitForTimeout(200);
   await compare(page, name, "哈農");
-  // 大綱每一題的題目與標籤:中英文行數一樣(用考級分頁的題目卡實際排版量)
+  // 大綱每一題的題目與標籤:中英文行數一樣(用檢定分頁的題目卡實際排版量)
   await page.click('#tabbar button[data-tab="exam"]'); await page.waitForTimeout(300);
   const diff = await page.evaluate(async () => {
     const { setLang } = await import("./js/i18n.js"), { questionText } = await import("./js/exercise.js"), { questionsFor } = await import("./js/syllabus.js");
